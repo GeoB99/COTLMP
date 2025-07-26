@@ -21,8 +21,11 @@ jobs:
       with:
         dotnet-version: 8.0.x
     - name: Restore dependencies
+      working-directory: ./COTLMP
       run: dotnet restore
     - name: Build
+      working-directory: ./COTLMP
       run: dotnet build --no-restore
     - name: Test
+      working-directory: ./COTLMP
       run: dotnet test --no-build --verbosity normal
