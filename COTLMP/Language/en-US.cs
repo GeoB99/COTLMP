@@ -20,10 +20,14 @@ namespace COTLMP.Language
         [
             new("UI/DLC", "Multiplayer", true),
             new("Multiplayer/UI/TitleDialog", "Multiplayer", false),
-            new("Multiplayer/UI/Options", "Multiplayer Options", false),
-            new("Multiplayer/UI/Options/PlayerName", "Player Name", false),
-            new("Multiplayer/UI/Options/PlayerSkin", "Player Skin", false),
-            new("Multiplayer/UI/Options/GameMode", "Game Mode", false),
+            new("Multiplayer/UI/Settings", "Multiplayer Settings", false),
+            new("Multiplayer/UI/Settings/DisableMod", "Mod Toggle", false),
+            new("Multiplayer/UI/Settings/PlayerName", "Player Name", false),
+            new("Multiplayer/UI/Settings/ServerName", "Server Name", false),
+            new("Multiplayer/UI/Settings/GameMode", "Game Mode", false),
+            new("Multiplayer/UI/Settings/PlayerCount", "Number of maximum players to join", false),
+            new("Multiplayer/UI/Settings/VoiceChat", "Enable Voice Chat", false),
+            new("Multiplayer/UI/Settings/SayChat", "Enable Say Chat", false),
             new("Multiplayer/Game/Join", "{0} has joined the server", false),
             new("Multiplayer/Game/Left", "{0} has left the server", false),
             new("Multiplayer/UI/WIP", "Multiplayer is currently not implemented yet", false)

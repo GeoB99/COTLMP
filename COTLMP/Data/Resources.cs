@@ -34,6 +34,73 @@ namespace I2.Loc
                     return LocalizationManager.GetTranslation("Multiplayer/UI/WIP");
                 }
             }
+
+            public static class Settings
+            {
+                public static string MultiplayerSettings_Title
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/Settings");
+                    }
+                }
+
+                public static string MultiplayerSettings_DisableMod
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/DisableMod");
+                    }
+                }
+
+                public static string MultiplayerSettings_PlayerName
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/PlayerName");
+                    }
+                }
+
+                public static string MultiplayerSettings_ServerName
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/ServerName");
+                    }
+                }
+
+                public static string MultiplayerSettings_GameMode
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/GameMode");
+                    }
+                }
+
+                public static string MultiplayerSettings_PlayerCount
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/PlayerCount");
+                    }
+                }
+
+                public static string MultiplayerSettings_VoiceChat
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/VoiceChat");
+                    }
+                }
+
+                public static string MultiplayerSettings_SayChat
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/SayChat");
+                    }
+                }
+            }
         }
     }
 }
