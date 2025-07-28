@@ -9,6 +9,7 @@
 
 using COTLMP.Version;
 using COTLMP.Localization;
+using COTL.Ui.Settings;
 using System.IO;
 using BepInEx;
 using BepInEx.Logging;
@@ -49,6 +50,9 @@ public class Plugin : BaseUnityPlugin
 
         /* Load the localizations of the mod */
         COTLMP.Localization.LocaleManager.LoadLocale("English");
+
+        /* Initialize the Settings UI */
+        COTL.Ui.Settings.SettingsUIMultiplayer.InitializeUI();
 
         /* Log to the debugger that our mod is loaded */
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
