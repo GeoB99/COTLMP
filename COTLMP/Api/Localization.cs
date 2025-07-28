@@ -10,15 +10,12 @@
 
 using COTLMP;
 using COTLMP.Debugging;
+using COTLMP.Language;
 using BepInEx;
 using HarmonyLib;
 using I2.Loc;
 using System.Collections.Generic;
 using UnityEngine.Assertions;
-
-/* LOCALIZATION NAMESPACES ****************************************************/
-
-using COTLMP.Localization.English;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -242,7 +239,7 @@ namespace COTLMP.Localization
             {
                 case "English":
                 {
-                    StringsTable = COTLMP.Localization.English.Strings.StringsTable;
+                    StringsTable = COTLMP.Language.English.StringsTable;
                     break;
                 }
 

@@ -12,9 +12,9 @@ using COTLMP.Localization;
 
 /* TRANSLATION ****************************************************************/
 
-namespace COTLMP.Localization.English
+namespace COTLMP.Language
 {
-    public class Strings
+    public class English
     {
         public static LocalizationTable[] StringsTable =
         [
