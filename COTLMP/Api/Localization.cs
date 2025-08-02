@@ -9,7 +9,7 @@
 /* IMPORTS ********************************************************************/
 
 using COTLMP;
-using COTLMP.Debugging;
+using COTLMP.Debug;
 using COTLMP.Language;
 using BepInEx;
 using HarmonyLib;
@@ -33,7 +33,7 @@ using UnityEngine.Assertions;
  * Contains harmony patches of which hook up with the main
  * localization manager of the game.
  */
-namespace COTLMP.Localization
+namespace COTLMP.Api.Localization
 {
     /*
      * @brief
@@ -172,13 +172,13 @@ namespace COTLMP.Localization
             /* Log to the debugger the given translation string is overriden */
             if (Overriden == true)
             {
-                COTLMP.Debugging.Log.Print(DebugLevel.WARNING_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+                COTLMP.Debug.Log.Print(DebugLevel.WARNING_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
                                            $"Overriding the {Term} term with {Translation}!");
             }
 
             /* Add the string */
 #if DEBUG
-            COTLMP.Debugging.Log.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+            COTLMP.Debug.Log.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
                                        $"Adding {Translation} translation from {Term} term for {Language} language!");
 #endif
             Translations[Language][Term] = Translation;
@@ -201,7 +201,7 @@ namespace COTLMP.Localization
 
             /* Remove the translated string */
 #if DEBUG
-            COTLMP.Debugging.Log.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+            COTLMP.Debug.Log.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
                                        $"Removing {Term} term from {Language} language!");
 #endif
             Translations[Language].Remove(Term);
@@ -223,13 +223,13 @@ namespace COTLMP.Localization
         {
             LocalizationTable[] StringsTable;
 
-            COTLMP.Debugging.Log.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+            COTLMP.Debug.Log.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
                                        $"Loading the {Language} language locale");
 
             /* Check that the given language locale is supported, bail out if not the case */
             if (!IsLocaleSupported(Language))
             {
-                COTLMP.Debugging.Log.Print(DebugLevel.FATAL_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+                COTLMP.Debug.Log.Print(DebugLevel.FATAL_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
                                            $"The {Language} language locale is not supported. Expect problems with mod initialization!");
                 return;
             }

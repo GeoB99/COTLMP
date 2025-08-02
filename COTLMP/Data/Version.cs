@@ -19,7 +19,7 @@ using COTLMP;
  * Encapsulates the critical version data of the mod, such as the GUID, name
  * and version of the mod. The GUID is set to be unique and permanent, DO NOT CHANGE IT!
  */
-namespace COTLMP.Version
+namespace COTLMP.Data.Version
 {
     public class ModVersion
 	{

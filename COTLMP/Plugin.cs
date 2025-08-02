@@ -7,9 +7,9 @@
 
 /* IMPORTS ********************************************************************/
 
-using COTLMP.Version;
-using COTLMP.Localization;
-using COTL.Ui.Settings;
+using COTLMP.Data.Version;
+using COTLMP.Api.Localization;
+using COTLMP.Ui.Settings;
 using System.IO;
 using BepInEx;
 using BepInEx.Logging;
@@ -24,7 +24,7 @@ namespace COTLMP;
 /* CLASSES & CODE *************************************************************/
 
 /* Initialize the base BepInEx attributes of the mod plug-in */ 
-[BepInPlugin(COTLMP.Version.ModVersion.CotlMpGuid, COTLMP.Version.ModVersion.CotlMpName, COTLMP.Version.ModVersion.CotlMpVer)]
+[BepInPlugin(COTLMP.Data.Version.ModVersion.CotlMpGuid, COTLMP.Data.Version.ModVersion.CotlMpName, COTLMP.Data.Version.ModVersion.CotlMpVer)]
 
 /* Load the COTL API plugin as a hard dependency */
 [BepInDependency("io.github.xhayper.COTL_API", BepInDependency.DependencyFlags.HardDependency)]
@@ -52,10 +52,10 @@ public class Plugin : BaseUnityPlugin
         Logger = base.Logger;
 
         /* Load the localizations of the mod */
-        COTLMP.Localization.LocaleManager.LoadLocale("English");
+        COTLMP.Api.Localization.LocaleManager.LoadLocale("English");
 
         /* Initialize the Settings UI */
-        COTL.Ui.Settings.SettingsUIMultiplayer.InitializeUI();
+        COTLMP.Ui.Settings.SettingsUIMultiplayer.InitializeUI();
 
         /* Log to the debugger that our mod is loaded */
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");

@@ -8,7 +8,7 @@
 /* IMPORTS ********************************************************************/
 
 using COTLMP;
-using COTLMP.Localization;
+using COTLMP.Api.Localization;
 
 /* TRANSLATION ****************************************************************/
 

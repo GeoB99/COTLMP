@@ -20,7 +20,7 @@ using BepInEx.Logging;
  * @class Log
  * Implements debug log output methods.
  */
-namespace COTLMP.Debugging
+namespace COTLMP.Debug
 {
     /*
      * @brief
