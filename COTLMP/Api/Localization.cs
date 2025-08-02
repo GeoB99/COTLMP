@@ -77,7 +77,7 @@ namespace COTLMP.Localization
          * A string that points to the language passed by the caller.
          * 
          * @return
-         * Returns TRUE if tthe locale is supported, FALSE otherwise.
+         * Returns TRUE if the locale is supported, FALSE otherwise.
          */
         private static bool IsLocaleSupported(string Language)
         {
