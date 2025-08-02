@@ -26,6 +26,9 @@ namespace COTLMP;
 /* Initialize the base BepInEx attributes of the mod plug-in */ 
 [BepInPlugin(COTLMP.Version.ModVersion.CotlMpGuid, COTLMP.Version.ModVersion.CotlMpName, COTLMP.Version.ModVersion.CotlMpVer)]
 
+/* Load the COTL API plugin as a hard dependency */
+[BepInDependency("io.github.xhayper.COTL_API", BepInDependency.DependencyFlags.HardDependency)]
+
 /*
  * @brief
  * Creates the COTL MP plug-in instance and initializes the critical
