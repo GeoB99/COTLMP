@@ -17,7 +17,7 @@ using BepInEx.Logging;
  * Contains the classes and code for the debugging mechanism
  * for the mod.
  * 
- * @class Log
+ * @class PrintLogger
  * Implements debug log output methods.
  */
 namespace COTLMP.Debug
@@ -83,7 +83,7 @@ namespace COTLMP.Debug
         LOCALIZATION_COMPONENT
     }
 
-    public class Log
+    public class PrintLogger
     {
         /*
          * @brief

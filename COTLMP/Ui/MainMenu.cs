@@ -32,9 +32,9 @@ using static Lamb.UI.UpgradeTreeNode;
  * game source code methods and data. Specifically, the patches
  * serve to change the aspect of the main menu.
  */
-namespace COTLMP.Ui.Mainmenu
+namespace COTLMP.Ui
 {
-    internal static class MainMenuMultiplayer
+    internal static class Mainmenu
     {
         [HarmonyPatch]
         internal static class MainMenuPatches
@@ -56,7 +56,7 @@ namespace COTLMP.Ui.Mainmenu
             private static bool OnMultiplayerButtonClickedPatch(MainMenu __instance)
             {
                 /* Throw a dialog box warning the user Multiplayer is currently WIP */
-                COTLMP.Debug.Log.Print(DebugLevel.INFO_LEVEL, DebugComponent.UI_COMPONENT, "The Multiplayer button has been clicked!");
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.UI_COMPONENT, "The Multiplayer button has been clicked!");
                 UIMenuConfirmationWindow ConfirmDialog = __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate);
                 ConfirmDialog.Configure(MultiplayerModLocalization.UI.Multiplayer_Title, MultiplayerModLocalization.UI.Multiplayer_Text, true);
                 return false;

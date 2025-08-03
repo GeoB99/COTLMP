@@ -25,13 +25,13 @@ using System;
  * @brief
  * Contains the classes and code for the settings UI interface.
  * 
- * @class SettingsUIMultiplayer
+ * @class Settings
  * The main Settings UI class of which it contains settings UI
  * management and initialization code.
  */
-namespace COTLMP.Ui.Settings
+namespace COTLMP.Ui
 {
-    internal static class SettingsUIMultiplayer
+    internal static class Settings
     {
         /*
          * @brief
@@ -133,7 +133,7 @@ namespace COTLMP.Ui.Settings
                  Type == SETTING_TYPE.Dropdown) &&
                  (Value == null || Options == null))
             {
-                COTLMP.Debug.Log.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
                                            $"Value or Options parameter are NULL while they are expected on {Type} setting type!");
                 return false;
             }
@@ -141,7 +141,7 @@ namespace COTLMP.Ui.Settings
             /* Bail out if no setting name was not provided */
             if (SettingName == null)
             {
-                COTLMP.Debug.Log.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT, "No setting name provided!");
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT, "No setting name provided!");
                 return false;
             }
 
@@ -181,7 +181,7 @@ namespace COTLMP.Ui.Settings
 
                 default:
                 {
-                        COTLMP.Debug.Log.Print(DebugLevel.WARNING_LEVEL, DebugComponent.UI_COMPONENT,
+                        COTLMP.Debug.PrintLogger.Print(DebugLevel.WARNING_LEVEL, DebugComponent.UI_COMPONENT,
                                                    $"The {Type} setting type is currently not implemented yet!");
                         Success = false;
                         break;
@@ -211,7 +211,7 @@ namespace COTLMP.Ui.Settings
                                  Callbacks);
             if (!Success)
             {
-                COTLMP.Debug.Log.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
                                            "Failed to add the Mod Toggle setting, expect problems with mod initialization!");
                 return;
             }
@@ -227,7 +227,7 @@ namespace COTLMP.Ui.Settings
                                  Callbacks);
             if (!Success)
             {
-                COTLMP.Debug.Log.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
                                            "Failed to add the Game Modes setting, expect problems with mod initialization!");
                 return;
             }
@@ -243,7 +243,7 @@ namespace COTLMP.Ui.Settings
                                  Callbacks);
             if (!Success)
             {
-                COTLMP.Debug.Log.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
                                            "Failed to add the Players Count setting, expect problems with mod initialization!");
                 return;
             }
@@ -258,7 +258,7 @@ namespace COTLMP.Ui.Settings
                                  Callbacks);
             if (!Success)
             {
-                COTLMP.Debug.Log.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
                                            "Failed to add the Voice Chat setting, expect problems with mod initialization!");
                 return;
             }
@@ -273,7 +273,7 @@ namespace COTLMP.Ui.Settings
                                  Callbacks);
             if (!Success)
             {
-                COTLMP.Debug.Log.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
                                            "Failed to add the Voice Chat setting, expect problems with mod initialization!");
                 return;
             }

@@ -24,7 +24,7 @@ using UnityEngine.Assertions;
  * Contains the classes and code for the localization API
  * infrastructure of the mod.
  * 
- * @class LocaleManager
+ * @class Localization
  * The main localization manager API, containing API methods
  * for manipulation of localized (aka translated) strings of
  * the mod.
@@ -33,7 +33,7 @@ using UnityEngine.Assertions;
  * Contains harmony patches of which hook up with the main
  * localization manager of the game.
  */
-namespace COTLMP.Api.Localization
+namespace COTLMP.Api
 {
     /*
      * @brief
@@ -65,7 +65,7 @@ namespace COTLMP.Api.Localization
         }
     }
 
-    internal static class LocaleManager
+    internal static class Localization
     {
         private static readonly Dictionary<string, Dictionary<string, string>> Translations = new Dictionary<string, Dictionary<string, string>>();
 
@@ -172,13 +172,13 @@ namespace COTLMP.Api.Localization
             /* Log to the debugger the given translation string is overriden */
             if (Overriden == true)
             {
-                COTLMP.Debug.Log.Print(DebugLevel.WARNING_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.WARNING_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
                                            $"Overriding the {Term} term with {Translation}!");
             }
 
             /* Add the string */
 #if DEBUG
-            COTLMP.Debug.Log.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+            COTLMP.Debug.PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
                                        $"Adding {Translation} translation from {Term} term for {Language} language!");
 #endif
             Translations[Language][Term] = Translation;
@@ -201,7 +201,7 @@ namespace COTLMP.Api.Localization
 
             /* Remove the translated string */
 #if DEBUG
-            COTLMP.Debug.Log.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+            COTLMP.Debug.PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
                                        $"Removing {Term} term from {Language} language!");
 #endif
             Translations[Language].Remove(Term);
@@ -223,13 +223,13 @@ namespace COTLMP.Api.Localization
         {
             LocalizationTable[] StringsTable;
 
-            COTLMP.Debug.Log.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+            COTLMP.Debug.PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
                                        $"Loading the {Language} language locale");
 
             /* Check that the given language locale is supported, bail out if not the case */
             if (!IsLocaleSupported(Language))
             {
-                COTLMP.Debug.Log.Print(DebugLevel.FATAL_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.FATAL_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
                                            $"The {Language} language locale is not supported. Expect problems with mod initialization!");
                 return;
             }
@@ -292,7 +292,7 @@ namespace COTLMP.Api.Localization
                 if (!string.IsNullOrEmpty(overrideLanguage))
                 {
                     /* Try to get the translation string from the given locale */
-                    Translation = LocaleManager.TryGetTranslation(overrideLanguage, Term);
+                    Translation = Localization.TryGetTranslation(overrideLanguage, Term);
                     if (!string.IsNullOrEmpty(Translation))
                     {
                         __result = Translation;
@@ -309,7 +309,7 @@ namespace COTLMP.Api.Localization
                  * and modify the resultant of the returned string with ours.
                  */
                 GameLanguage = SettingsManager.Settings.Game.Language;
-                Translation = LocaleManager.TryGetTranslation(GameLanguage, Term);
+                Translation = Localization.TryGetTranslation(GameLanguage, Term);
                 if (!string.IsNullOrEmpty(Translation))
                 {
                     __result = Translation;
