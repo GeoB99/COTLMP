@@ -21,6 +21,7 @@
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
     <PackageReference Include="COTL_API" Version="0.2.8" />
     <PackageReference Include="CultOfTheLamb.GameLibs" Version="1.4.6.596-r.0" />
+    <PackageReference Include="DTLS2.Net" Version="1.1.5" />
     <PackageReference Include="UnityEngine.Modules" Version="2021.3.16" IncludeAssets="compile" />
   </ItemGroup>
   
