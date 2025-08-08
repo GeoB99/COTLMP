@@ -80,7 +80,8 @@ namespace COTLMP.Debug
         INIT_COMPONENT = 0,
         UI_COMPONENT,
         NETWORK_STACK_COMPONENT,
-        LOCALIZATION_COMPONENT
+        LOCALIZATION_COMPONENT,
+        CONFIGURATION_COMPONENT
     }
 
     public class PrintLogger
