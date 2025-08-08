@@ -134,7 +134,7 @@ namespace COTLMP.Ui
                  (Value == null || Options == null))
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
-                                           $"Value or Options parameter are NULL while they are expected on {Type} setting type!");
+                                               $"Value or Options parameter are NULL while they are expected on {Type} setting type!");
                 return false;
             }
 
@@ -182,7 +182,7 @@ namespace COTLMP.Ui
                 default:
                 {
                         COTLMP.Debug.PrintLogger.Print(DebugLevel.WARNING_LEVEL, DebugComponent.UI_COMPONENT,
-                                                   $"The {Type} setting type is currently not implemented yet!");
+                                                       $"The {Type} setting type is currently not implemented yet!");
                         Success = false;
                         break;
                 }
@@ -202,79 +202,64 @@ namespace COTLMP.Ui
             ActionCallbacks Callbacks;
 
             /* Add the "Mod Toggle" setting */
-            Callbacks = new ActionCallbacks(null, null);
+            Callbacks = new ActionCallbacks(COTLMP.Game.Callbacks.ModToggleCallback, null);
             Success = AddSetting(SETTING_TYPE.Toggle,
                                  MultiplayerModLocalization.UI.Settings.MultiplayerSettings_DisableMod,
                                  null,
                                  null,
-                                 true,
+                                 Plugin.Globals.EnableMod,
                                  Callbacks);
             if (!Success)
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
-                                           "Failed to add the Mod Toggle setting, expect problems with mod initialization!");
+                                               "Failed to add the Mod Toggle setting, expect problems with mod initialization!");
                 return;
             }
 
             /* Add the "Game Mode" setting */
-            Callbacks = new ActionCallbacks(null, null);
-            string[] GameModes = {"Standard", "Boss Fight", "Deathmatch", "Zombies!"}; // FIXME: This is a placeholder, this must be gathered from configuration files!
+            Callbacks = new ActionCallbacks(null, COTLMP.Game.Callbacks.GameModeCallback);
+            string[] GameModes = {"Standard", "Boss Fight", "Deathmatch", "Zombies!"}; // FIXME: This is a placeholder, this must be declared in a dedicated internal array with supported game modes!
             Success = AddSetting(SETTING_TYPE.HorizontalSelector,
                                  MultiplayerModLocalization.UI.Settings.MultiplayerSettings_GameMode,
-                                 "Standard",
+                                 Plugin.Globals.GameMode,
                                  GameModes,
                                  false,
                                  Callbacks);
             if (!Success)
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
-                                           "Failed to add the Game Modes setting, expect problems with mod initialization!");
+                                               "Failed to add the Game Modes setting, expect problems with mod initialization!");
                 return;
             }
 
             /* Add the "Players Count" setting */
-            Callbacks = new ActionCallbacks(null, null);
-            string[] MaxPlayersCount = {"1", "2", "3", "4"}; // FIXME: This is a placeholder, this must be gathered from configuration files!
+            Callbacks = new ActionCallbacks(null, COTLMP.Game.Callbacks.PlayerCountCallback);
+            string[] MaxPlayersCount = {"1", "2", "3", "4", "5", "6", "7", "8"};
             Success = AddSetting(SETTING_TYPE.HorizontalSelector,
                                  MultiplayerModLocalization.UI.Settings.MultiplayerSettings_PlayerCount,
-                                 "1",
+                                 Plugin.Globals.MaxNumPlayers.ToString(),
                                  MaxPlayersCount,
                                  false,
                                  Callbacks);
             if (!Success)
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
-                                           "Failed to add the Players Count setting, expect problems with mod initialization!");
+                                               "Failed to add the Players Count setting, expect problems with mod initialization!");
                 return;
             }
 
             /* Add the "Enable Voice Chat" setting */
-            Callbacks = new ActionCallbacks(null, null);
+            Callbacks = new ActionCallbacks(COTLMP.Game.Callbacks.VoiceChatCallback, null);
             Success = AddSetting(SETTING_TYPE.Toggle,
                                  MultiplayerModLocalization.UI.Settings.MultiplayerSettings_VoiceChat,
                                  null,
                                  null,
-                                 false,
+                                 Plugin.Globals.EnableVoiceChat,
                                  Callbacks);
             if (!Success)
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
-                                           "Failed to add the Voice Chat setting, expect problems with mod initialization!");
-                return;
-            }
-
-            /* Add the "Enable Say Chat" setting */
-            Callbacks = new ActionCallbacks(null, null);
-            Success = AddSetting(SETTING_TYPE.Toggle,
-                                 MultiplayerModLocalization.UI.Settings.MultiplayerSettings_SayChat,
-                                 null,
-                                 null,
-                                 false,
-                                 Callbacks);
-            if (!Success)
-            {
-                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
-                                           "Failed to add the Voice Chat setting, expect problems with mod initialization!");
+                                               "Failed to add the Voice Chat setting, expect problems with mod initialization!");
                 return;
             }
         }

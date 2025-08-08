@@ -92,14 +92,6 @@ namespace I2.Loc
                         return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/VoiceChat");
                     }
                 }
-
-                public static string MultiplayerSettings_SayChat
-                {
-                    get
-                    {
-                        return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/SayChat");
-                    }
-                }
             }
         }
     }

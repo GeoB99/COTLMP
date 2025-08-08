@@ -7,13 +7,15 @@
 
 /* IMPORTS ********************************************************************/
 
-using COTLMP.Data;
-using COTLMP.Api;
-using COTLMP.Ui;
-using System.IO;
 using BepInEx;
+using BepInEx.Configuration;
 using BepInEx.Logging;
+using COTLMP.Api;
+using COTLMP.Data;
+using COTLMP.Ui;
 using HarmonyLib;
+using System;
+using System.IO;
 using System.Reflection;
 
 /* NAMESPACES *****************************************************************/
@@ -37,7 +39,9 @@ namespace COTLMP;
 public class Plugin : BaseUnityPlugin
 {
     internal static new ManualLogSource Logger;
-        
+    internal static new ConfigFile Config;
+    internal static ModDataGlobals Globals;
+
     /*
      * @brief
      * Executes initialization code as the mod is being loaded
@@ -45,14 +49,123 @@ public class Plugin : BaseUnityPlugin
      */
     private void Awake()
     {
+        Object SettingData;
+        int MaxPlayers;
+        string ServerName, PlayerName, GameMode;
+        bool ToggleMod, VoiceChat;
+
         /* Start patching the game assembly with our code */
         Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
-        /* Cache the logger field so that the COTL MP mod can use it for debug support */
+        /* Cache the plugin class methods so that the COTL MP mod can use them across different modules */
         Logger = base.Logger;
+        Config = base.Config;
 
         /* Load the localizations of the mod */
         COTLMP.Api.Localization.LoadLocale("English");
+
+        /*
+         * Initialize the settings of the mod to defaults in following
+         * order, first the "Toggle Mod" setting. If the user configuration
+         * file has already been created the function will simply load
+         * the configuration entry of each setting.
+         */
+        SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ModSettings,
+                                                             "Toggle Mod",
+                                                             "Enables or Disables the Multiplayer mod in runtime",
+                                                             true);
+        if (SettingData == null)
+        {
+            Logger.LogFatal("Failed to set default or load the \"Mod Toggle\" setting!");
+            Harmony.UnpatchAll();
+            return;
+        }
+
+        /* Retrieve the setting data from the setting object */
+        ToggleMod = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData);
+
+        /* Initialize the "Game Mode" setting */
+        SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
+                                                             "Game Mode",
+                                                             "The game mode for the multiplayer server. Possible values are: Standard, Boss Fight, Deathmatch, Zombies!",
+                                                             "Standard");
+        if (SettingData == null)
+        {
+            Logger.LogFatal("Failed to set default or load the \"Game Mode\" setting!");
+            Harmony.UnpatchAll();
+            return;
+        }
+
+        /* Retrieve the setting data from the setting object */
+        GameMode = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
+
+        /* Initialize the "Player Name" setting */
+        SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
+                                                             "Player Name",
+                                                             "The name of the player in-game",
+                                                             "The Player");
+        if (SettingData == null)
+        {
+            Logger.LogFatal("Failed to set default or load the \"Player Name\" setting!");
+            Harmony.UnpatchAll();
+            return;
+        }
+
+        /* Retrieve the setting data from the setting object */
+        PlayerName = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
+
+        /* Initialize the "Server Name" setting */
+        SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
+                                                             "Server Name",
+                                                             "The name of the server",
+                                                             "Cult of the Lamb Server");
+        if (SettingData == null)
+        {
+            Logger.LogFatal("Failed to set default or load the \"Server Name\" setting!");
+            Harmony.UnpatchAll();
+            return;
+        }
+
+        /* Retrieve the setting data from the setting object */
+        ServerName = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
+
+        /* Initialize the "Max Players In Server" setting */
+        SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
+                                                             "Max Players",
+                                                             "The maximum count of players that can join a server",
+                                                             8);
+        if (SettingData == null)
+        {
+            Logger.LogFatal("Failed to set default or load the \"Max Players\" setting!");
+            Harmony.UnpatchAll();
+            return;
+        }
+
+        /* Retrieve the setting data from the setting object */
+        MaxPlayers = COTLMP.Api.Configuration.GetSettingData<int>(SettingData);
+
+        /* Initialize the "Enable Voice Chat" setting */
+        SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
+                                                             "Toggle Voice Chat",
+                                                             "Enables or Disables voice chat in a server",
+                                                             false);
+        if (SettingData == null)
+        {
+            Logger.LogFatal("Failed to set default or load the \"Toggle Voice Chat\" setting!");
+            Harmony.UnpatchAll();
+            return;
+        }
+
+        /* Retrieve the setting data from the setting object */
+        VoiceChat = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData);
+
+        /* Now store all the cached settings into the globals data store */
+        Globals = new ModDataGlobals(ToggleMod,
+                                     GameMode,
+                                     PlayerName,
+                                     ServerName,
+                                     MaxPlayers,
+                                     VoiceChat);
 
         /* Initialize the Settings UI */
         COTLMP.Ui.Settings.InitializeUI();
