@@ -12,8 +12,6 @@ using System.IO;
 
 /* CLASSES & CODE *************************************************************/
 
-
-
 /**
  * @brief
  * Contains all classes/structs/enums associated with network messages
@@ -66,3 +64,4 @@ namespace COTLMPServer.Messages
 }
 
 /* EOF */
+
