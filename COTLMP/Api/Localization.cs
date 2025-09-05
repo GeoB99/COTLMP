@@ -15,7 +15,6 @@ using BepInEx;
 using HarmonyLib;
 using I2.Loc;
 using System.Collections.Generic;
-using UnityEngine.Assertions;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -173,13 +172,13 @@ namespace COTLMP.Api
             if (Overriden == true)
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.WARNING_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
-                                           $"Overriding the {Term} term with {Translation}!");
+                                               $"Overriding the {Term} term with {Translation}!");
             }
 
             /* Add the string */
 #if DEBUG
             COTLMP.Debug.PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
-                                       $"Adding {Translation} translation from {Term} term for {Language} language!");
+                                           $"Adding {Translation} translation from {Term} term for {Language} language!");
 #endif
             Translations[Language][Term] = Translation;
         }
@@ -202,7 +201,7 @@ namespace COTLMP.Api
             /* Remove the translated string */
 #if DEBUG
             COTLMP.Debug.PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
-                                       $"Removing {Term} term from {Language} language!");
+                                           $"Removing {Term} term from {Language} language!");
 #endif
             Translations[Language].Remove(Term);
         }
@@ -224,13 +223,13 @@ namespace COTLMP.Api
             LocalizationTable[] StringsTable;
 
             COTLMP.Debug.PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
-                                       $"Loading the {Language} language locale");
+                                           $"Loading the {Language} language locale");
 
             /* Check that the given language locale is supported, bail out if not the case */
             if (!IsLocaleSupported(Language))
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.FATAL_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
-                                           $"The {Language} language locale is not supported. Expect problems with mod initialization!");
+                                               $"The {Language} language locale is not supported. Expect problems with mod initialization!");
                 return;
             }
 
@@ -251,7 +250,7 @@ namespace COTLMP.Api
             }
 
             /* Getting a null table is illegal here, it shouldn't happen */
-            Assert.IsNotNull(StringsTable);
+            COTLMP.Debug.Assertions.Assert(StringsTable != null, false, null, null);
 
             /* Now initialize the translation strings from the locale table */
             InitializeTranslationsFromLocaleTable(StringsTable, Language);

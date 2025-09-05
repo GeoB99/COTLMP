@@ -81,7 +81,8 @@ namespace COTLMP.Debug
         UI_COMPONENT,
         NETWORK_STACK_COMPONENT,
         LOCALIZATION_COMPONENT,
-        CONFIGURATION_COMPONENT
+        CONFIGURATION_COMPONENT,
+        DEBUG_COMPONENT
     }
 
     public class PrintLogger
@@ -132,6 +133,12 @@ namespace COTLMP.Debug
                 case DebugComponent.CONFIGURATION_COMPONENT:
                 {
                     Name = "CONFIGURATION_COMPONENT";
+                    break;
+                }
+
+                case DebugComponent.DEBUG_COMPONENT:
+                {
+                    Name = "DEBUG_COMPONENT";
                     break;
                 }
 

@@ -14,8 +14,6 @@ using BepInEx;
 using BepInEx.Configuration;
 using HarmonyLib;
 using System;
-using UnityEngine;
-using UnityEngine.Assertions;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -52,7 +50,7 @@ namespace COTLMP.Game
             /* Get the Mod Toggle setting */
             Definition = new ConfigDefinition(Section, "Toggle Mod");
             SettingEntry = COTLMP.Api.Configuration.GetSettingEntry<bool>(Definition);
-            Assert.IsNotNull(SettingEntry);
+            COTLMP.Debug.Assertions.Assert(SettingEntry != null, false, null, null);
 
             /* Cache the new value to the globals store */
             Plugin.Globals.EnableMod = Value;
@@ -86,7 +84,7 @@ namespace COTLMP.Game
             /* Get the Game Mode setting */
             Definition = new ConfigDefinition(Section, "Game Mode");
             SettingEntry = COTLMP.Api.Configuration.GetSettingEntry<string>(Definition);
-            Assert.IsNotNull(SettingEntry);
+            COTLMP.Debug.Assertions.Assert(SettingEntry != null, false, null, null);
 
             /* FIXME: This is a placeholder code, the game modes should be declared in a dedicated enum */
             switch (Value)
@@ -152,7 +150,7 @@ namespace COTLMP.Game
             /* Get the Max Players Count setting */
             Definition = new ConfigDefinition(Section, "Max Players");
             SettingEntry = COTLMP.Api.Configuration.GetSettingEntry<int>(Definition);
-            Assert.IsNotNull(SettingEntry);
+            COTLMP.Debug.Assertions.Assert(SettingEntry != null, false, null, null);
 
             /*
              * Cache the new value to the globals store.
@@ -188,7 +186,7 @@ namespace COTLMP.Game
             /* Get the Voice Chat Toggle setting */
             Definition = new ConfigDefinition(Section, "Toggle Voice Chat");
             SettingEntry = COTLMP.Api.Configuration.GetSettingEntry<bool>(Definition);
-            Assert.IsNotNull(SettingEntry);
+            COTLMP.Debug.Assertions.Assert(SettingEntry != null, false, null, null);
 
             /* Cache the new value to the globals store */
             Plugin.Globals.EnableVoiceChat = Value;

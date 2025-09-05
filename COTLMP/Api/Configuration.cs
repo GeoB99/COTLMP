@@ -14,7 +14,6 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using System;
 using System.IO;
-using UnityEngine.Assertions;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -188,7 +187,7 @@ namespace COTLMP.Api
 
             /* Retrieve the category label of the config setting */
             LabelName = ConfigSectionToLabel(SettingData.Section);
-            Assert.IsNotNull(LabelName);
+            COTLMP.Debug.Assertions.Assert(LabelName != null, false, null, null);
 
             /* Create the setting if it doesn't exist or load it */
             BoolSettingEntry = Plugin.Config.Bind(LabelName,
@@ -231,7 +230,7 @@ namespace COTLMP.Api
 
             /* Retrieve the category label of the config setting */
             LabelName = ConfigSectionToLabel(SettingData.Section);
-            Assert.IsNotNull(LabelName);
+            COTLMP.Debug.Assertions.Assert(LabelName != null, false, null, null);
 
             /* Create the setting if it doesn't exist or load it */
             StringSettingEntry = Plugin.Config.Bind(LabelName,
@@ -274,7 +273,7 @@ namespace COTLMP.Api
 
             /* Retrieve the category label of the config setting */
             LabelName = ConfigSectionToLabel(SettingData.Section);
-            Assert.IsNotNull(LabelName);
+            COTLMP.Debug.Assertions.Assert(LabelName != null, false, null, null);
 
             /* Create the setting if it doesn't exist or load it */
             IntSettingEntry = Plugin.Config.Bind(LabelName,
@@ -458,7 +457,7 @@ namespace COTLMP.Api
         public static T GetSettingData<T>(Object ConfigObject)
         {
             /* NULL objects is illegal here */
-            Assert.IsNotNull(ConfigObject);
+            COTLMP.Debug.Assertions.Assert(ConfigObject != null, false, null, null);
 
             /* Cast the object immediately to the generic type if possible */
             if (ConfigObject is T)
