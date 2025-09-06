@@ -19,6 +19,14 @@ namespace I2.Loc
     {
         public static class UI
         {
+            public static string Multiplayer_Banner
+            {
+                get
+                {
+                    return LocalizationManager.GetTranslation("UI/Banner");
+                }
+            }
+
             public static string Multiplayer_Title
             {
                 get
