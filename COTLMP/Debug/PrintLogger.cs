@@ -236,6 +236,26 @@ namespace COTLMP.Debug
                 }
             }
         }
+
+        /*
+         * @brief
+         * Prints debug information to the logger. Works identically
+         * the same to the Print method except that this method is
+         * reserved for debug output that might be too spammy in
+         * the debug console. If the VerboseDebug flag is set to FALSE
+         * this method won't output anything to the console.
+         */
+        public static void PrintVerbose(DebugLevel Level, DebugComponent Component, string Text)
+        {
+            /* Don't display anything if verbose debugging is disabled */
+            if (!Plugin.GlobalsInternal.VerboseDebug)
+            {
+                return;
+            }
+
+            /* Output the spammy debug log */
+            Print(Level, Component, Text);
+        }
     }
 }
 

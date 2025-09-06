@@ -176,10 +176,8 @@ namespace COTLMP.Api
             }
 
             /* Add the string */
-#if DEBUG
-            COTLMP.Debug.PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
-                                           $"Adding {Translation} translation from {Term} term for {Language} language!");
-#endif
+            COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+                                                  $"Adding {Translation} translation from {Term} term for {Language} language!");
             Translations[Language][Term] = Translation;
         }
 
@@ -199,10 +197,8 @@ namespace COTLMP.Api
             if (!Translations.ContainsKey(Language)) return;
 
             /* Remove the translated string */
-#if DEBUG
-            COTLMP.Debug.PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
-                                           $"Removing {Term} term from {Language} language!");
-#endif
+            COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.INFO_LEVEL, DebugComponent.LOCALIZATION_COMPONENT,
+                                                  $"Removing {Term} term from {Language} language!");
             Translations[Language].Remove(Term);
         }
 

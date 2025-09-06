@@ -40,17 +40,6 @@ namespace COTLMP.Data
         /* Enable or Disable voice chat */
         public bool EnableVoiceChat;
 
-        /******************************************************************************
-         *                 THE FOLLOWING FIELDS ARE RESERVED INTERNALLY               *
-         *                 FOR THE MOD. CHANGE THESE VALUES WITH CAUTION!!!           *
-         ******************************************************************************/
-
-        /* Enable or disable verbose debug output in the console */
-        internal bool VerboseDebug = false;
-
-        /* The internal variable of maximum count of players per server. Used for validation purposes. */
-        internal const int MaxPlayersPerServerInternal = 8;
-
         public ModDataGlobals(bool Enable,
                               string Mode,
                               string PlName,

@@ -41,6 +41,7 @@ public class Plugin : BaseUnityPlugin
     internal static new ManualLogSource Logger;
     internal static new ConfigFile Config;
     internal static ModDataGlobals Globals;
+    internal static InternalData GlobalsInternal;
 
     /*
      * @brief
@@ -60,6 +61,9 @@ public class Plugin : BaseUnityPlugin
         /* Cache the plugin class methods so that the COTL MP mod can use them across different modules */
         Logger = base.Logger;
         Config = base.Config;
+
+        /* Fetch the flags and switches of the mod, reserved for internal use */
+        GlobalsInternal = new InternalData();
 
         /* Load the localizations of the mod */
         COTLMP.Api.Localization.LoadLocale("English");
