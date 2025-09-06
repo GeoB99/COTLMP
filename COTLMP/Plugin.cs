@@ -16,6 +16,7 @@ using COTLMP.Ui;
 using HarmonyLib;
 using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 
 /* NAMESPACES *****************************************************************/
@@ -42,6 +43,7 @@ public class Plugin : BaseUnityPlugin
     internal static new ConfigFile Config;
     internal static ModDataGlobals Globals;
     internal static InternalData GlobalsInternal;
+    private readonly Harmony HarmonyManager = new(MyPluginInfo.PLUGIN_GUID);
 
     /*
      * @brief
@@ -54,9 +56,6 @@ public class Plugin : BaseUnityPlugin
         int MaxPlayers;
         string ServerName, PlayerName, GameMode;
         bool ToggleMod, VoiceChat;
-
-        /* Start patching the game assembly with our code */
-        Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
         /* Cache the plugin class methods so that the COTL MP mod can use them across different modules */
         Logger = base.Logger;
@@ -176,6 +175,29 @@ public class Plugin : BaseUnityPlugin
 
         /* Log to the debugger that our mod is loaded */
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
+    }
+
+    /*
+     * @brief
+     * Patches the game assembly with Harmony patches set up
+     * by the mod.
+     */
+    private void OnEnable()
+    {
+        HarmonyManager.PatchAll(Assembly.GetExecutingAssembly());
+        Logger.LogMessage($"{HarmonyManager.GetPatchedMethods().Count()} patches have been applied!");
+    }
+
+    /*
+     * @brief
+     * Unloads all the patches hooked into game on quit event
+     * of the game.
+     */
+    private void OnDisable()
+    {
+        Logger.LogMessage($"Unloading {MyPluginInfo.PLUGIN_GUID}");
+        HarmonyManager.UnpatchSelf();
+        Logger.LogMessage("Mod has been unloaded!");
     }
 }
 
