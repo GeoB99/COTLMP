@@ -31,39 +31,6 @@ namespace COTLMP.Game
     {
         /*
          * @brief
-         * A callback that gets called when the Toggle Mod
-         * setting's value has changed.
-         * 
-         * @param[in] Value
-         * A boolean value representing the value of the setting
-         * that has changed.
-         */
-        public static void ModToggleCallback(bool Value)
-        {
-            string Section;
-            ConfigDefinition Definition;
-            ConfigEntry<bool> SettingEntry;
-
-            /* Retrieve the section name for the setting */
-            Section = COTLMP.Api.Configuration.GetSectionName(CONFIGURATION_SECTION.ModSettings);
-
-            /* Get the Mod Toggle setting */
-            Definition = new ConfigDefinition(Section, "Toggle Mod");
-            SettingEntry = COTLMP.Api.Configuration.GetSettingEntry<bool>(Definition);
-            COTLMP.Debug.Assertions.Assert(SettingEntry != null, false, null, null);
-
-            /* Cache the new value to the globals store */
-            Plugin.Globals.EnableMod = Value;
-
-            /* FIXME: Enable/Disable mod execution here */
-
-            /* Overwrite the current value of the setting and flush it */
-            SettingEntry.BoxedValue = Value;
-            COTLMP.Api.Configuration.FlushSettings();
-        }
-
-        /*
-         * @brief
          * A callback that gets called when the Game Mode
          * setting's value has changed.
          * 

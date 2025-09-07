@@ -61,12 +61,6 @@ namespace COTLMP.Ui
         [HarmonyPrefix]
         private static bool BannerEditionPatch(ShowIfSpecialEdition __instance, ref IEnumerator __result)
         {
-            /* The mod is currently not executing so run the original method instead */
-            if (!Plugin.Globals.EnableMod)
-            {
-                return true;
-            }
-
             /* Replace the banner header */
             __instance._localize.Term = "UI/Banner";
             __instance._text.text = MultiplayerModLocalization.UI.Multiplayer_Banner;

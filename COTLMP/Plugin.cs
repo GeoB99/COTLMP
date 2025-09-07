@@ -81,7 +81,7 @@ public class Plugin : BaseUnityPlugin
          */
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ModSettings,
                                                              "Toggle Mod",
-                                                             "Enables or Disables the Multiplayer mod in runtime",
+                                                             "Enables or Disables the Multiplayer mod. This setting has to be changed manually here!",
                                                              true);
         if (SettingData == null)
         {
@@ -190,6 +190,17 @@ public class Plugin : BaseUnityPlugin
      */
     private void OnEnable()
     {
+        /*
+         * The user wants the mod to be disabled so stop the execution
+         * of all the patches that have been loaded previously.
+         */
+        if (!Globals.EnableMod)
+        {
+            Logger.LogWarning("The user disabled the mod, stopping execution of the mod...");
+            HarmonyInstance.UnpatchSelf();
+            return;
+        }
+
         Logger.LogMessage($"{HarmonyInstance.GetPatchedMethods().Count()} patches have been applied!");
     }
 

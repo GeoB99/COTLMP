@@ -201,21 +201,6 @@ namespace COTLMP.Ui
             bool Success;
             ActionCallbacks Callbacks;
 
-            /* Add the "Mod Toggle" setting */
-            Callbacks = new ActionCallbacks(COTLMP.Game.Callbacks.ModToggleCallback, null);
-            Success = AddSetting(SETTING_TYPE.Toggle,
-                                 MultiplayerModLocalization.UI.Settings.MultiplayerSettings_DisableMod,
-                                 null,
-                                 null,
-                                 Plugin.Globals.EnableMod,
-                                 Callbacks);
-            if (!Success)
-            {
-                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
-                                               "Failed to add the Mod Toggle setting, expect problems with mod initialization!");
-                return;
-            }
-
             /* Add the "Game Mode" setting */
             Callbacks = new ActionCallbacks(null, COTLMP.Game.Callbacks.GameModeCallback);
             string[] GameModes = {"Standard", "Boss Fight", "Deathmatch", "Zombies!"}; // FIXME: This is a placeholder, this must be declared in a dedicated internal array with supported game modes!
