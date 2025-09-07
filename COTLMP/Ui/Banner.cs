@@ -8,12 +8,12 @@
 /* IMPORTS ********************************************************************/
 
 using COTLMP;
-using COTLMP.Debug;
 using COTLMP.Data;
 using BepInEx;
 using HarmonyLib;
 using I2.Loc;
 using Lamb.UI;
+using System.Collections;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -30,6 +30,17 @@ namespace COTLMP.Ui
     [HarmonyPatch]
     internal static class Banner
     {
+
+        /*
+         * @brief
+         * A dummy IEnumerator method that is used to replace the
+         * returned value which represents a coroutine.
+         */
+        private static IEnumerator BannerEnumerator()
+        {
+            yield break;
+        }
+
         /*
          * @brief
          * Patches the private DLC check edition method, of which it replaces
@@ -38,13 +49,17 @@ namespace COTLMP.Ui
          * @param[in] __instance
          * The current instance value of the method being patched.
          * 
+         * @param[in] __result
+         * The current result value being returned. Typically the original
+         * method returns a IEnumerator.
+         * 
          * @return
          * Returns TRUE if tthe original method of the game is to be executed.
          * FALSE if our method is to be executed instead.
          */
         [HarmonyPatch(typeof(ShowIfSpecialEdition), "WaitForDLCCheck")]
         [HarmonyPrefix]
-        private static bool BannerEditionPatch(ShowIfSpecialEdition __instance)
+        private static bool BannerEditionPatch(ShowIfSpecialEdition __instance, ref IEnumerator __result)
         {
             /* The mod is currently not executing so run the original method instead */
             if (!Plugin.Globals.EnableMod)
@@ -55,6 +70,7 @@ namespace COTLMP.Ui
             /* Replace the banner header */
             __instance._localize.Term = "UI/Banner";
             __instance._text.text = MultiplayerModLocalization.UI.Multiplayer_Banner;
+            __result = BannerEnumerator();
             return false;
         }
     }
