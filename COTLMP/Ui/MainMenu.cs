@@ -58,6 +58,21 @@ namespace COTLMP.Ui
                 ConfirmDialog.Configure(MultiplayerModLocalization.UI.Multiplayer_Title, MultiplayerModLocalization.UI.Multiplayer_Text, true);
                 return false;
             }
+
+            /**
+             * @brief
+             * Show a message when returning to main menu, when needed
+             */
+            [HarmonyPatch(typeof(MainMenu), "Start")]
+            [HarmonyPostfix]
+            private static void Start(MainMenu __instance)
+            {
+                if(PauseMenuPatches.Message != null)
+                {
+                    __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Server was shutdown", PauseMenuPatches.Message, true);
+                    PauseMenuPatches.Message = null;
+                }
+            }
         }
     }
 }

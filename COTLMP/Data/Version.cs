@@ -22,10 +22,10 @@ using COTLMP;
 namespace COTLMP.Data
 {
     public class Version
-	{
-		public const string CotlMpGuid = "geob99.cotl.cotlmp";
-		public const string CotlMpName = "Cult of the Lamb Multiplayer Mod Plug-In";
-		public const string CotlMpVer = "0.0.0.1";
+    {
+        public const string CotlMpGuid = "geob99.cotl.cotlmp";
+        public const string CotlMpName = "Cult of the Lamb Multiplayer Mod Plug-In";
+        public const string CotlMpVer = "0.0.0.1";
     }
 }
 

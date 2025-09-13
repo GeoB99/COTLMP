@@ -43,6 +43,30 @@ namespace I2.Loc
                 }
             }
 
+            public static string StartServer
+            {
+                get
+                {
+                    return LocalizationManager.GetTranslation("Multiplayer/UI/StartServer");
+                }
+            }
+
+            public static string ServerStarted
+            {
+                get
+                {
+                    return LocalizationManager.GetTranslation("Multiplayer/UI/ServerStarted");
+                }
+            }
+
+            public static string ServerStopConfirm
+            {
+                get
+                {
+                    return LocalizationManager.GetTranslation("Multiplayer/UI/ServerConfirm");
+                }
+            }
+
             public static class Settings
             {
                 public static string MultiplayerSettings_Title
