@@ -15,10 +15,8 @@ using COTLMP.Data;
 using COTLMP.Ui;
 using HarmonyLib;
 using System;
-using System.IO;
 using System.Linq;
 using System.Reflection;
-using MMTools;
 using UnityEngine.SceneManagement;
 
 /* NAMESPACES *****************************************************************/
