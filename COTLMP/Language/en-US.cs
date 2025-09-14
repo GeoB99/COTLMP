@@ -32,8 +32,8 @@ namespace COTLMP.Language
             new("Multiplayer/Game/Join", "{0} has joined the server", false),
             new("Multiplayer/Game/Left", "{0} has left the server", false),
             new("Multiplayer/UI/WIP", "Multiplayer is currently not implemented yet", false),
-            new("Multiplayer/UI/StartServer", "Start server", false),
-            new("Multiplayer/UI/ServerStarted", "Stop server", false),
+            new("Multiplayer/UI/StartServer", "Open to LAN", false),
+            new("Multiplayer/UI/ServerStarted", "Stop server and quit", false),
             new("Multiplayer/UI/ServerConfirm", "Are you sure you want to stop the server? This action will return you to the main menu without saving progress.", false)
         ];
     }
