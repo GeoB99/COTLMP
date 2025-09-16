@@ -179,20 +179,8 @@ public class Plugin : BaseUnityPlugin
         /* Initialize the Settings UI */
         COTLMP.Ui.Settings.InitializeUI();
 
-        UnityEngine.Application.quitting += () => {
-            PauseMenuPatches.Quitting = true;
-            PauseMenuPatches.Server?.Dispose();
-        };
-
-        SceneManager.sceneLoaded += (scene, _) => {
-            if (scene.name.Equals("Main Menu"))
-            {
-                // set the quitting flag temporarily so it doesn't try to transition to the main menu on server stop
-                PauseMenuPatches.Quitting = true;
-                PauseMenuPatches.Server?.Dispose();
-                PauseMenuPatches.Quitting = false;
-            }
-        };
+        // Initialize the network features
+        COTLMP.Network.Network.Initialize();
 
         /* Log to the debugger that our mod is loaded */
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");

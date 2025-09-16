@@ -59,6 +59,22 @@ namespace I2.Loc
                 }
             }
 
+            public static string Disconnected
+            {
+                get
+                {
+                    return LocalizationManager.GetTranslation("Multiplayer/UI/Disconnected");
+                }
+            }
+
+            public static string DisconnectedError
+            {
+                get
+                {
+                    return LocalizationManager.GetTranslation("Multiplayer/UI/DisconnectedError");
+                }
+            }
+
             public static string ServerStopConfirm
             {
                 get
