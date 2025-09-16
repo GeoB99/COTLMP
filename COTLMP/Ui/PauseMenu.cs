@@ -180,7 +180,7 @@ namespace COTLMP.Ui
             UIDynamicNotificationCenter.Reset();
             MonoSingleton<UIManager>.Instance.ResetPreviousCursor();
             TwitchManager.Abort();
-            Message = (e.Reason == ServerStopReason.Error) ? "An error has ocurred (check console)" : "";
+            Message = (e.Reason == ServerStopReason.Error) ? MultiplayerModLocalization.UI.DisconnectedError : "";
             MMTransition.Play(MMTransition.TransitionType.ChangeSceneAutoResume, MMTransition.Effect.BlackFade, "Main Menu", 1f, "", null);
         }
 

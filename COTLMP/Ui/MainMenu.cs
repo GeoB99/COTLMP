@@ -69,7 +69,7 @@ namespace COTLMP.Ui
             {
                 if(PauseMenuPatches.Message != null)
                 {
-                    __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Server was shutdown", PauseMenuPatches.Message, true);
+                    __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure(MultiplayerModLocalization.UI.Disconnected, PauseMenuPatches.Message, true);
                     PauseMenuPatches.Message = null;
                 }
             }
