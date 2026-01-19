@@ -15,6 +15,7 @@ using Lamb.UI.PauseMenu;
 using MMTools;
 using src.UI;
 using src.UINavigator;
+using System.Threading;
 using TMPro;
 
 /* CLASSES & CODE *************************************************************/
@@ -45,6 +46,7 @@ namespace COTLMP.Ui
         public static Server Server = null;
         public static string Message = null;
         public static bool Quitting = false;
+        private static CancellationTokenSource tokenSource = new();
 
         /**
          * @brief
@@ -139,21 +141,23 @@ namespace COTLMP.Ui
             {
                 UIMenuConfirmationWindow window = __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate);
                 window.Configure(MultiplayerModLocalization.UI.ServerStarted, MultiplayerModLocalization.UI.ServerStopConfirm);
-                window.OnConfirm += () => { 
-                    Server.Dispose();
-                    Server = null;
-                };
+                window.OnConfirm += StopServer;
             } 
             else
             {
-                Server = Server.Start(0, new ServerLogger());
-                if (Server == null)
-                    __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Failed to start server!", "", true);
-                else
+                try
                 {
-                    __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Started server!", $"Port: {Server.Port}", true);
-                    Server.ServerStopped += ServerStopped;
+                    Server = new Server(cancellationToken:tokenSource.Token, log:new ServerLogger());
                 }
+                catch
+                {
+                    __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Failed to start server!", "", true);
+                    return false;
+                }
+
+                __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Started server!", $"Port: {Server.Port}", true);
+                Server.ServerStopped += ServerStopped;
+                _ = Server.Run();
             }
             return false;
         }
@@ -182,6 +186,13 @@ namespace COTLMP.Ui
             TwitchManager.Abort();
             Message = (e.Reason == ServerStopReason.Error) ? MultiplayerModLocalization.UI.DisconnectedError : "";
             MMTransition.Play(MMTransition.TransitionType.ChangeSceneAutoResume, MMTransition.Effect.BlackFade, "Main Menu", 1f, "", null);
+        }
+
+        public static void StopServer()
+        {
+            tokenSource.Cancel();
+            tokenSource = new();
+            Server = null;
         }
 
         /**
