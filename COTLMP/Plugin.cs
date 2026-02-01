@@ -154,7 +154,7 @@ public class Plugin : BaseUnityPlugin
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
                                                              "Max Players",
                                                              "The maximum count of players that can join a server",
-                                                             8);
+                                                             12);
         if (SettingData == null)
         {
             Logger.LogFatal("Failed to set default or load the \"Max Players\" setting!");

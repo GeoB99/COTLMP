@@ -219,7 +219,7 @@ namespace COTLMP.Ui
 
             /* Add the "Players Count" setting */
             Callbacks = new ActionCallbacks(null, COTLMP.Game.Callbacks.PlayerCountCallback);
-            string[] MaxPlayersCount = {"1", "2", "3", "4", "5", "6", "7", "8"};
+            string[] MaxPlayersCount = {"1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"};
             Success = AddSetting(SETTING_TYPE.HorizontalSelector,
                                  MultiplayerModLocalization.UI.Settings.MultiplayerSettings_PlayerCount,
                                  Plugin.Globals.MaxNumPlayers.ToString(),

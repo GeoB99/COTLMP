@@ -31,7 +31,7 @@ namespace COTLMP.Data
         internal bool VerboseDebug = false;
 
         /* The internal variable of maximum count of players per server. Used for validation purposes. */
-        internal const int MaxPlayersPerServerInternal = 8;
+        internal const int MaxPlayersPerServerInternal = 12;
 
         internal InternalData()
         {
