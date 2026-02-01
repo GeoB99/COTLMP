@@ -196,7 +196,7 @@ namespace COTLMP.Ui
          * Initializes the Settings UI of the mod during the
          * startup of the mod.
          */
-        public static void InitializeUI()
+        public static bool InitializeUI()
         {
             bool Success;
             ActionCallbacks Callbacks;
@@ -214,7 +214,7 @@ namespace COTLMP.Ui
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
                                                "Failed to add the Game Modes setting, expect problems with mod initialization!");
-                return;
+                return Success;
             }
 
             /* Add the "Players Count" setting */
@@ -230,7 +230,7 @@ namespace COTLMP.Ui
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
                                                "Failed to add the Players Count setting, expect problems with mod initialization!");
-                return;
+                return Success;
             }
 
             /* Add the "Enable Voice Chat" setting */
@@ -245,8 +245,10 @@ namespace COTLMP.Ui
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
                                                "Failed to add the Voice Chat setting, expect problems with mod initialization!");
-                return;
+                return Success;
             }
+
+            return Success;
         }
     }
 }
