@@ -4,3 +4,6 @@
 
 # visual studio folder
 **/.vs/
+
+# Unity project assets
+*/Assets/
