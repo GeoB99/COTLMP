@@ -15,9 +15,10 @@ using COTLMP.Data;
 using COTLMP.Ui;
 using HarmonyLib;
 using System;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using UnityEngine.SceneManagement;
+using UnityEngine;
 
 /* NAMESPACES *****************************************************************/
 
@@ -39,10 +40,13 @@ namespace COTLMP;
  */
 public class Plugin : BaseUnityPlugin
 {
+    internal static string CotlmpPathLocation;
     internal static new ManualLogSource Logger;
     internal static new ConfigFile Config;
     internal static ModDataGlobals Globals;
     internal static InternalData GlobalsInternal;
+    internal static AssetBundle ModScenesBundle;
+    internal static MonoBehaviour MonoInstance;
     private Harmony HarmonyInstance;
 
     /*
@@ -52,10 +56,11 @@ public class Plugin : BaseUnityPlugin
      */
     private void Awake()
     {
-        Object SettingData;
+        System.Object SettingData;
         int MaxPlayers;
         string ServerName, PlayerName, GameMode;
         bool ToggleMod, VoiceChat;
+        bool Success;
 
         /*
          * Start patching the game assembly with our code
@@ -63,9 +68,16 @@ public class Plugin : BaseUnityPlugin
          */
         HarmonyInstance = Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
-        /* Cache the plugin class methods so that the COTL MP mod can use them across different modules */
+        /* Cache the path location of the COTLMP mod */
+        CotlmpPathLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+        /*
+         * Cache the plugin class methods and the Mono instance so that the 
+         * COTL MP mod can use them across different modules.
+         */
         Logger = base.Logger;
         Config = base.Config;
+        MonoInstance = this;
 
         /* Fetch the flags and switches of the mod, reserved for internal use */
         GlobalsInternal = new InternalData();
@@ -177,9 +189,24 @@ public class Plugin : BaseUnityPlugin
                                      VoiceChat);
 
         /* Initialize the Settings UI */
-        COTLMP.Ui.Settings.InitializeUI();
+        Success = COTLMP.Ui.Settings.InitializeUI();
+        if (!Success)
+        {
+            Logger.LogFatal("Failed to initialize the Settings UI!");
+            HarmonyInstance.UnpatchSelf();
+            return;
+        }
 
-        // Initialize the network features
+        /* Load all the COTLMP scene assets bundle in memory */
+        ModScenesBundle = COTLMP.Api.Assets.OpenAssetBundleFile("cotlmpscenes");
+        if (ModScenesBundle == null)
+        {
+            Logger.LogFatal("Failed to open the COTLMP scenes bundle file!");
+            HarmonyInstance.UnpatchSelf();
+            return;
+        }
+
+        /* Initialize the network features */
         COTLMP.Network.Network.Initialize();
 
         /* Log to the debugger that our mod is loaded */

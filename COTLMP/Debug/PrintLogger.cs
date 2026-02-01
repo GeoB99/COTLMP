@@ -74,6 +74,15 @@ namespace COTLMP.Debug
      *
      * @field LOCALIZATION_COMPONENT
      * Localization API component of the mod.
+     * 
+     * @field CONFIGURATION_COMPONENT
+     * Save/Load configuration settings component of the mod.
+     * 
+     * @field SCENES_MANAGEMENT_COMPONENT
+     * UI scenes management component of the mod.
+     * 
+     * @field DEBUG_COMPONENT
+     * Core debug routines component of the mod.
      */
     public enum DebugComponent
     {
@@ -82,6 +91,7 @@ namespace COTLMP.Debug
         NETWORK_STACK_COMPONENT,
         LOCALIZATION_COMPONENT,
         CONFIGURATION_COMPONENT,
+        ASSETS_MANAGEMENT_COMPONENT,
         DEBUG_COMPONENT
     }
 
@@ -133,6 +143,12 @@ namespace COTLMP.Debug
                 case DebugComponent.CONFIGURATION_COMPONENT:
                 {
                     Name = "CONFIGURATION_COMPONENT";
+                    break;
+                }
+
+                case DebugComponent.ASSETS_MANAGEMENT_COMPONENT:
+                {
+                    Name = "ASSETS_MANAGEMENT_COMPONENT";
                     break;
                 }
 

@@ -9,13 +9,12 @@
 
 using COTLMP;
 using COTLMP.Debug;
-using BepInEx;
 using HarmonyLib;
+using BepInEx;
 using I2.Loc;
 using Lamb.UI;
 using Lamb.UI.MainMenu;
 using src.UI;
-using UnityEngine.UI;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -52,10 +51,9 @@ namespace COTLMP.Ui
             [HarmonyPrefix]
             private static bool OnMultiplayerButtonClickedPatch(MainMenu __instance)
             {
-                /* Throw a dialog box warning the user Multiplayer is currently WIP */
-                COTLMP.Debug.PrintLogger.Print(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "The Multiplayer button has been clicked!");
-                UIMenuConfirmationWindow ConfirmDialog = __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate);
-                ConfirmDialog.Configure(MultiplayerModLocalization.UI.Multiplayer_Title, MultiplayerModLocalization.UI.Multiplayer_Text, true);
+                /* Display the servers list UI */
+                COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "The Multiplayer button has been clicked!");
+                COTLMP.Ui.ServerList.DisplayUi();
                 return false;
             }
 
