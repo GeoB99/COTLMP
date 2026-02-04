@@ -4,7 +4,7 @@
     <TargetFramework>net472</TargetFramework>
     <AssemblyName>COTLMP</AssemblyName>
     <Product>Cult of the Lamb Multiplayer Mod Plug-In</Product>
-    <Version>0.0.0.2</Version>
+    <Version>0.0.0.3</Version>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <LangVersion>latest</LangVersion>
     <RestoreAdditionalProjectSources>
