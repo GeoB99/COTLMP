@@ -135,8 +135,24 @@ namespace COTLMPServer
 
             switch (message.Type)
             {
-                case MessageType.Test:
-                    _logger?.LogInfo("A message has been recieved!");
+                case MessageType.TeleportDungeon:
+                    _logger?.LogInfo("Player has entered new dungeon, teleport all players!");
+                    break;
+
+                case MessageType.RitualPerform:
+                    _logger?.LogInfo("Player is performing a ritual!");
+                    break;
+
+                case MessageType.PlayerJoin:
+                    _logger?.LogInfo("Player has joined the server!");
+                    break;
+
+                case MessageType.PlayerLeft:
+                    _logger?.LogInfo("Player has left the server!");
+                    break;
+
+                case MessageType.ChatNotify:
+                    _logger?.LogInfo("Player has sent a chat message, broadcast it!");
                     break;
             }
 
