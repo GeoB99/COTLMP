@@ -5,5 +5,12 @@
 # visual studio folder
 **/.vs/
 
-# Unity project assets
-*/Assets/
+# Unity project
+**/AssetBundles/
+**/Library/
+**/UserSettings
+**/Logs
+Assets/UI/UI.sln
+Assets/UI/Assembly-CSharp-Editor.csproj
+Assets/UI/.vsconfig
+
