@@ -62,7 +62,7 @@ namespace COTLMPServer.Messages
             {
                 writer.Write(MagicNumber);
                 writer.Write((int)Type);
-//                writer.Write(ID);
+                //                writer.Write(ID);
                 if (Data?.Length > 0) // check if data is null or zero length
                 {
                     writer.Write(Data.Length);
@@ -93,11 +93,13 @@ namespace COTLMPServer.Messages
         public static Message Deserialize(IReadOnlyList<byte> data)
         {
             if (data == null)
-                throw new ArgumentNullException("data is null!");
+                throw new ArgumentNullException(nameof(data));
             if (data.Count < (sizeof(int) * 3))
                 throw new InvalidDataException("data is too small!");
 
-            using (MemoryStream stream = new MemoryStream(data.ToArray()))
+            byte[] buffer = data as byte[] ?? data.ToArray();
+
+            using (MemoryStream stream = new MemoryStream(buffer, false))
             using (BinaryReader reader = new BinaryReader(stream))
             {
                 if (reader.ReadInt32() != MagicNumber)
@@ -108,8 +110,8 @@ namespace COTLMPServer.Messages
                 return new Message()
                 {
                     Type = type,
-//                    ID = reader.ReadInt32(),
-                    Data = Utils.ReadBytes(stream)
+                    //                    ID = reader.ReadInt32(),
+                    Data = Utils.ReadBytes(reader)
                 };
             }
         }
