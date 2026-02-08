@@ -188,6 +188,11 @@ namespace COTLMP.Ui
             MMTransition.Play(MMTransition.TransitionType.ChangeSceneAutoResume, MMTransition.Effect.BlackFade, "Main Menu", 1f, "", null);
         }
 
+
+        /**
+         * @brief
+         * Stops the integrated server.
+         */
         public static void StopServer()
         {
             tokenSource.Cancel();
