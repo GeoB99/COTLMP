@@ -133,6 +133,57 @@ namespace I2.Loc
                     }
                 }
             }
+
+            public static class ServerList
+            {
+                public static string ServerList_BackButton
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/BackButton");
+                    }
+                }
+
+                public static string ServerList_PlayerNameButton
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/PlayerNameButton");
+                    }
+                }
+
+                public static string ServerList_ServerNameButton
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/ServerNameButton");
+                    }
+                }
+
+                public static string ServerList_MainDescription
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/MainDescription");
+                    }
+                }
+
+                public static string ServerList_NoneFound
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/NoneFound");
+                    }
+                }
+
+                public static string ServerList_ConnectButton
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/ConnectButton");
+                    }
+                }
+            }
         }
     }
 }
