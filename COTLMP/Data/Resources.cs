@@ -35,14 +35,6 @@ namespace I2.Loc
                 }
             }
 
-            public static string Multiplayer_Text
-            {
-                get
-                {
-                    return LocalizationManager.GetTranslation("Multiplayer/UI/WIP");
-                }
-            }
-
             public static string StartServer
             {
                 get
