@@ -31,8 +31,8 @@ namespace COTLMPServer.Messages
          * @return
          * The read byte array or null if the size is 0
          * 
-         * @param[in] stream
-         * The stream to read from
+         * @param[in] reader
+         * The binary reader to use
          * 
          * @throws InvalidDataException
          * If the data passed to it is invalid
@@ -40,25 +40,22 @@ namespace COTLMPServer.Messages
          * @throws ArgumentNullException
          * If any of the arguments are null
          */
-        public static byte[] ReadBytes(MemoryStream stream)
+        public static byte[] ReadBytes(BinaryReader reader)
         {
-            if (stream == null)
-                throw new ArgumentNullException("stream is null!");
-            if (stream.Length - stream.Position < sizeof(int))
+            if (reader == null)
+                throw new ArgumentNullException(nameof(reader));
+            if (reader.BaseStream.Length - reader.BaseStream.Position < sizeof(int))
                 throw new InvalidDataException("stream is too small!");
 
-            using (BinaryReader reader = new BinaryReader(stream))
+            int size = reader.ReadInt32();
+            if (size > 0 && size < 1500)
             {
-                int size = reader.ReadInt32();
-                if (size > 0)
-                {
-                    if (size > stream.Length - stream.Position)
-                        throw new InvalidDataException($"Expected {size} bytes, got {stream.Length - stream.Position}");
-                    return reader.ReadBytes(size);
-                }
-                else
-                    return null;
+                if (size > reader.BaseStream.Length - reader.BaseStream.Position)
+                    throw new InvalidDataException($"Expected {size} bytes, got {reader.BaseStream.Length - reader.BaseStream.Position}");
+                return reader.ReadBytes(size);
             }
+            else
+                return null;
         }
     }
 }
