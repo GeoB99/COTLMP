@@ -18,7 +18,7 @@ using System.Linq;
  * @brief
  * Contains the classes/structs/enums for the server
  */
-namespace COTLMPServer
+namespace COTLMPServer.Messages
 {
     /**
      * @brief
