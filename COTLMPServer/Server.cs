@@ -10,9 +10,12 @@
 using COTLMPServer.Messages;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -62,6 +65,7 @@ namespace COTLMPServer
         private readonly CancellationToken token;
         private readonly ILogger logger;
         private readonly string gameVersion;
+        private static readonly byte[] invalidDataDisconnect = new byte[] { 067, 108, 105, 101, 110, 116, 032, 115, 101, 110, 116, 032, 105, 110, 118, 097, 108, 105, 100, 032, 100, 097, 116, 097 }; // "Client sent invalid data"
         private readonly ConcurrentDictionary<IPEndPoint, Player> players;
 
         /**
@@ -80,6 +84,8 @@ namespace COTLMPServer
         public Server(string ver, int port = 0, CancellationToken? cancellationToken = null, ILogger log = null)
         {
             client = new UdpClient(port);
+            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                client.Client.IOControl(-1744830452, new byte[] { 0 }, null);
             logger = log;
             running = 0;
             players = new ConcurrentDictionary<IPEndPoint, Player>();
@@ -101,7 +107,7 @@ namespace COTLMPServer
         public async Task Run()
         {
             if (disposedValue)
-                throw new ObjectDisposedException("Tried to use disposed Server object");
+                throw new ObjectDisposedException(nameof(Server));
 
             if(Interlocked.CompareExchange(ref running, 1, 0) != 0)
             {
@@ -110,7 +116,7 @@ namespace COTLMPServer
 
             var args = new ServerStoppedArgs(ServerStopReason.NormalShutdown, "");
             CancellationTokenRegistration registration = token.Register(client.Dispose);
-            logger?.LogInfo("Started server!");
+            logger?.LogInfo("Started server at port" + Port + "!");
             try
             {
                 while (true)
@@ -126,7 +132,26 @@ namespace COTLMPServer
                     }
                     catch(InvalidDataException)
                     {
-                        // TODO: disconnect the user
+                        players.TryRemove(result.RemoteEndPoint, out var removed);
+                        if(removed != null)
+                        {
+                            logger?.LogInfo(result.RemoteEndPoint + " (" + removed.Username + ") disconnected: invalid data sent");
+                            removed.Cancellation.Cancel();
+                        } else
+                        {
+                            logger?.LogInfo(result.RemoteEndPoint + " sent invalid data");
+                        }
+                        try
+                        {
+                            Message disconnect = new Message
+                            {
+                                Type = MessageType.Disconnect,
+                                Data = invalidDataDisconnect
+                            };
+                            byte[] discbytes = disconnect.Serialize();
+                            await client.SendAsync(discbytes, discbytes.Length, result.RemoteEndPoint);
+                        }
+                        catch { }
                         continue;
                     }
 
