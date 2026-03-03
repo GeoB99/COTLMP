@@ -19,7 +19,7 @@
     <PackageReference Include="BepInEx.Analyzers" Version="1.*" PrivateAssets="all" />
     <PackageReference Include="BepInEx.Core" Version="5.*" />
     <PackageReference Include="BepInEx.PluginInfoProps" Version="2.*" />
-    <PackageReference Include="COTL_API" Version="0.3.1" />
+    <PackageReference Include="COTL_API" Version="0.3.2" />
     <PackageReference Include="CultOfTheLamb.GameLibs" Version="1.5.15.979-r.0" />
     <PackageReference Include="DTLS2.Net" Version="1.1.5" />
     <!-- Pin to 13.0.3 to match the version shipped by the game (Assembly-CSharp
@@ -28,11 +28,11 @@
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="UnityEngine.Modules" Version="2021.3.16" IncludeAssets="compile" />
   </ItemGroup>
-  
+
   <ItemGroup Condition="'$(TargetFramework.TrimEnd(`0123456789`))' == 'net'">
     <PackageReference Include="Microsoft.NETFramework.ReferenceAssemblies" Version="1.0.2" PrivateAssets="all" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <ProjectReference Include="..\COTLMPServer\COTLMPServer.csproj" />
   </ItemGroup>
