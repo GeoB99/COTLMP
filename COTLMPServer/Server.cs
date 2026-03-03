@@ -9,6 +9,7 @@
 
 using COTLMPServer.Messages;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -60,6 +61,7 @@ namespace COTLMPServer
         private readonly UdpClient client;
         private readonly CancellationToken token;
         private readonly ILogger logger;
+        private readonly ConcurrentDictionary<IPEndPoint, Player> players;
 
         /**
          * @brief
@@ -79,6 +81,7 @@ namespace COTLMPServer
             client = new UdpClient(port);
             logger = log;
             running = 0;
+            players = new ConcurrentDictionary<IPEndPoint, Player>();
             Port = (client.Client.LocalEndPoint as IPEndPoint)?.Port ?? 0;
             if (cancellationToken == null)
                 token = CancellationToken.None;

@@ -7,6 +7,7 @@
 
 /* IMPORTS ********************************************************************/
 
+using COTLMPServer.Messages;
 using System.Threading;
 
 /* CLASSES & CODE *************************************************************/
@@ -32,7 +33,7 @@ namespace COTLMPServer
      */
     internal class Player
     {
-        public uint ID;
+        public int ID;
         public PlayerState State;
         public CancellationTokenSource Cancellation;
 
@@ -49,7 +50,7 @@ namespace COTLMPServer
          * @param[in] Cancellation
          * The cancellation token for everything related to the player
          */
-        public Player(uint id, PlayerState state, CancellationTokenSource cancellation)
+        public Player(int id, PlayerState state, CancellationTokenSource cancellation)
         {
             ID = id;
             State = state;
