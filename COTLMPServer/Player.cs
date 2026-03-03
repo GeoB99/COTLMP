@@ -38,6 +38,7 @@ namespace COTLMPServer
     {
         public int ID;
         public int Skin;
+        public string Username;
         public PlayerState State;
         public CancellationTokenSource Cancellation;
         public SemaphoreSlim Mutex;
