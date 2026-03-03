@@ -22,6 +22,10 @@
     <PackageReference Include="COTL_API" Version="0.3.1" />
     <PackageReference Include="CultOfTheLamb.GameLibs" Version="1.5.15.979-r.0" />
     <PackageReference Include="DTLS2.Net" Version="1.1.5" />
+    <!-- Pin to 13.0.3 to match the version shipped by the game (Assembly-CSharp
+         and COTL_API reference Newtonsoft.Json 13.0.0.0).  Without this, the
+         transitive 12.0.3 pulled by DTLS2.Net wins and causes MSB3277. -->
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="UnityEngine.Modules" Version="2021.3.16" IncludeAssets="compile" />
   </ItemGroup>
   

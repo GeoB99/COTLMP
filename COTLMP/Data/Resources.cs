@@ -75,6 +75,45 @@ namespace I2.Loc
                 }
             }
 
+            public static string Disconnect
+            {
+                get
+                {
+                    return LocalizationManager.GetTranslation("Multiplayer/UI/Disconnect");
+                }
+            }
+
+            public static string DisconnectConfirm
+            {
+                get
+                {
+                    return LocalizationManager.GetTranslation("Multiplayer/UI/DisconnectConfirm");
+                }
+            }
+
+            public static class Welcome
+            {
+                public static string Title
+                {
+                    get { return LocalizationManager.GetTranslation("Multiplayer/UI/Welcome/Title"); }
+                }
+
+                public static string Body
+                {
+                    get { return LocalizationManager.GetTranslation("Multiplayer/UI/Welcome/Body"); }
+                }
+
+                public static string DontShow
+                {
+                    get { return LocalizationManager.GetTranslation("Multiplayer/UI/Welcome/DontShow"); }
+                }
+
+                public static string Confirm
+                {
+                    get { return LocalizationManager.GetTranslation("Multiplayer/UI/Welcome/Confirm"); }
+                }
+            }
+
             public static class Settings
             {
                 public static string MultiplayerSettings_Title
@@ -144,19 +183,43 @@ namespace I2.Loc
                     }
                 }
 
-                public static string ServerList_PlayerNameButton
+                public static string ServerList_ScanButton
                 {
                     get
                     {
-                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/PlayerNameButton");
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/ScanButton");
                     }
                 }
 
-                public static string ServerList_ServerNameButton
+                public static string ServerList_RefreshButton
                 {
                     get
                     {
-                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/ServerNameButton");
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/RefreshButton");
+                    }
+                }
+
+                public static string ServerList_ConnectButton
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/ConnectButton");
+                    }
+                }
+
+                public static string ServerList_DirectConnectButton
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/DirectConnectButton");
+                    }
+                }
+
+                public static string ServerList_IpPlaceholder
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/IpPlaceholder");
                     }
                 }
 
@@ -176,11 +239,43 @@ namespace I2.Loc
                     }
                 }
 
-                public static string ServerList_ConnectButton
+                public static string ServerList_Scanning
                 {
                     get
                     {
-                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/ConnectButton");
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/Scanning");
+                    }
+                }
+
+                public static string ServerList_Found
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/Found");
+                    }
+                }
+
+                public static string ServerList_Connecting
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/Connecting");
+                    }
+                }
+
+                public static string ServerList_ConnectFailed
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/ConnectFailed");
+                    }
+                }
+
+                public static string ServerList_SelectServer
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/SelectServer");
                     }
                 }
             }

@@ -47,7 +47,8 @@ namespace COTLMPServer.Messages
             if (stream.Length - stream.Position < sizeof(int))
                 throw new InvalidDataException("stream is too small!");
 
-            using (BinaryReader reader = new BinaryReader(stream))
+            // leaveOpen: true so the caller's stream stays open after we finish
+            using (BinaryReader reader = new BinaryReader(stream, System.Text.Encoding.UTF8, true))
             {
                 int size = reader.ReadInt32();
                 if (size > 0)

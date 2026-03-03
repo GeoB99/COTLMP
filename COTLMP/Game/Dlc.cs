@@ -8,6 +8,7 @@
 /* IMPORTS ********************************************************************/
 
 using COTLMP;
+using COTLMP.Data;
 using COTLMP.Debug;
 using HarmonyLib;
 using BepInEx;
@@ -31,14 +32,6 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of the Heretic DLC method, of which
          * we are going to force disable it.
-         * 
-         * @param[in] __result
-         * The current result value being returned. Typically the original
-         * method returns a boolean.
-         * 
-         * @return
-         * Returns TRUE if the original method of the game is to be executed.
-         * FALSE if our method is to be executed instead.
          */
         [HarmonyPatch(typeof(GameManager), "AuthenticateHereticDLC")]
         [HarmonyPrefix]
@@ -52,14 +45,6 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of the Cultist DLC method, of which
          * we are going to force disable it.
-         * 
-         * @param[in] __result
-         * The current result value being returned. Typically the original
-         * method returns a boolean.
-         * 
-         * @return
-         * Returns TRUE if the original method of the game is to be executed.
-         * FALSE if our method is to be executed instead.
          */
         [HarmonyPatch(typeof(GameManager), "AuthenticateCultistDLC")]
         [HarmonyPrefix]
@@ -73,14 +58,6 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of the Sinful DLC method, of which
          * we are going to force disable it.
-         * 
-         * @param[in] __result
-         * The current result value being returned. Typically the original
-         * method returns a boolean.
-         * 
-         * @return
-         * Returns TRUE if the original method of the game is to be executed.
-         * FALSE if our method is to be executed instead.
          */
         [HarmonyPatch(typeof(GameManager), "AuthenticateSinfulDLC")]
         [HarmonyPrefix]
@@ -94,14 +71,6 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of the Pilgrim DLC method, of which
          * we are going to force disable it.
-         * 
-         * @param[in] __result
-         * The current result value being returned. Typically the original
-         * method returns a boolean.
-         * 
-         * @return
-         * Returns TRUE if the original method of the game is to be executed.
-         * FALSE if our method is to be executed instead.
          */
         [HarmonyPatch(typeof(GameManager), "AuthenticatePilgrimDLC")]
         [HarmonyPrefix]
@@ -115,14 +84,6 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of the the early purchase DLC method,
          * of which we are going to force disable it.
-         * 
-         * @param[in] __result
-         * The current result value being returned. Typically the original
-         * method returns a boolean.
-         * 
-         * @return
-         * Returns TRUE if the original method of the game is to be executed.
-         * FALSE if our method is to be executed instead.
          */
         [HarmonyPatch(typeof(GameManager), "AuthenticatePrePurchaseDLC")]
         [HarmonyPrefix]
@@ -134,23 +95,56 @@ namespace COTLMP.Game
 
         /*
          * @brief
-         * Patches the authentication of Woolhaven DLC method, of which
-         * we are going to force disable it.
-         * 
-         * @param[in] __result
-         * The current result value being returned. Typically the original
-         * method returns a boolean.
-         * 
-         * @return
-         * Returns TRUE if the original method of the game is to be executed.
-         * FALSE if our method is to be executed instead.
+         * Patches the Woolhaven (Major DLC) authentication so that:
+         *   - In the main menu / outside a game session it ALWAYS returns false,
+         *     ensuring the base-game main-menu scene is loaded for all users and
+         *     preventing a DLC-specific menu layout from breaking the Multiplayer
+         *     button injection.
+         *   - During an active multiplayer session it also returns false so that
+         *     no player gains access to Woolhaven DLC areas or content.
+         *
+         * Single-player users who own the DLC will find Woolhaven unavailable
+         * while this mod is installed; they should disable the mod to play the
+         * DLC story content in solo mode.
          */
         [HarmonyPatch(typeof(GameManager), "AuthenticateMajorDLC")]
         [HarmonyPrefix]
         private static bool DisableWoolhavenDLC(ref bool __result)
         {
+            // Block during multiplayer or in the main menu (no session started)
+            if (InternalData.IsMultiplayerSession || !SessionHandler.HasSessionStarted)
+            {
+                __result = false;
+                return false;
+            }
+            // Single-player in-session: let the original Steam check run
+            return true;
+        }
+
+        /*
+         * @brief
+         * Blocks the Woolhaven goop door interaction during any active multiplayer
+         * session so players without the DLC cannot accidentally enter DLC areas
+         * if they were somehow unlocked.
+         */
+        [HarmonyPatch(typeof(BaseGoopDoor), "CanWoolhavenDoorOpen")]
+        [HarmonyPrefix]
+        private static bool BlockWoolhavenDoorInMP(ref bool __result)
+        {
+            if (!InternalData.IsMultiplayerSession) return true;
             __result = false;
             return false;
+        }
+
+        /*
+         * @brief
+         * Prevent the Woolhaven door lock from ever opening during multiplayer.
+         */
+        [HarmonyPatch(typeof(BaseGoopDoor), "CheckWoolhavenDoor")]
+        [HarmonyPrefix]
+        private static bool BlockCheckWoolhavenDoor()
+        {
+            return !InternalData.IsMultiplayerSession;
         }
     }
 }
