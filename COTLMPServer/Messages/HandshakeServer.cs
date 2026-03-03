@@ -12,12 +12,14 @@ namespace COTLMPServer.Messages
         public readonly struct Player
         {
             public readonly int ID;
+            public readonly int Skin;
             public readonly PlayerState State;
 
-            public Player(PlayerState state, int id = -1)
+            public Player(PlayerState state, int id = -1, int skin = 0)
             {
                 ID = id;
                 State = state;
+                Skin = skin;
             }
 
             public byte[] Serialize()
@@ -26,6 +28,7 @@ namespace COTLMPServer.Messages
                 using (BinaryWriter writer = new BinaryWriter(stream))
                 {
                     writer.Write(ID);
+                    writer.Write(Skin);
                     byte[] bytes = State.Serialize();
                     writer.Write(bytes.Length);
                     writer.Write(bytes);
@@ -37,7 +40,7 @@ namespace COTLMPServer.Messages
             {
                 if (bytes == null)
                     throw new ArgumentNullException(nameof(bytes));
-                if (bytes.Count < sizeof(int) * 2)
+                if (bytes.Count < sizeof(int) * 3)
                     throw new InvalidDataException("data too small!");
 
                 byte[] data = bytes as byte[] ?? bytes.ToArray();
@@ -46,14 +49,15 @@ namespace COTLMPServer.Messages
                 using (BinaryReader reader = new BinaryReader(stream))
                 {
                     int id = reader.ReadInt32();
+                    int skin = reader.ReadInt32();
                     byte[] statebytes = Utils.ReadBytes(reader) ?? throw new InvalidDataException("invalid data");
-                    return new Player(PlayerState.Deserialize(statebytes), id);
+                    return new Player(PlayerState.Deserialize(statebytes), id, skin);
                 }
             }
 
             internal static Player FromInternal(COTLMPServer.Player source)
             {
-                return new Player(source.State, source.ID);
+                return new Player(source.State, source.ID, source.Skin);
             }
         }
 
