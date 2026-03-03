@@ -10,6 +10,7 @@ namespace COTLMPServer.Messages
     {
         public int Skin;
         public string Username;
+        public string GameVersion;
         public const int MagicNumber = 0xBE12475;
 
         public byte[] Serialize()
@@ -25,6 +26,9 @@ namespace COTLMPServer.Messages
                 byte[] userBytes = Encoding.UTF8.GetBytes(Username);
                 writer.Write(userBytes.Length);
                 writer.Write(userBytes);
+                byte[] verBytes = Encoding.UTF8.GetBytes(GameVersion);
+                writer.Write(verBytes.Length);
+                writer.Write(verBytes);
                 return stream.ToArray();
             }
         }
@@ -33,7 +37,7 @@ namespace COTLMPServer.Messages
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
-            if (data.Count < (sizeof(int) * 3 + 1))
+            if (data.Count < (sizeof(int) * 4 + 2))
                 throw new InvalidDataException("Data too small");
 
             byte[] buffer = data as byte[] ?? data.ToArray();
@@ -45,23 +49,24 @@ namespace COTLMPServer.Messages
                     throw new InvalidDataException("Magic number doesn't match");
                 int skin = reader.ReadInt32();
 
-                byte[] userBytes = Utils.ReadBytes(reader);
-                if (userBytes == null)
-                    throw new InvalidDataException("Corrupt username string");
-
+                byte[] userBytes = Utils.ReadBytes(reader) ?? throw new InvalidDataException("Corrupt username string");
                 string user = Encoding.UTF8.GetString(userBytes);
 
-                if (string.IsNullOrWhiteSpace(user) || skin < 0)
+                byte[] verBytes = Utils.ReadBytes(reader) ?? throw new InvalidDataException("Corrupt version string");
+                string ver = Encoding.UTF8.GetString(verBytes);
+
+                if (string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(ver) || skin < 0)
                     throw new InvalidDataException("invalid data in bytes array");
 
-                return new HandshakeClient(user, skin);
+                return new HandshakeClient(user, ver, skin);
             }
         }
 
-        public HandshakeClient(string username, int skin = 0)
+        public HandshakeClient(string username, string version, int skin = 0)
         {
             Username = username;
             Skin = skin;
+            GameVersion = version;
         }
     }
 }

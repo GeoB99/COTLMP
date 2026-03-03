@@ -61,6 +61,7 @@ namespace COTLMPServer
         private readonly UdpClient client;
         private readonly CancellationToken token;
         private readonly ILogger logger;
+        private readonly string gameVersion;
         private readonly ConcurrentDictionary<IPEndPoint, Player> players;
 
         /**
@@ -76,13 +77,14 @@ namespace COTLMPServer
          * @param[in] logger
          * The logger that the server should use. Null if none.
          */
-        public Server(int port = 0, CancellationToken? cancellationToken = null, ILogger log = null)
+        public Server(string ver, int port = 0, CancellationToken? cancellationToken = null, ILogger log = null)
         {
             client = new UdpClient(port);
             logger = log;
             running = 0;
             players = new ConcurrentDictionary<IPEndPoint, Player>();
             Port = (client.Client.LocalEndPoint as IPEndPoint)?.Port ?? 0;
+            gameVersion = ver;
             if (cancellationToken == null)
                 token = CancellationToken.None;
             else
@@ -130,8 +132,8 @@ namespace COTLMPServer
 
                     switch(message.Type)
                     {
-                        case MessageType.Test:
-                            logger?.LogInfo("Test message!");
+                        case MessageType.Handshake:
+
                             break;
                     }
                 }
@@ -152,8 +154,8 @@ namespace COTLMPServer
             }
             finally
             {
-                client.Dispose();
                 registration.Dispose();
+                client.Dispose();
                 ServerStopped?.Invoke(this, args);
             }
         }
