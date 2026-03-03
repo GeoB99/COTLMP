@@ -19,6 +19,7 @@ namespace COTLMPServer.Messages
      */
     public enum MessageType
     {
+        Ping,
         Handshake,
         Disconnect
     }
