@@ -13,13 +13,15 @@ namespace COTLMPServer.Messages
         {
             public readonly int ID;
             public readonly int Skin;
+            public readonly string Username;
             public readonly PlayerState State;
 
-            public Player(PlayerState state, int id = -1, int skin = 0)
+            public Player(PlayerState state, string username = "", int id = -1, int skin = 0)
             {
                 ID = id;
                 State = state;
                 Skin = skin;
+                Username = username;
             }
 
             public byte[] Serialize()
@@ -29,6 +31,9 @@ namespace COTLMPServer.Messages
                 {
                     writer.Write(ID);
                     writer.Write(Skin);
+                    byte[] userbytes = Encoding.UTF8.GetBytes(Username);
+                    writer.Write(userbytes.Length);
+                    writer.Write(userbytes);
                     byte[] bytes = State.Serialize();
                     writer.Write(bytes.Length);
                     writer.Write(bytes);
@@ -50,14 +55,15 @@ namespace COTLMPServer.Messages
                 {
                     int id = reader.ReadInt32();
                     int skin = reader.ReadInt32();
+                    byte[] userbytes = Utils.ReadBytes(reader) ?? throw new InvalidDataException("invalid data");
                     byte[] statebytes = Utils.ReadBytes(reader) ?? throw new InvalidDataException("invalid data");
-                    return new Player(PlayerState.Deserialize(statebytes), id, skin);
+                    return new Player(PlayerState.Deserialize(statebytes), Encoding.UTF8.GetString(userbytes), id, skin);
                 }
             }
 
             internal static Player FromInternal(COTLMPServer.Player source)
             {
-                return new Player(source.State, source.ID, source.Skin);
+                return new Player(source.State, source.Username, source.ID, source.Skin);
             }
         }
 

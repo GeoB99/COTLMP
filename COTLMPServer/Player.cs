@@ -39,6 +39,7 @@ namespace COTLMPServer
         public int ID;
         public int Skin;
         public string Username;
+        public string Biome;
         public PlayerState State;
         public CancellationTokenSource Cancellation;
         public SemaphoreSlim Mutex;
@@ -56,11 +57,13 @@ namespace COTLMPServer
          * @param[in] Cancellation
          * The cancellation token for everything related to the player
          */
-        public Player(int id, int skin, PlayerState state, CancellationTokenSource cancellation)
+        public Player(int id, int skin, string username, string biome, PlayerState state, CancellationTokenSource cancellation)
         {
             ID = id;
             Skin = skin;
             State = state;
+            Biome = biome;
+            Username = username;
             Cancellation = cancellation;
             Mutex = new SemaphoreSlim(1, 1);
         }
