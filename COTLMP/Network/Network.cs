@@ -41,7 +41,7 @@ namespace COTLMP.Network
             {
                 // set the quitting flag temporarily so it doesn't try to transition to the main menu on server stop
                 PauseMenuPatches.Quitting = true;
-                PauseMenuPatches.Server?.Dispose();
+                PauseMenuPatches.StopServer();
                 PauseMenuPatches.Quitting = false;
             }
         }
