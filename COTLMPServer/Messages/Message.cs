@@ -74,6 +74,12 @@ namespace COTLMPServer.Messages
             }
         }
 
+        public Message(MessageType type, byte[] data = null)
+        {
+            Type = type;
+            Data = data;
+        }
+
         /**
          * @brief
          * Deserialize byte array back into a Message object
@@ -107,12 +113,7 @@ namespace COTLMPServer.Messages
                 MessageType type = (MessageType)reader.ReadInt32();
                 if (!Enum.IsDefined(typeof(MessageType), type))
                     throw new InvalidDataException("Invalid message type");
-                return new Message()
-                {
-                    Type = type,
-                    //                    ID = reader.ReadInt32(),
-                    Data = Utils.ReadBytes(reader)
-                };
+                return new Message(type, Utils.ReadBytes(reader));
             }
         }
     }
