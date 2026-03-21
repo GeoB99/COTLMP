@@ -77,6 +77,11 @@ namespace COTLMP.Api
          * @param[in] SceneName
          * A string to the name of the scene of which to be loaded.
          * 
+         * @param[in] Overlay
+         * If set to TRUE, the scene will be shown overlapping the other existing scene.
+         * Otherwise set this to FALSE for the scene to entirely replace the existing active
+         * scene.
+         * 
          * @param[in] ActionToTakeCallback
          * An action callback provided by the caller. The method executes
          * this callback if the scene name is "Main Menu" of which it
@@ -84,7 +89,7 @@ namespace COTLMP.Api
          * This parameter is optional and ignored for every other scene name.
          * 
          */
-        public static void ShowScene(string SceneName, Action ActionToTakeCallback)
+        public static void ShowScene(string SceneName, bool Overlay, Action ActionToTakeCallback)
         {
             /*
              * The caller asked to load the main menu scene, use MMTools for that
@@ -102,7 +107,7 @@ namespace COTLMP.Api
             }
 
             /* Otherwise use the scene manager to load whatever scene */
-            SceneManager.LoadScene(SceneName, LoadSceneMode.Single);
+            SceneManager.LoadScene(SceneName, Overlay ? LoadSceneMode.Additive : LoadSceneMode.Single);
         }
     }
 }

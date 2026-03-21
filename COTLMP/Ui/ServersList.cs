@@ -50,7 +50,7 @@ namespace COTLMP.Ui
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "BackButtonHandler() called");
 
             /* Return to the main menu of the game */ 
-            COTLMP.Api.Assets.ShowScene("Main Menu", null);
+            COTLMP.Api.Assets.ShowScene("Main Menu", false, null);
         }
 
         private static void LocalizeUi()
@@ -122,7 +122,7 @@ namespace COTLMP.Ui
         public static void DisplayUi()
         {
             /* Load the server list UI scene, the asset bundle should be already loaded */
-            COTLMP.Api.Assets.ShowScene("ServerListUI", null);
+            COTLMP.Api.Assets.ShowScene("ServerListUI", false, null);
 
             /*
              * Invoke the UI initialization worker with a coroutine. Unity loads
