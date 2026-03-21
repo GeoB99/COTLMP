@@ -135,7 +135,8 @@ namespace COTLMP.Ui
         [HarmonyPrefix]
         private static bool OnCoopButtonPressed(UIPauseMenuController __instance)
         {
-            if(Server != null)
+            /* The server has already been created, ask the player if they want to shut it down */
+            if (Server != null)
             {
                 UIMenuConfirmationWindow window = __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate);
                 window.Configure(MultiplayerModLocalization.UI.ServerStarted, MultiplayerModLocalization.UI.ServerStopConfirm);
@@ -146,6 +147,7 @@ namespace COTLMP.Ui
             } 
             else
             {
+                /* It hasn't been created, create one now */
                 Server = Server.Start(0, new ServerLogger());
                 if (Server == null)
                     __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Failed to start server!", "", true);
@@ -153,6 +155,12 @@ namespace COTLMP.Ui
                 {
                     __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Started server!", $"Port: {Server.Port}", true);
                     Server.ServerStopped += ServerStopped;
+
+                    /* The server has been started, the player is currently in session */
+                    Plugin.GlobalsInternal.InGameSession = true;
+
+                    /* Start the saychat mechanism */
+                    COTLMP.Ui.SayChat.StartSayChat();
                 }
             }
             return false;
@@ -170,18 +178,31 @@ namespace COTLMP.Ui
          */
         private static void ServerStopped(object sender, ServerStoppedArgs e)
         {
+            /* The server is already quitting, bail out */
             Server = null;
             if (Quitting)
                 return;
+
+            /* Shutdown all the game related stuff */
             SimulationManager.Pause();
             DeviceLightingManager.Reset();
             FollowerManager.Reset();
             StructureManager.Reset();
+
+            /* Reset the game display */
             UIDynamicNotificationCenter.Reset();
             MonoSingleton<UIManager>.Instance.ResetPreviousCursor();
             TwitchManager.Abort();
+
+            /* Shutdown the saychat mechanism */
+            COTLMP.Ui.SayChat.Shutdown();
+
+            /* Show a reason message to the player why the server has stopped and return to main menu scene */
             Message = (e.Reason == ServerStopReason.Error) ? MultiplayerModLocalization.UI.DisconnectedError : "";
             MMTransition.Play(MMTransition.TransitionType.ChangeSceneAutoResume, MMTransition.Effect.BlackFade, "Main Menu", 1f, "", null);
+
+            /* The server has been stopped, the player is no longer in session */
+            Plugin.GlobalsInternal.InGameSession = false;
         }
 
         /**
