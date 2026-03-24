@@ -5,9 +5,9 @@ TagManager:
   serializedVersion: 2
   tags:
   - BackButton
-  - PlayerNameButton
-  - ServerNameButton
   - SayChatBox
+  - PlayerNameField
+  - ServerNameField
   layers:
   - Default
   - TransparentFX

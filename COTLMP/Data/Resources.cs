@@ -2,7 +2,7 @@
  * PROJECT:     Cult of the Lamb Multiplayer Mod
  * LICENSE:     MIT (https://spdx.org/licenses/MIT)
  * PURPOSE:     Main file containing global resource localization strings
- * COPYRIGHT:	Copyright 2025 GeoB99 <geobman1999@gmail.com>
+ * COPYRIGHT:	Copyright 2025-2026 GeoB99 <geobman1999@gmail.com>
  */
 
 /* IMPORTS ********************************************************************/
@@ -144,19 +144,19 @@ namespace I2.Loc
                     }
                 }
 
-                public static string ServerList_PlayerNameButton
+                public static string ServerList_EnterPlayerNameDescription
                 {
                     get
                     {
-                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/PlayerNameButton");
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/PlayerNameDescription");
                     }
                 }
 
-                public static string ServerList_ServerNameButton
+                public static string ServerList_EnterServerNameDescription
                 {
                     get
                     {
-                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/ServerNameButton");
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/ServerNameDescription");
                     }
                 }
 

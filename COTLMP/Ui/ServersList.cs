@@ -2,7 +2,7 @@
  * PROJECT:     Cult of the Lamb Multiplayer Mod
  * LICENSE:     MIT (https://spdx.org/licenses/MIT)
  * PURPOSE:     Servers List UI management code
- * COPYRIGHT:	Copyright 2025 GeoB99 <geobman1999@gmail.com>
+ * COPYRIGHT:	Copyright 2025-2026 GeoB99 <geobman1999@gmail.com>
  */
 
 /* IMPORTS ********************************************************************/
@@ -13,9 +13,10 @@ using COTLMP.Data;
 using COTLMP.Debug;
 using HarmonyLib;
 using BepInEx;
+using BepInEx.Configuration;
 using I2.Loc;
-using TMPro;
 using System.Collections;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -33,12 +34,15 @@ namespace COTLMP.Ui
 {
     public static class ServerList
     {
+        private static Image ServerEntry;
         private static Button BackButton;
-        private static Button PlayerNameButton;
-        private static Button ServerNameButton;
         private static Button ConnectButton;
         private static TMP_Text MainDescription;
-        private static Image NoneFoundDisclaimer;
+        private static TMP_InputField PlayerNameInput;
+        private static TMP_Text PlayerNameDescription;
+        private static TMP_InputField ServerNameInput;
+        private static TMP_Text ServerNameDescription;
+        private static TMP_Text NoneFoundDisclaimer;
 
         /*
          * @brief
@@ -53,21 +57,76 @@ namespace COTLMP.Ui
             COTLMP.Api.Assets.ShowScene("Main Menu", false, null);
         }
 
+        private static void RefreshServersList()
+        {
+            /* TODO: Implement this when the network stack is implemented */
+            /* Cache the server entry item and hide it when no servers were found */
+            ServerEntry = GameObject.Find("ServerEntry").GetComponent<Image>();
+            ServerEntry.gameObject.SetActive(false);
+            return;
+        }
+
+        private static void PlayerNameSubmitHandler()
+        {
+            string Section;
+            ConfigDefinition Definition;
+            ConfigEntry<string> SettingEntry;
+
+            /* Retrieve the section name for the setting */
+            Section = COTLMP.Api.Configuration.GetSectionName(CONFIGURATION_SECTION.ServerSettings);
+
+            /* Get the Player Name setting */
+            Definition = new ConfigDefinition(Section, "Player Name");
+            SettingEntry = COTLMP.Api.Configuration.GetSettingEntry<string>(Definition);
+            COTLMP.Debug.Assertions.Assert(SettingEntry != null, false, null, null);
+
+            /* Cache the new value to the globals store */
+            Plugin.Globals.PlayerName = PlayerNameInput.text;
+
+            /* Overwrite the current value of the setting and flush it */
+            SettingEntry.BoxedValue = PlayerNameInput.text;
+            COTLMP.Api.Configuration.FlushSettings();
+        }
+
+        private static void ServerNameSubmitHandler()
+        {
+            string Section;
+            ConfigDefinition Definition;
+            ConfigEntry<string> SettingEntry;
+
+            /* Retrieve the section name for the setting */
+            Section = COTLMP.Api.Configuration.GetSectionName(CONFIGURATION_SECTION.ServerSettings);
+
+            /* Get the Server Name setting */
+            Definition = new ConfigDefinition(Section, "Server Name");
+            SettingEntry = COTLMP.Api.Configuration.GetSettingEntry<string>(Definition);
+            COTLMP.Debug.Assertions.Assert(SettingEntry != null, false, null, null);
+
+            /* Cache the new value to the globals store */
+            Plugin.Globals.ServerName = ServerNameInput.text;
+
+            /* Overwrite the current value of the setting and flush it */
+            SettingEntry.BoxedValue = ServerNameInput.text;
+            COTLMP.Api.Configuration.FlushSettings();
+        }
+
         private static void LocalizeUi()
         {
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "LocalizeUi() called");
 
             /* Localize all the buttons */
             BackButton.GetComponentInChildren<TMP_Text>().text = MultiplayerModLocalization.UI.ServerList.ServerList_BackButton;
-            PlayerNameButton.GetComponentInChildren<TMP_Text>().text = MultiplayerModLocalization.UI.ServerList.ServerList_PlayerNameButton;
-            ServerNameButton.GetComponentInChildren<TMP_Text>().text = MultiplayerModLocalization.UI.ServerList.ServerList_ServerNameButton;
             ConnectButton.GetComponentInChildren<TMP_Text>().text = MultiplayerModLocalization.UI.ServerList.ServerList_ConnectButton;
 
             /* Localize the description header */
             MainDescription.text = MultiplayerModLocalization.UI.ServerList.ServerList_MainDescription;
 
+            /* Localize the player and server name descriptions header */
+            PlayerNameDescription.text = MultiplayerModLocalization.UI.ServerList.ServerList_EnterPlayerNameDescription;
+            ServerNameDescription.text = MultiplayerModLocalization.UI.ServerList.ServerList_EnterServerNameDescription;
+
             /* Localize the "no servers found" disclaimer */
-            NoneFoundDisclaimer.GetComponentInChildren<TMP_Text>().text = MultiplayerModLocalization.UI.ServerList.ServerList_NoneFound;
+            NoneFoundDisclaimer.text = MultiplayerModLocalization.UI.ServerList.ServerList_NoneFound;
         }
 
         /*
@@ -90,13 +149,35 @@ namespace COTLMP.Ui
             COTLMP.Debug.Assertions.Assert(BackButton != null, false, "BackButton gameobject returned NULL!", null);
             BackButton.onClick.AddListener(BackButtonHandler);
 
-            /* Retrieve the "Player Name" button */
-            PlayerNameButton = GameObject.Find("PlayerNameButton").GetComponent<Button>();
-            COTLMP.Debug.Assertions.Assert(PlayerNameButton != null, false, "PlayerNameButton gameobject returned NULL!", null);
+            /* Retrieve the "Player Name" input field and bind a handler to it */
+            PlayerNameInput = GameObject.Find("PlayerNameField").GetComponent<TMP_InputField>();
+            COTLMP.Debug.Assertions.Assert(PlayerNameInput != null, false, "PlayerNameInput gameobject returned NULL!", null);
+            PlayerNameInput.onValueChanged.AddListener(delegate { PlayerNameSubmitHandler(); });
 
-            /* Retrieve the "Server Name" button */
-            ServerNameButton = GameObject.Find("ServerNameButton").GetComponent<Button>();
-            COTLMP.Debug.Assertions.Assert(PlayerNameButton != null, false, "ServerNameButton gameobject returned NULL!", null);
+            /*
+             * Populate the player name input field with the name of the player
+             * from the mod configuration settings.
+             */
+            PlayerNameInput.text = Plugin.Globals.PlayerName;
+
+            /* Retrieve the player name description */
+            PlayerNameDescription = GameObject.Find("PlayerNameDescriptionInput").GetComponent<TMP_Text>();
+            COTLMP.Debug.Assertions.Assert(PlayerNameDescription != null, false, "PlayerNameDescription gameobject returned NULL!", null);
+
+            /* Retrieve the "Server Name" input field and bind a handler to it */
+            ServerNameInput = GameObject.Find("ServerNameField").GetComponent<TMP_InputField>();
+            COTLMP.Debug.Assertions.Assert(ServerNameInput != null, false, "ServerNameInput gameobject returned NULL!", null);
+            ServerNameInput.onValueChanged.AddListener(delegate { ServerNameSubmitHandler(); });
+
+            /*
+             * Populate the player name input field with the name of the player
+             * from the mod configuration settings.
+             */
+            ServerNameInput.text = Plugin.Globals.ServerName;
+
+            /* Retrieve the server name description */
+            ServerNameDescription = GameObject.Find("ServerNameDescriptionInput").GetComponent<TMP_Text>();
+            COTLMP.Debug.Assertions.Assert(ServerNameDescription != null, false, "ServerNameDescription gameobject returned NULL!", null);
 
             /* Retrieve the "Connect" button */
             ConnectButton = GameObject.Find("ConnectButton").GetComponent<Button>();
@@ -107,11 +188,14 @@ namespace COTLMP.Ui
             COTLMP.Debug.Assertions.Assert(MainDescription != null, false, "MainDescription gameobject returned NULL!", null);
 
             /* Retrieve the servers list container */
-            NoneFoundDisclaimer = GameObject.Find("NotFoundDisclaimer").GetComponent<Image>();
-            COTLMP.Debug.Assertions.Assert(NoneFoundDisclaimer != null, false, "NoneFoundDisclaimer gameobject returned NULL!", null);
+            NoneFoundDisclaimer = GameObject.Find("NoServersFoundDisclaimer").GetComponent<TMP_Text>();
+            COTLMP.Debug.Assertions.Assert(NoneFoundDisclaimer != null, false, "NoServersFoundDisclaimer gameobject returned NULL!", null);
 
             /* All the UI elements binded to their listeners, now localize them */
             LocalizeUi();
+
+            /* Estabilish connection with the masterserver and look for available servers */
+            RefreshServersList();
             yield break;
         }
 
