@@ -15,7 +15,7 @@ using COTLMP;
  * @brief
  * Contains internal global mod data, reserved for developers only.
  * Some of the fields might be changed at runtime.
- * 
+ *
  * @class InternalData
  * Main class of which mod data is stored.
  */
@@ -37,8 +37,16 @@ namespace COTLMP.Data
         /* Maximum number of characters a player can type in the saychat box */
         internal const int MaxSayCharsLimit = 90;
 
-        /* TRUE if the player is currently into a game session, FALSE otherwise. This field is changed during runtime. */
+        /******************************************************************************
+         *                 THE FOLLOWING FIELDS ARE UPDATED AT RUNTIME.               *
+         *                    DO NOT CHANGE THE FOLLOWING FIELDS!!!                   *
+         ******************************************************************************/
+
+        /* TRUE if the player is currently into a game session, FALSE otherwise */
         internal bool InGameSession = false;
+
+        /* The player hosts the server through LAN (tipically via Play > Open to LAN option) */
+        internal bool IsServerCreator = false;
 
         internal InternalData()
         {

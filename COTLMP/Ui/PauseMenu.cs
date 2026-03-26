@@ -156,8 +156,13 @@ namespace COTLMP.Ui
                     __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Started server!", $"Port: {Server.Port}", true);
                     Server.ServerStopped += ServerStopped;
 
-                    /* The server has been started, the player is currently in session */
+                    /*
+                     * The server has been started, the player is currently in session.
+                     * Acknowledge the player hosts the server through LAN which makes
+                     * themselves a server so to speak.
+                     */
                     Plugin.GlobalsInternal.InGameSession = true;
+                    Plugin.GlobalsInternal.IsServerCreator = true;
 
                     /* Start the saychat mechanism */
                     COTLMP.Ui.SayChat.StartSayChat();
@@ -203,6 +208,7 @@ namespace COTLMP.Ui
 
             /* The server has been stopped, the player is no longer in session */
             Plugin.GlobalsInternal.InGameSession = false;
+            Plugin.GlobalsInternal.IsServerCreator = false;
         }
 
         /**
