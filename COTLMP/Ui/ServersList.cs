@@ -36,7 +36,7 @@ namespace COTLMP.Ui
 {
     public static class ServerList
     {
-        private static Image ServerEntry;
+        private static Image ServerUiEntry;
         private static Button BackButton;
         private static Button ConnectButton;
         private static TMP_Text MainDescription;
@@ -63,15 +63,26 @@ namespace COTLMP.Ui
             COTLMP.Api.Assets.ShowScene("Main Menu", false, null);
         }
 
+        /*
+         * @brief
+         * Refreshes the servers list. The scroll view list gets populated with
+         * server entries each time the user receives a heartbeat from active servers.
+         * Data is fetched from the server as the user received the heartbeat.
+         */
         private static void RefreshServersList()
         {
             /* TODO: Implement this when the network stack is implemented */
             /* Cache the server entry item and hide it when no servers were found */
-            ServerEntry = GameObject.Find("ServerEntry").GetComponent<Image>();
-            ServerEntry.gameObject.SetActive(false);
+            ServerUiEntry = GameObject.Find("ServerEntry").GetComponent<Image>();
+            ServerUiEntry.gameObject.SetActive(false);
             return;
         }
 
+        /*
+         * @brief
+         * Main worker handler that is executed each time the player
+         * changes their name.
+         */
         private static void PlayerNameSubmitHandler()
         {
             string Section;
@@ -94,6 +105,11 @@ namespace COTLMP.Ui
             COTLMP.Api.Configuration.FlushSettings();
         }
 
+        /*
+         * @brief
+         * Main worker handler that is executed each time the player
+         * changes the name of their server.
+         */
         private static void ServerNameSubmitHandler()
         {
             string Section;
@@ -116,6 +132,11 @@ namespace COTLMP.Ui
             COTLMP.Api.Configuration.FlushSettings();
         }
 
+        /*
+         * @brief
+         * Localizes the servers list UI to different language that's currently
+         * being chosen in the game.
+         */
         private static void LocalizeUi()
         {
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "LocalizeUi() called");

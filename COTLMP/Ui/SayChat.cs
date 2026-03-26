@@ -104,7 +104,7 @@ namespace COTLMP.Ui
 
             /*
              * The player is currently not in session yet, do not display the say chat box,
-             * Keep this enumerator worker running.
+             * but let Unity keep calling this method each frame to pool for key events.
              */
             if (!Plugin.GlobalsInternal.InGameSession)
             {
