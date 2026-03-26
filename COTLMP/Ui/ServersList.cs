@@ -19,13 +19,15 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using System.Collections.Generic;
+using static COTLMP.Data.Network;
 
 /* CLASSES & CODE *************************************************************/
 
 /*
  * @brief
  * Contains the classes and code for the server list user interface.
- * 
+ *
  * @class ServerList
  * The main server list UI class of which it contains UI management
  * code and related stuff.
@@ -43,6 +45,7 @@ namespace COTLMP.Ui
         private static TMP_InputField ServerNameInput;
         private static TMP_Text ServerNameDescription;
         private static TMP_Text NoneFoundDisclaimer;
+        private static LinkedList<ServerEntry> ServerEntries;
 
         /*
          * @brief
@@ -53,7 +56,10 @@ namespace COTLMP.Ui
         {
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "BackButtonHandler() called");
 
-            /* Return to the main menu of the game */ 
+            /* Don't cache any server entries as we leave the servers browser so punt the list */
+            ServerEntries.Clear();
+
+            /* Return to the main menu of the game */
             COTLMP.Api.Assets.ShowScene("Main Menu", false, null);
         }
 
@@ -207,6 +213,9 @@ namespace COTLMP.Ui
         {
             /* Load the server list UI scene, the asset bundle should be already loaded */
             COTLMP.Api.Assets.ShowScene("ServerListUI", false, null);
+
+            /* Initialize the server entries list head */
+            ServerEntries = new LinkedList<ServerEntry>();
 
             /*
              * Invoke the UI initialization worker with a coroutine. Unity loads
