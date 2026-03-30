@@ -6,6 +6,7 @@ The tools needed to contribute to the mod project are the following:
 2. Unity Editor 2022.3.62f2
 
 Whilst any text editor (Notepad++, Sublime Text, Visual Studio Code or anything of your choice) can be used, it's generally recommended to use **Visual Studio** due to ease of use when configuring the .NET environment in order to compile .NET C# projects.
+
 Any other text editor requires manual configuration of the .NET environment (compiler, packages, C# stuff et al) which is tedious and a waste of time.
 The Unity Editor is only needed if you plan to modify or create new UI scenes for the project.
 
@@ -44,6 +45,7 @@ Where `<YOUR_NAME>` represents your GitHub username of the forked respoistory.
 
 ### Compiling the project for the first timep
 Compiling the mod with Visual Studio should be straightforward as long as you have installed the **".NET desktop environment"** during installation of the VS IDE. If you haven't done it so you can always install the .NET environment workload at anytime through **Visual Studio Installer**.
+
 When everything is set up, import the `COTLMP.sln` file within working directory which is the core VSSolution file of the project. Visual Studio will import the project and setups the dependencies and everything needed in order to compile the mod.
 
 To compile the mod, click `Build > Build Solution`. This will generate `COTLMP.dll` and `COTLMPServer.dll` on their rrespective `bin` directories.
