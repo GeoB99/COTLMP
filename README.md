@@ -15,6 +15,7 @@ COTLMP (aka Cult of the Lamb Multiplayer) is a game modification of which implem
 
 This allows BepInEx to properly load the mod and patch all the core methods of the game needed.
 The following fields are located down below within `Preloader.Entrypoint` label. [This is how the file should look like](https://raw.githubusercontent.com/GeoB99/COTLMP/refs/heads/master/Media/BepInExFields.png) if you did this step correctly.
+
 5. Simply run the game and the mod should be ready to be loaded!
 
 ## Contributing
