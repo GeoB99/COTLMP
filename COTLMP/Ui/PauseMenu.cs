@@ -29,13 +29,13 @@ namespace COTLMP.Ui
     /**
      * @brief
      * Contains the pause menu patches
-     * 
+     *
      * @field Server
      * The server object
-     * 
+     *
      * @field Message
      * The message to show when quitting to main menu
-     * 
+     *
      * @field Quitting
      * Whether the game is quitting
      */
@@ -49,19 +49,19 @@ namespace COTLMP.Ui
         /**
          * @brief
          * Refresh the coop button
-         * 
+         *
          * @param[in] __instance
          * The instance of the patched class
-         * 
+         *
          * @param[in] ____coopButton
          * The coop button
-         * 
+         *
          * @param[in] ____coopButtonText
          * The coop button text
-         * 
+         *
          * @param[in] ____photoModeButton
          * The photo mode button
-         * 
+         *
          * @return
          * true to execute the original method, false to not
          */
@@ -91,13 +91,13 @@ namespace COTLMP.Ui
         /**
          * @brief
          * On pause menu open
-         * 
+         *
          * @param[in] __instance
          * The instance of the patched class
-         * 
+         *
          * @param[in] ____coopButton
          * The coop button
-         * 
+         *
          * @param[in] ____coopButtonText
          * The coop button text
          */
@@ -124,10 +124,10 @@ namespace COTLMP.Ui
         /**
          * @brief
          * On coop button pressed
-         * 
+         *
          * @param[in] __instance
          * The instance of the patched class
-         * 
+         *
          * @return
          * true to execute the original method, false to not
          */
@@ -144,7 +144,7 @@ namespace COTLMP.Ui
                     Server.Dispose();
                     Server = null;
                 };
-            } 
+            }
             else
             {
                 /* It hasn't been created, create one now */
@@ -170,14 +170,14 @@ namespace COTLMP.Ui
             }
             return false;
         }
-        
+
         /**
          * @brief
          * On server stopped
-         * 
+         *
          * @param[in] sender
          * The sender of the event
-         * 
+         *
          * @param[in] e
          * The reason why the server was stopped
          */
@@ -218,9 +218,9 @@ namespace COTLMP.Ui
         private class ServerLogger : COTLMPServer.ILogger
         {
             /**
-             * @brief 
+             * @brief
              * Log an error
-             * 
+             *
              * @param[in] message
              * The message to log
              */
@@ -232,7 +232,7 @@ namespace COTLMP.Ui
             /**
              * @brief
              * Log a fatal error
-             * 
+             *
              * @param[in] message
              * The message to log
              */
@@ -244,7 +244,7 @@ namespace COTLMP.Ui
             /**
              * @brief
              * Log information
-             * 
+             *
              * @param[in] message
              * The message to log
              */
@@ -256,7 +256,7 @@ namespace COTLMP.Ui
             /**
              * @brief
              * Log a warning
-             * 
+             *
              * @param[in] message
              * The message to log
              */

@@ -20,7 +20,7 @@ using System.IO;
 /*
  * @brief
  * Contains classes and code for the Configuration API.
- * 
+ *
  * @class Configuration
  * Main class of which implements methods for manipulation
  * of user configuration settings, loading and saving them.
@@ -31,10 +31,10 @@ namespace COTLMP.Api
      * @brief
      * Configuration category enumeration. This is used to regroup
      * individual settings in separate configuration sections.
-     * 
+     *
      * @field ServerSettings
      * The server settings category.
-     * 
+     *
      * @field ModSettings
      * The mod settings category.
      */
@@ -50,13 +50,13 @@ namespace COTLMP.Api
          * @brief
          * Data type enumeration. This divides the setting data
          * into several different types.
-         * 
+         *
          * @field StringType
          * The setting data is a string type.
-         * 
+         *
          * @field IntType
          * The setting data is an integer type.
-         * 
+         *
          * @field BoolType
          * The setting data is a boolean type.
          */
@@ -72,25 +72,25 @@ namespace COTLMP.Api
          * Configuration data structure. This is internally used by the
          * Configuration API to encapsulate the arguments provided by the caller such
          * as setting name, value and such and pass it down to the private helpers.
-         * 
+         *
          * @field Section
          * The section category of the setting.
-         * 
+         *
          * @field ValueName
          * The name of the value setting.
-         * 
+         *
          * @field ValueDescription
          * The description of the value setting.
-         * 
+         *
          * @field TypeData
          * The type of the setting.
-         * 
+         *
          * @field ValueStringData
          * The data of the setting, as a string.
-         * 
+         *
          * @field ValueBoolData
          * The data of the setting, as a boolean.
-         * 
+         *
          * @field ValueIntData
          * The data of the setting, as an integer.
          */
@@ -125,10 +125,10 @@ namespace COTLMP.Api
         /*
          * @brief
          * Converts the configuration section into a string label.
-         * 
+         *
          * @param[in] Section
          * The section category.
-         * 
+         *
          * @return
          * Returns the label string that represents the category section,
          * otherwise NULL is returned if the given section is not supported.
@@ -164,10 +164,10 @@ namespace COTLMP.Api
         /*
          * @brief
          * Creates a setting as a boolean.
-         * 
+         *
          * @param[in] SettingData
          * Data structure with configuration data of the setting, filled by the caller.
-         * 
+         *
          * @return
          * Returns an object to a configuration entry that represents the setting,
          * otherwise NULL is returned if the operation fails.
@@ -207,10 +207,10 @@ namespace COTLMP.Api
         /*
          * @brief
          * Creates a setting as a string.
-         * 
+         *
          * @param[in] SettingData
          * Data structure with configuration data of the setting, filled by the caller.
-         * 
+         *
          * @return
          * Returns an object to a configuration entry that represents the setting,
          * otherwise NULL is returned if the operation fails.
@@ -250,10 +250,10 @@ namespace COTLMP.Api
         /*
          * @brief
          * Creates a setting as an integer.
-         * 
+         *
          * @param[in] SettingData
          * Data structure with configuration data of the setting, filled by the caller.
-         * 
+         *
          * @return
          * Returns an object to a configuration entry that represents the setting,
          * otherwise NULL is returned if the operation fails.
@@ -293,24 +293,24 @@ namespace COTLMP.Api
         /*
          * @brief
          * Creates a user configuration setting.
-         * 
+         *
          * @param[in] ConfigSection
          * The configuration category section of the setting.
-         * 
+         *
          * @param[in] ValueName
          * The name of the setting.
-         * 
+         *
          * @param[in] ValueDescription
          * The description of the setting, which is displayed within the user
          * configuration file of the mod.
-         * 
+         *
          * @param[in] ValueData
          * An arbitrary type of the value data of the setting, provided by the caller.
          * This can be either a boolean, integer or a string.
-         * 
+         *
          * @return
          * Returns an object to the setting value that has been created, NULL otherwise.
-         * 
+         *
          * @remarks
          * If the setting has already been created it will open the already created
          * setting by returning the existent config entry. The caller is expected
@@ -403,11 +403,11 @@ namespace COTLMP.Api
          * @brief
          * Retrieves a config entry of the setting that has already
          * been created.
-         * 
+         *
          * @param[in] Definition
          * Data structure with configuration definition data that represents
          * the setting of which an entry is to be retrieved, filled by the caller.
-         * 
+         *
          * @return
          * Returns a config entry of the setting, NULL otherwise if it fails.
          */
@@ -447,10 +447,10 @@ namespace COTLMP.Api
         /*
          * @brief
          * Retrieves the data of the setting.
-         * 
+         *
          * @param[in] ConfigObject
          * An object to a configuration setting.
-         * 
+         *
          * @return
          * Returns the type data of the setting.
          */

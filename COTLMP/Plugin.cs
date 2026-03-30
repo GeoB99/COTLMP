@@ -27,7 +27,7 @@ namespace COTLMP;
 
 /* CLASSES & CODE *************************************************************/
 
-/* Initialize the base BepInEx attributes of the mod plug-in */ 
+/* Initialize the base BepInEx attributes of the mod plug-in */
 [BepInPlugin(COTLMP.Data.Version.CotlMpGuid, COTLMP.Data.Version.CotlMpName, COTLMP.Data.Version.CotlMpVer)]
 
 /* Load the COTL API plugin as a hard dependency */
@@ -72,7 +72,7 @@ public class Plugin : BaseUnityPlugin
         CotlmpPathLocation = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
         /*
-         * Cache the plugin class methods and the Mono instance so that the 
+         * Cache the plugin class methods and the Mono instance so that the
          * COTL MP mod can use them across different modules.
          */
         Logger = base.Logger;

@@ -22,12 +22,12 @@ using System.Collections.Generic;
  * @brief
  * Contains the classes and code for the localization API
  * infrastructure of the mod.
- * 
+ *
  * @class Localization
  * The main localization manager API, containing API methods
  * for manipulation of localized (aka translated) strings of
  * the mod.
- * 
+ *
  * @class LocalizationManagerPatches
  * Contains harmony patches of which hook up with the main
  * localization manager of the game.
@@ -38,14 +38,14 @@ namespace COTLMP.Api
      * @brief
      * Localization table data structure. It's used to store
      * a translated string onto the specific language of a specific term.
-     * 
+     *
      * @field Term
      * The term group of the translation string of which it corresponds to.
      * An example of a term would be "Multiplayer/UI".
-     * 
+     *
      * @field Translation
      * The actual translated string onto the target language.
-     * 
+     *
      * @field Overriden
      * If this field is initialized to TRUE, it means the specific translation
      * string overwrites the already existing original string of the Cult of the Lamb game.
@@ -71,10 +71,10 @@ namespace COTLMP.Api
         /*
          * @brief
          * Checks if the given language locale is supported by the mod.
-         * 
+         *
          * @param[in] Language
          * A string that points to the language passed by the caller.
-         * 
+         *
          * @return
          * Returns TRUE if the locale is supported, FALSE otherwise.
          */
@@ -103,11 +103,11 @@ namespace COTLMP.Api
          * @brief
          * Initializes the translation strings of a given language from
          * the locale table.
-         * 
+         *
          * @param[in] Table
          * An array to a table of localized strings of the target language,
          * passed by the caller.
-         * 
+         *
          * @param[in] Language
          * A string that points to the language passed by the caller.
          */
@@ -127,13 +127,13 @@ namespace COTLMP.Api
         /*
          * @brief
          * Retrieves the translated string of the given term.
-         * 
+         *
          * @param[in] Language
          * A string that points to the language passed by the caller.
-         * 
+         *
          * @param[in] Term
          * The term group of the translation string of which it corresponds to.
-         * 
+         *
          * @return
          * Returns a string which points to the translation of the given term,
          * otherwise NULL is returned if the translation doesn't exist.
@@ -148,16 +148,16 @@ namespace COTLMP.Api
         /*
          * @brief
          * Adds a translated string into the locale translations dictionary.
-         * 
+         *
          * @param[in] Language
          * A string that points to the language passed by the caller.
-         * 
+         *
          * @param[in] Term
          * The term group of the translation string of which it corresponds to.
-         * 
+         *
          * @param[in] Translation
          * The translated string of the target language.
-         * 
+         *
          * @param[in] Overriden
          * If set to TRUE the method will overwrite the existing translation string
          * of the given term from the game. If set to FALSE then it indicates the
@@ -184,10 +184,10 @@ namespace COTLMP.Api
         /*
          * @brief
          * Removes a translated string from the dictionary.
-         * 
+         *
          * @param[in] Language
          * A string that points to the language passed by the caller.
-         * 
+         *
          * @param[in] Term
          * The term group of the translation string of which it corresponds to.
          */
@@ -205,11 +205,11 @@ namespace COTLMP.Api
         /*
          * @brief
          * Loads a locale.
-         * 
+         *
          * @param[in] Language
          * A string that points to the language passed by the caller to be
          * loaded.
-         * 
+         *
          * @remarks
          * Generally this method is used to load different language locales
          * during startup of the mod. DO NOT USE IT ON ANYWHERE PART OF THE CODE!
@@ -260,19 +260,19 @@ namespace COTLMP.Api
              * Patches the GetTranslation method of the localization manager
              * of the game. Its purpose is to add custom localized strings
              * provided by the mod into the game.
-             * 
+             *
              * @param[in] Term
              * The term group of the translation string of which it corresponds to.
-             * 
+             *
              * @param[in] overrideLanguage
              * A string that points to language locale being overriden with custom
              * translation strings. This parameter is optional.
-             * 
+             *
              * @param[in,out] __result
-             * The current returned value of the method. Typically this is a translation 
-             * string returned by the original method of the game, which is modified on 
+             * The current returned value of the method. Typically this is a translation
+             * string returned by the original method of the game, which is modified on
              * our end by the returned translation we have provided by the mod.
-             * 
+             *
              * @remarks
              * Returns TRUE if tthe original method of the game is to be executed.
              * FALSE if our method is to be executed instead.

@@ -16,7 +16,7 @@ using BepInEx.Logging;
  * @brief
  * Contains the classes and code for the debugging mechanism
  * for the mod.
- * 
+ *
  * @class PrintLogger
  * Implements debug log output methods.
  */
@@ -27,13 +27,13 @@ namespace COTLMP.Debug
      * Debugging log levels enumeration. Each level represents
      * a different priority and meaning for the debug information
      * being output to the logger.
-     * 
+     *
      * @field INFO_LEVEL
      * Indicates the debug output is an informational log.
-     * 
+     *
      * @field WARNING_LEVEL
      * Indicates the debug output is a warning log.
-     * 
+     *
      * @field ERROR_LEVEL
      * Indicates the debug output is an error log, typically used
      * by code of which conditions fail or are not met.
@@ -42,7 +42,7 @@ namespace COTLMP.Debug
      * Indicates the debug output is a fatal error log. Usually this is
      * used to indicate a certain piece of code has failed to do its job
      * and the mod will prematurely fail to operate properly.
-     * 
+     *
      * @field MESSAGE_LEVEL
      * Indicates the debug output is a message log. The difference between
      * INFO_LEVEL and this one is that a message log is output to the
@@ -62,25 +62,25 @@ namespace COTLMP.Debug
     /*
      * @brief
      * Components of the mod of which they log out debug information.
-     * 
+     *
      * @field INIT_COMPONENT
      * Mod startup initialization component.
-     * 
+     *
      * @field UI_COMPONENT
      * UI module component of the mod.
-     * 
+     *
      * @field NETWORK_STACK_COMPONENT
      * Network (Server/Client) multiplayer component of the mod.
      *
      * @field LOCALIZATION_COMPONENT
      * Localization API component of the mod.
-     * 
+     *
      * @field CONFIGURATION_COMPONENT
      * Save/Load configuration settings component of the mod.
-     * 
+     *
      * @field SCENES_MANAGEMENT_COMPONENT
      * UI scenes management component of the mod.
-     * 
+     *
      * @field DEBUG_COMPONENT
      * Core debug routines component of the mod.
      */
@@ -101,10 +101,10 @@ namespace COTLMP.Debug
          * @brief
          * Private method helper of which it retrieves the name of the
          * component as a string.
-         * 
+         *
          * @param[in] Component
          * An enumeration to a specific component of the mod.
-         * 
+         *
          * @return
          * Returns a string of the component name, otherwise NULL is
          * returned if the name of the component is unknown.
@@ -171,15 +171,15 @@ namespace COTLMP.Debug
         /*
          * @brief
          * Prints debug information to the logger.
-         * 
+         *
          * @param[in] Level
          * An enumeration to a specific debug level, to indicate the meaning
          * of what's being logged out.
-         * 
+         *
          * @param[in] Component
          * An enumeration to a specific component, to indicate from which place
          * of the mod is the information being logged out.
-         * 
+         *
          * @param[in] Text
          * A string to a debug text to be logged out to the logger.
          */

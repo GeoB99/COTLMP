@@ -22,7 +22,7 @@ using src.UI;
  * @brief
  * Contains the classes and code for the main menu interface
  * of the Multiplayer functionality.
- * 
+ *
  * @class MainMenuPatches
  * Contains harmony patches of which hook up with the original
  * game source code methods and data. Specifically, the patches
@@ -38,11 +38,11 @@ namespace COTLMP.Ui
             /*
              * @brief
              * Patches the private DLC on-click button private method, of which
-             * we hook up our Multiplayer dialog. 
-             * 
+             * we hook up our Multiplayer dialog.
+             *
              * @param[in] __instance
              * The current instance value of the method being patched.
-             * 
+             *
              * @return
              * Returns TRUE if tthe original method of the game is to be executed.
              * FALSE if our method is to be executed instead.

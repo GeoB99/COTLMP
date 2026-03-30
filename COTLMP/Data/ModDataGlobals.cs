@@ -14,7 +14,7 @@ using COTLMP;
 /*
  * @brief
  * Contains global mod data.
- * 
+ *
  * @class ModDataGlobals
  * Main class of which mod data is stored.
  */

@@ -23,16 +23,16 @@ namespace COTLMPServer.Messages
     /**
      * @brief
      * Message header
-     * 
+     *
      * @field Type
      * Message type
-     * 
+     *
      * @field ID
      * Client ID (< 0 if none)
-     * 
+     *
      * @field Data
      * Actual message data (depends on the message type)
-     * 
+     *
      * @field MagicNumber
      * Magic number to identify messages
      */
@@ -46,14 +46,14 @@ namespace COTLMPServer.Messages
         /**
          * @brief
          * Serialize the message into a byte array
-         * 
+         *
          * @return
          * A byte array that represents the message
-         * 
+         *
          * @remarks
          * Type must be a value that the MessageType enum defines
          * Data can be null or an empty array
-         * 
+         *
          * @throws InvalidDataException
          * If any of the data in the class is invalid
          */
@@ -81,16 +81,16 @@ namespace COTLMPServer.Messages
         /**
          * @brief
          * Deserialize byte array back into a Message object
-         * 
+         *
          * @param[in] data
          * The byte array
-         * 
+         *
          * @return
          * The resulting Message object
-         * 
+         *
          * @throws InvalidDataException
          * If the data in the array is invalid
-         * 
+         *
          * @throws ArgumentNullException
          * If any of the arguments are null
          */

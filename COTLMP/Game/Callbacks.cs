@@ -20,7 +20,7 @@ using System;
 /*
  * @brief
  * Contains the classes and code for the mod game related stuff.
- * 
+ *
  * @class Callbacks
  * The callbacks class which contains callback methods for the
  * mod game settings.
@@ -33,7 +33,7 @@ namespace COTLMP.Game
          * @brief
          * A callback that gets called when the Game Mode
          * setting's value has changed.
-         * 
+         *
          * @param[in] Value
          * An integer value representing the value of the
          * setting that has changed.
@@ -100,7 +100,7 @@ namespace COTLMP.Game
          * @brief
          * A callback that gets called when the Max Players
          * Count setting's value has changed.
-         * 
+         *
          * @param[in] Value
          * An integer value representing the value of the
          * setting that has changed.
@@ -136,7 +136,7 @@ namespace COTLMP.Game
          * @brief
          * A callback that gets called when the Toggle Voice
          * Chat setting's value has changed.
-         * 
+         *
          * @param[in] Value
          * A boolean value representing the value of the
          * setting that has changed.

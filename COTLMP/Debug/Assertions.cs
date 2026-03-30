@@ -17,7 +17,7 @@ using System.Diagnostics;
  * @brief
  * Contains the classes and code for the debugging mechanism
  * for the mod.
- * 
+ *
  * @class Assertions
  * Implements debug assertions.
  */
@@ -29,22 +29,22 @@ namespace COTLMP.Debug
          * @brief
          * Checks a condition of which the predicate of the said condition
          * returns TRUE, otherwise the system will stop execution of the mod.
-         * 
+         *
          * @param[in] ConditionToCheck
          * The condition to check.
-         * 
+         *
          * @param[in] ShowGui
          * If set to TRUE, the assertion mechanism will display a GUI box with
          * detailed information of the assertion failure. If set to FALSE, it
          * won't display any GUI box.
-         * 
+         *
          * @param[in] Message
          * A string to a message explaining the assertion failure.
-         * 
+         *
          * @param[in] Description
          * A string to a detailed description which describes further the
          * failure of the assertion.
-         * 
+         *
          * @remarks
          * If the caller wants to display an informative GUI box (ShowGui == TRUE),
          * both Message and Description parameters must be provided.

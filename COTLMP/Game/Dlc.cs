@@ -18,7 +18,7 @@ using System;
 /*
  * @brief
  * Contains the classes and code for the managemnt of DLCs of the game.
- * 
+ *
  * @class DlcPatches
  * The callbacks class which contains all the Harmony patches for DLC stuff.
  */
@@ -31,11 +31,11 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of the Heretic DLC method, of which
          * we are going to force disable it.
-         * 
+         *
          * @param[in] __result
          * The current result value being returned. Typically the original
          * method returns a boolean.
-         * 
+         *
          * @return
          * Returns TRUE if the original method of the game is to be executed.
          * FALSE if our method is to be executed instead.
@@ -52,11 +52,11 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of the Cultist DLC method, of which
          * we are going to force disable it.
-         * 
+         *
          * @param[in] __result
          * The current result value being returned. Typically the original
          * method returns a boolean.
-         * 
+         *
          * @return
          * Returns TRUE if the original method of the game is to be executed.
          * FALSE if our method is to be executed instead.
@@ -73,11 +73,11 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of the Sinful DLC method, of which
          * we are going to force disable it.
-         * 
+         *
          * @param[in] __result
          * The current result value being returned. Typically the original
          * method returns a boolean.
-         * 
+         *
          * @return
          * Returns TRUE if the original method of the game is to be executed.
          * FALSE if our method is to be executed instead.
@@ -94,11 +94,11 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of the Pilgrim DLC method, of which
          * we are going to force disable it.
-         * 
+         *
          * @param[in] __result
          * The current result value being returned. Typically the original
          * method returns a boolean.
-         * 
+         *
          * @return
          * Returns TRUE if the original method of the game is to be executed.
          * FALSE if our method is to be executed instead.
@@ -115,11 +115,11 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of the the early purchase DLC method,
          * of which we are going to force disable it.
-         * 
+         *
          * @param[in] __result
          * The current result value being returned. Typically the original
          * method returns a boolean.
-         * 
+         *
          * @return
          * Returns TRUE if the original method of the game is to be executed.
          * FALSE if our method is to be executed instead.
@@ -136,11 +136,11 @@ namespace COTLMP.Game
          * @brief
          * Patches the authentication of Woolhaven DLC method, of which
          * we are going to force disable it.
-         * 
+         *
          * @param[in] __result
          * The current result value being returned. Typically the original
          * method returns a boolean.
-         * 
+         *
          * @return
          * Returns TRUE if the original method of the game is to be executed.
          * FALSE if our method is to be executed instead.

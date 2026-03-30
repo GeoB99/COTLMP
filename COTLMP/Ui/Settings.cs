@@ -24,7 +24,7 @@ using System;
 /*
  * @brief
  * Contains the classes and code for the settings UI interface.
- * 
+ *
  * @class Settings
  * The main Settings UI class of which it contains settings UI
  * management and initialization code.
@@ -37,19 +37,19 @@ namespace COTLMP.Ui
          * @brief
          * Setting type enumeration. This is used to categorize
          * settings into different types.
-         * 
+         *
          * @field Toggle
          * Denotes a toggle type setting. A toggle represents a switch
          * that can be toggled.
-         * 
+         *
          * @field HorizontalSelector
          * Denotes a horizontal selector. Such selectors contain multiple
          * options that can be changed.
-         * 
+         *
          * @field Dropdown
          * Denotes a dropdown. Dropdowns are like selectors but instead
          * the options are wrapped in a listbox.
-         * 
+         *
          * @field Slider
          * Denotes a slider. Sliders are controlled by moving an indicator
          * of which it changes a specific value.
@@ -67,11 +67,11 @@ namespace COTLMP.Ui
          * Action callbacks structure. This is used to encapsulate
          * different kinds of action callbacks of which they are
          * executed when a value of a setting has changed.
-         * 
+         *
          * @field ActionBoolCallback
          * Denotes a boolean type of callback. Generally used by
          * toggle settings.
-         * 
+         *
          * @field ActionIntCallback
          * Denotes an integer type of callback. Generally used by
          * selectors, dropdowns and sliders.
@@ -91,33 +91,33 @@ namespace COTLMP.Ui
         /*
          * @brief
          * Adds a setting to the Mods Settings UI.
-         * 
+         *
          * @param[in] Type
          * The type of setting to be added.
-         * 
+         *
          * @param[in] SettingName
          * The name of the setting, provided by the caller.
-         * 
+         *
          * @param[in] Value
          * The default value of the setting initialized at startup,
          * provided by the caller. This parameter can be optional only
          * if the setting type is a Toggle type.
-         * 
+         *
          * @param[in] Options
          * An array of options, denoted as strings. This is used to
          * store multiple setting options of a setting. This parameter
          * can be optional only if the setting type is a Toggle type.
-         * 
+         *
          * @param[in] ToggleSwitch
          * The initial switch value of a toggle. If set to TRUE, the
          * toggle is set, otherwise it's unset with FALSE. This parameter
          * only applies for toggle settings.
-         * 
+         *
          * @param[in] Callbacks
          * A list of action callbacks, provided by the caller. This is used
          * to invoke the specific callbacks depending on the value of a setting
          * that has changed.
-         * 
+         *
          * @return
          * Returns TRUE if the setting has been added successfully, FALSE otherwise.
          */

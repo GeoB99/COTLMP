@@ -27,16 +27,16 @@ namespace COTLMPServer.Messages
         /**
          * @brief
          * Read a byte array that is prefixed by its size from a stream
-         * 
+         *
          * @return
          * The read byte array or null if the size is 0
-         * 
+         *
          * @param[in] stream
          * The stream to read from
-         * 
+         *
          * @throws InvalidDataException
          * If the data passed to it is invalid
-         * 
+         *
          * @throws ArgumentNullException
          * If any of the arguments are null
          */

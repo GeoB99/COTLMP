@@ -28,10 +28,10 @@ namespace COTLMP.Network
         /**
          * @brief
          * If the scene loaded is main menu, stop the integrated server
-         * 
+         *
          * @param[in] scene
          * The scene
-         * 
+         *
          * @param[in] _
          * The scene load mode, unused
          */

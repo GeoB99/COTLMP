@@ -21,7 +21,7 @@ using System.Collections;
  * @brief
  * Contains classed and code for the UI interface of the mod,
  * namely the banner.
- * 
+ *
  * @class Banner
  * Main class of which it implements the banner header of the mod.
  */
@@ -45,14 +45,14 @@ namespace COTLMP.Ui
          * @brief
          * Patches the private DLC check edition method, of which it replaces
          * the banner header with ours.
-         * 
+         *
          * @param[in] __instance
          * The current instance value of the method being patched.
-         * 
+         *
          * @param[in] __result
          * The current result value being returned. Typically the original
          * method returns a IEnumerator.
-         * 
+         *
          * @return
          * Returns TRUE if tthe original method of the game is to be executed.
          * FALSE if our method is to be executed instead.

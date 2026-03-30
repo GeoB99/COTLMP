@@ -23,16 +23,16 @@ namespace COTLMP.Game
          * @brief
          * Teams enumeration. Each player is assigned to a team
          * with their own specific team player skin.
-         * 
+         *
          * @field Lamb
-         * The lamb team. This is the default supported by the game. 
-         * 
+         * The lamb team. This is the default supported by the game.
+         *
          * @field Goat
          * The goat team. This is the default supported by the game.
-         * 
+         *
          * @field Owl
          * The owl team. This is currently not supported yet in the mod.
-         * 
+         *
          * @field Snake
          * The snake team. This is currently not supported yet in the mod.
          */
