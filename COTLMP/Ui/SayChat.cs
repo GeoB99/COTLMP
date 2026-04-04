@@ -18,6 +18,7 @@ using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using Rewired;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -29,6 +30,7 @@ namespace COTLMP.Ui
         private static TMP_InputField SayInput;
         private static Image SayBox;
         private static Component SayComponent;
+        private static Player PlayerInstance;
 
         /*
          * @brief
@@ -71,6 +73,12 @@ namespace COTLMP.Ui
 
             /* Force focus on the chatbox */
             SayInput.ActivateInputField();
+
+            /*
+             * Disable all the controller maps, including the keyboard. This makes the
+             * player stopping moving or showing any unwanted UI when typing a message.
+             */
+            PlayerInstance.controllers.maps.SetAllMapsEnabled(false);
             yield break;
         }
 
@@ -91,6 +99,9 @@ namespace COTLMP.Ui
             SayBox.gameObject.SetActive(false);
             Object.Destroy(SayBox);
             BoxSpawned = false;
+
+            /* Reenable all the controller maps back */
+            PlayerInstance.controllers.maps.SetAllMapsEnabled(true);
         }
 
         /*
@@ -174,9 +185,14 @@ namespace COTLMP.Ui
              * This will make the class as a registered instance of
              * MonoBehavior so we can do stuff like pooling for key
              * events each frame.
+             *
+             * Also get the input instance of the current client player.
+             * This is so we can disable controller maps (like the keyboard)
+             * later on.
              */
             BoxSpawned = false;
             SayComponent = Plugin.MonoInstance.gameObject.AddComponent<SayChat>();
+            PlayerInstance = ReInput.players.GetPlayer(0);
         }
     }
 }
