@@ -100,6 +100,7 @@ namespace COTLMP.Game
                 var plrsk = players[id].PlayerSkin = new Spine.Skin("Player Skin");
                 plrsk.AddSkin(players[id].Spine.Skeleton.Data.FindSkin($"Lamb_{skin}"));
                 players[id].gameObject?.transform.position = pos;
+                players[id]._state = new StateMachine();
                 return;
             }
 
