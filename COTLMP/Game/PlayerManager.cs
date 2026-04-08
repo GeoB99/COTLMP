@@ -7,6 +7,7 @@
 
 /* IMPORTS ********************************************************************/
 
+using COTLMP.Data;
 using HarmonyLib;
 using MMTools;
 using UnityEngine;
@@ -36,7 +37,7 @@ namespace COTLMP.Game
          */
         static PlayerManager()
         {
-            players = new PlayerFarming[16];
+            players = new PlayerFarming[InternalData.MaxPlayersPerServerInternal];
         }
 
         /*
