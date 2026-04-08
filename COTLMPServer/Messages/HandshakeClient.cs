@@ -1,4 +1,11 @@
-﻿using System;
+﻿/*
+ * PROJECT:     Cult of the Lamb Multiplayer Mod
+ * LICENSE:     MIT (https://spdx.org/licenses/MIT)
+ * PURPOSE:     Define HandshakeClient class
+ * COPYRIGHT:	Copyright 2026 Neco-Arc <neco-arc@inbox.ru>
+ */
+
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;

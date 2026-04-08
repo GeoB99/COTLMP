@@ -203,7 +203,6 @@ namespace COTLMP.Ui
             Plugin.GlobalsInternal.IsServerCreator = false;
         }
 
-
         /**
          * @brief
          * Stops the integrated server.
