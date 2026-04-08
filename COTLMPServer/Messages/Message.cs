@@ -36,6 +36,7 @@ namespace COTLMPServer.Messages
     public sealed class Message
     {
         public MessageType Type;
+        public uint Sequence;
         public byte[] Data;
         public const int MagicNumber = 0x173495;
 
@@ -62,6 +63,7 @@ namespace COTLMPServer.Messages
             {
                 writer.Write(MagicNumber);
                 writer.Write((int)Type);
+                writer.Write(Sequence);
                 //                writer.Write(ID);
                 if (Data?.Length > 0) // check if data is null or zero length
                 {
@@ -74,10 +76,11 @@ namespace COTLMPServer.Messages
             }
         }
 
-        public Message(MessageType type, byte[] data = null)
+        public Message(MessageType type, uint sequence, byte[] data = null)
         {
             Type = type;
             Data = data;
+            Sequence = sequence;
         }
 
         /**
@@ -102,6 +105,8 @@ namespace COTLMPServer.Messages
                 throw new ArgumentNullException(nameof(data));
             if (data.Count < (sizeof(int) * 3))
                 throw new InvalidDataException("data is too small!");
+            if (data.Count > 3000)
+                throw new InvalidDataException("data is too big!");
 
             byte[] buffer = data as byte[] ?? data.ToArray();
 
@@ -113,7 +118,7 @@ namespace COTLMPServer.Messages
                 MessageType type = (MessageType)reader.ReadInt32();
                 if (!Enum.IsDefined(typeof(MessageType), type))
                     throw new InvalidDataException("Invalid message type");
-                return new Message(type, Utils.ReadBytes(reader));
+                return new Message(type, reader.ReadUInt32(), Utils.ReadBytes(reader));
             }
         }
     }
