@@ -10,7 +10,6 @@
 using COTLMPServer.Messages;
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -67,6 +66,9 @@ namespace COTLMPServer
         private readonly ILogger logger;
         private readonly string gameVersion;
         private readonly ConcurrentDictionary<IPEndPoint, Player> players;
+        private readonly SemaphoreSlim sendLock;
+        private readonly bool[] ids;
+        private readonly object idLock;
 
         /**
          * @brief
@@ -81,10 +83,10 @@ namespace COTLMPServer
          * @param[in] logger
          * The logger that the server should use. Null if none.
          */
-        public Server(string ver, int port = 0, CancellationToken? cancellationToken = null, ILogger log = null)
+        public Server(string ver, int maxPlayers, int port = 0, CancellationToken? cancellationToken = null, ILogger log = null)
         {
             client = new UdpClient(port);
-            if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 client.Client.IOControl(-1744830452, new byte[] { 0 }, null);
             logger = log;
             running = 0;
@@ -95,11 +97,68 @@ namespace COTLMPServer
                 token = CancellationToken.None;
             else
                 token = cancellationToken.Value;
+            sendLock = new SemaphoreSlim(1, 1);
+            ids = new bool[maxPlayers];
+            idLock = new object();
         }
 
-        private async Task PlayerHeartBeat(Player plr)
+        private async Task PlayerHeartBeat(Player plr, IPEndPoint endpoint)
         {
+            try
+            {
+                while (!plr.Cancellation.Token.IsCancellationRequested)
+                {
+                    bool disconnect = false;
+                    lock (plr.Lock)
+                    {
+                        if (plr.Lag && players.TryRemove(endpoint, out _))
+                        {
+                            lock (idLock)
+                                ids[plr.ID] = false;
+                            disconnect = true;
+                        }
+                        plr.Lag = true;
+                    }
+                    if (disconnect)
+                    {
+                        await DisconnectPlayer(endpoint, plr, "Timed out");
+                        break;
+                    }
+                    await Task.Delay(15000);
+                }
+            }
+            finally
+            {
+                plr.Cancellation.Dispose();
+            }
+        }
 
+        private async Task Send(IPEndPoint endPoint, byte[] data)
+        {
+            await sendLock.WaitAsync();
+            try
+            {
+                await client.SendAsync(data, data.Length, endPoint);
+            } // don't catch anything, let the caller do it
+            finally
+            {
+                sendLock.Release();
+            }
+        }
+
+        private async Task DisconnectPlayer(IPEndPoint endPoint, Player plr, string message = null)
+        {
+            byte[] bytes = new Message(MessageType.Disconnect, plr?.Sequence ?? 1, message == null ? null : Encoding.UTF8.GetBytes(message)).Serialize();
+            if (players.TryRemove(endPoint, out var removed))
+            {
+                logger?.LogInfo($"{endPoint} ({removed.Username}) disconnected: {message ?? "No reason provided"}");
+                removed.Cancellation.Cancel();
+                lock (idLock)
+                {
+                    ids[removed.ID] = false;
+                }
+            }
+            await Send(endPoint, bytes);
         }
 
         /**
@@ -114,7 +173,7 @@ namespace COTLMPServer
             if (disposedValue)
                 throw new ObjectDisposedException(nameof(Server));
 
-            if(Interlocked.CompareExchange(ref running, 1, 0) != 0)
+            if (Interlocked.CompareExchange(ref running, 1, 0) != 0)
             {
                 return;
             }
@@ -123,13 +182,6 @@ namespace COTLMPServer
             CancellationTokenRegistration registration = token.Register(client.Dispose);
             logger?.LogInfo("Started server at port " + Port + "!");
 
-            // id tracking
-            bool[] ids = new bool[maxPlayers];
-
-            // pre-serialize these static messages to not serialize them each time we need to send them
-            byte[] disconnectBytes = new Message(MessageType.Disconnect, Encoding.UTF8.GetBytes("Client sent invalid data")).Serialize();
-            byte[] fullBytes = new Message(MessageType.Handshake, new HandshakeServer(new HandshakeServer.Player[0], "The server is full!").Serialize()).Serialize();
-            byte[] pongBytes = new Message(MessageType.Ping).Serialize();
             try
             {
                 while (true)
@@ -138,14 +190,30 @@ namespace COTLMPServer
 
                     UdpReceiveResult result = await client.ReceiveAsync();
 
+                    if (result.Buffer.Length > 2500)
+                    {
+                        await DisconnectPlayer(result.RemoteEndPoint, null);
+                    }
+
                     try
                     {
                         Message message = Message.Deserialize(result.Buffer);
 
-                        switch(message.Type)
+                        if (players.TryGetValue(result.RemoteEndPoint, out var plr))
+                        {
+                            if (message.Sequence < plr.Sequence && message.Type != MessageType.Disconnect)
+                                continue;
+                            if (message.Sequence > plr.Sequence)
+                                plr.Sequence = message.Sequence + 1;
+                            lock (plr.Lock)
+                                plr.Lag = false;
+                        }
+
+
+                        switch (message.Type)
                         {
                             case MessageType.Handshake:
-                                if(players.ContainsKey(result.RemoteEndPoint))
+                                if (message.Sequence != 0 || players.ContainsKey(result.RemoteEndPoint))
                                     throw new InvalidDataException();
 
                                 var data = HandshakeClient.Deserialize(message.Data);
@@ -155,29 +223,28 @@ namespace COTLMPServer
 
                                 if (!data.GameVersion.Equals(gameVersion))
                                 {
-                                    byte[] rejectBytes = new Message(MessageType.Handshake,
-                                        new HandshakeServer(new HandshakeServer.Player[0],
-                                        $"Game version mismatch! server {gameVersion} client {data.GameVersion}").Serialize()
-                                        ).Serialize();
-                                    await client.SendAsync(rejectBytes, rejectBytes.Length, result.RemoteEndPoint);
+                                    await DisconnectPlayer(result.RemoteEndPoint, null, $"Game version mismatch! server {gameVersion} client {data.GameVersion}");
                                     break;
                                 }
 
                                 int id = -1;
 
-                                for (int i = 0; i < ids.Length; ++i)
+                                lock (idLock)
                                 {
-                                    if (!ids[i])
+                                    for (int i = 0; i < ids.Length; ++i)
                                     {
-                                        id = i;
-                                        ids[i] = true;
-                                        break;
+                                        if (!ids[i])
+                                        {
+                                            id = i;
+                                            ids[i] = true;
+                                            break;
+                                        }
                                     }
                                 }
 
                                 if (id == -1)
                                 {
-                                    await client.SendAsync(fullBytes, fullBytes.Length, result.RemoteEndPoint);
+                                    await DisconnectPlayer(result.RemoteEndPoint, null, "The server is full!");
                                     break;
                                 }
 
@@ -186,65 +253,92 @@ namespace COTLMPServer
 
                                 byte[] acceptBytes = new Message(
                                     MessageType.Handshake,
+                                    1,
                                     new HandshakeServer(
                                         pubPlayers,
-                                        id:id
+                                        id: id
                                     ).Serialize()
                                     ).Serialize();
 
-                                await client.SendAsync(acceptBytes, acceptBytes.Length, result.RemoteEndPoint);
+                                try
+                                {
+                                    await Send(result.RemoteEndPoint, acceptBytes);
+                                }
+                                catch
+                                {
+                                    lock (idLock)
+                                        ids[id] = false;
+                                    break;
+                                }
 
                                 var player = new Player(
                                     id,
                                     data.Skin,
-                                    data.Username, 
+                                    data.Username,
                                     "Base Biome 1", // the main cult
                                     new PlayerState(PlayerState.State.Idle, 0, 0, false, 0, new Vector3()),
                                     CancellationTokenSource.CreateLinkedTokenSource(token));
-                                players.TryAdd(result.RemoteEndPoint, player);
+                                if (!players.TryAdd(result.RemoteEndPoint, player))
+                                {
+                                    lock (idLock)
+                                        ids[id] = false;
+                                    await DisconnectPlayer(result.RemoteEndPoint, null, "The server is full!");
+                                    player.Cancellation.Dispose();
+                                    break;
+                                }
 
-                                _ = PlayerHeartBeat(player);
+                                _ = PlayerHeartBeat(player, result.RemoteEndPoint);
 
                                 break;
 
                             case MessageType.Disconnect:
-                                players.TryRemove(result.RemoteEndPoint, out var remove);
-                                if (remove != null)
+                                if (players.TryRemove(result.RemoteEndPoint, out var remove))
                                 {
                                     logger?.LogInfo(remove.Username + " left the game");
                                     remove.Cancellation.Cancel();
-                                    ids[remove.ID] = false;
+                                    lock (idLock)
+                                        ids[remove.ID] = false;
                                 }
                                 break;
 
                             case MessageType.Ping:
-                                await client.SendAsync(pongBytes, pongBytes.Length, result.RemoteEndPoint);
+                                uint seq = plr?.Sequence ?? 0;
+                                if (seq != 0)
+                                {
+                                    plr.Sequence++;
+                                    lock(plr.Lock)
+                                        plr.Lag = false;
+                                }
+                                await Send(result.RemoteEndPoint, new Message(MessageType.Ping, seq).Serialize());
                                 break;
                         }
                     }
-                    catch(Exception e) when (e is InvalidDataException || e is ArgumentNullException)
+                    catch (Exception e) when (e is InvalidDataException || e is ArgumentNullException)
                     {
-                        players.TryRemove(result.RemoteEndPoint, out var removed);
-                        if (removed != null)
-                            ids[removed.ID] = false;
-                        logger?.LogInfo(result.RemoteEndPoint + " (" + (removed?.Username ?? "no username") + ") disconnected: invalid data sent");
-                        removed?.Cancellation.Cancel();
+                        if (players.TryRemove(result.RemoteEndPoint, out Player plr))
+                        {
+                            lock (idLock)
+                                ids[plr.ID] = false;
+                            plr.Cancellation.Cancel();
+                        }
                         try
                         {
-                            await client.SendAsync(disconnectBytes, disconnectBytes.Length, result.RemoteEndPoint);
+                            await DisconnectPlayer(result.RemoteEndPoint, plr, "Client sent invalid data");
                         }
                         catch { }
                     }
                     catch (SocketException e)
                     {
-                        players.TryRemove(result.RemoteEndPoint, out var removed);
-                        if (removed != null)
-                            ids[removed.ID] = false;
-                        logger?.LogInfo(result.RemoteEndPoint + " (" + (removed?.Username ?? "no username") + ") disconnected: " + e.Message);
-                        removed?.Cancellation.Cancel();
+                        if (players.TryRemove(result.RemoteEndPoint, out var removed))
+                        {
+                            removed.Cancellation.Cancel();
+                            lock (idLock)
+                                ids[removed.ID] = false;
+                            logger?.LogInfo($"{result.RemoteEndPoint} ({removed.Username}) disconnected: {e.Message}");
+                        }
                     }
                 }
-            } 
+            }
             catch (OperationCanceledException)
             {
                 logger?.LogInfo("Stopping server...");

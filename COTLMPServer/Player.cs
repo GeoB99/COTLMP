@@ -42,7 +42,9 @@ namespace COTLMPServer
         public string Biome;
         public PlayerState State;
         public CancellationTokenSource Cancellation;
-        public SemaphoreSlim Mutex;
+        public object Lock;
+        public bool Lag;
+        public uint Sequence;
 
         /**
          * @brief
@@ -65,7 +67,9 @@ namespace COTLMPServer
             Biome = biome;
             Username = username;
             Cancellation = cancellation;
-            Mutex = new SemaphoreSlim(1, 1);
+            Lock = new object();
+            Lag = false;
+            Sequence = 2; // start at 2 because of handshake
         }
     }
 }
