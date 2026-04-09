@@ -2,7 +2,7 @@
  * PROJECT:     Cult of the Lamb Multiplayer Mod
  * LICENSE:     MIT (https://spdx.org/licenses/MIT)
  * PURPOSE:     Globals data of the mod
- * COPYRIGHT:	Copyright 2025 GeoB99 <geobman1999@gmail.com>
+ * COPYRIGHT:	Copyright 2025-2026 GeoB99 <geobman1999@gmail.com>
  */
 
 /* IMPORTS ********************************************************************/
@@ -20,7 +20,7 @@ using COTLMP;
  */
 namespace COTLMP.Data
 {
-    internal class ModDataGlobals
+    internal sealed class ModDataGlobals
     {
         /* Enable or Disable the execution of the mod */
         public bool EnableMod;
@@ -40,12 +40,20 @@ namespace COTLMP.Data
         /* Enable or Disable voice chat */
         public bool EnableVoiceChat;
 
+        /* The password of the server */
+        public string ServerPassowrd;
+
+        /* Should the server be protected with a password or not upon joining */
+        public bool ProtectServer;
+
         public ModDataGlobals(bool Enable,
                               string Mode,
                               string PlName,
                               string SvName,
                               int PlNum,
-                              bool EnableVC)
+                              bool EnableVC,
+                              string Pw,
+                              bool Protect)
         {
             EnableMod = Enable;
             GameMode = Mode;
@@ -53,6 +61,8 @@ namespace COTLMP.Data
             ServerName = SvName;
             MaxNumPlayers = PlNum;
             EnableVoiceChat = EnableVC;
+            ServerPassowrd = Pw;
+            ProtectServer = Protect;
         }
     }
 }
