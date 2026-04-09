@@ -2,7 +2,7 @@
  * PROJECT:     Cult of the Lamb Multiplayer Mod
  * LICENSE:     MIT (https://spdx.org/licenses/MIT)
  * PURPOSE:     Setting callbacks methods
- * COPYRIGHT:	Copyright 2025 GeoB99 <geobman1999@gmail.com>
+ * COPYRIGHT:	Copyright 2025-2026 GeoB99 <geobman1999@gmail.com>
  */
 
 /* IMPORTS ********************************************************************/
@@ -159,6 +159,37 @@ namespace COTLMP.Game
             Plugin.Globals.EnableVoiceChat = Value;
 
             /* FIXME: Enable/Disable the voice chat subsystem here */
+
+            /* Overwrite the current value of the setting and flush it */
+            SettingEntry.BoxedValue = Value;
+            COTLMP.Api.Configuration.FlushSettings();
+        }
+
+        /*
+         * @brief
+         * A callback that gets called when the Protect Server
+         * setting's value has changed.
+         *
+         * @param[in] Value
+         * A boolean value representing the value of the
+         * setting that has changed.
+         */
+        public static void ProtectServerCallback(bool Value)
+        {
+            string Section;
+            ConfigDefinition Definition;
+            ConfigEntry<bool> SettingEntry;
+
+            /* Retrieve the section name for the setting */
+            Section = COTLMP.Api.Configuration.GetSectionName(CONFIGURATION_SECTION.ServerSettings);
+
+            /* Get the Protect Server setting */
+            Definition = new ConfigDefinition(Section, "Protect Server");
+            SettingEntry = COTLMP.Api.Configuration.GetSettingEntry<bool>(Definition);
+            COTLMP.Debug.Assertions.Assert(SettingEntry != null, false, null, null);
+
+            /* Cache the new value to the globals store */
+            Plugin.Globals.ProtectServer = Value;
 
             /* Overwrite the current value of the setting and flush it */
             SettingEntry.BoxedValue = Value;

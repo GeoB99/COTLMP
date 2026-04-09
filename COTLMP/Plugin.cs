@@ -2,7 +2,7 @@
  * PROJECT:     Cult of the Lamb Multiplayer Mod
  * LICENSE:     MIT (https://spdx.org/licenses/MIT)
  * PURPOSE:     Main plugin startup code file
- * COPYRIGHT:	Copyright 2025 GeoB99 <geobman1999@gmail.com>
+ * COPYRIGHT:	Copyright 2025-2026 GeoB99 <geobman1999@gmail.com>
  */
 
 /* IMPORTS ********************************************************************/
@@ -58,8 +58,8 @@ public class Plugin : BaseUnityPlugin
     {
         System.Object SettingData;
         int MaxPlayers;
-        string ServerName, PlayerName, GameMode;
-        bool ToggleMod, VoiceChat;
+        string ServerName, PlayerName, GameMode, ServerPassowrd;
+        bool ToggleMod, VoiceChat, ProtectServer;
         bool Success;
 
         /*
@@ -180,13 +180,45 @@ public class Plugin : BaseUnityPlugin
         /* Retrieve the setting data from the setting object */
         VoiceChat = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData);
 
+        /* Initialize the "Server Password" setting */
+        SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
+                                                             "Server Password",
+                                                             "Ask the player for a password to be submitted when joining the server",
+                                                             "MyPassword");
+        if (SettingData == null)
+        {
+            Logger.LogFatal("Failed to set default or load the \"Server Password\" setting!");
+            HarmonyInstance.UnpatchSelf();
+            return;
+        }
+
+        /* Retrieve the setting data from the setting object */
+        ServerPassowrd = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
+
+        /* Initialize the "Protect Server" setting */
+        SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
+                                                             "Protect Server",
+                                                             "Should the server be protected with a password when players join the server",
+                                                             false);
+        if (SettingData == null)
+        {
+            Logger.LogFatal("Failed to set default or load the \"Protect Server\" setting!");
+            HarmonyInstance.UnpatchSelf();
+            return;
+        }
+
+        /* Retrieve the setting data from the setting object */
+        ProtectServer = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData);
+
         /* Now store all the cached settings into the globals data store */
         Globals = new ModDataGlobals(ToggleMod,
                                      GameMode,
                                      PlayerName,
                                      ServerName,
                                      MaxPlayers,
-                                     VoiceChat);
+                                     VoiceChat,
+                                     ServerPassowrd,
+                                     ProtectServer);
 
         /* Initialize the Settings UI */
         Success = COTLMP.Ui.Settings.InitializeUI();

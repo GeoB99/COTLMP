@@ -2,7 +2,7 @@
  * PROJECT:     Cult of the Lamb Multiplayer Mod
  * LICENSE:     MIT (https://spdx.org/licenses/MIT)
  * PURPOSE:     Multiplayer Settings UI support
- * COPYRIGHT:	Copyright 2025 GeoB99 <geobman1999@gmail.com>
+ * COPYRIGHT:	Copyright 2025-2026 GeoB99 <geobman1999@gmail.com>
  */
 
 /* IMPORTS ********************************************************************/
@@ -245,6 +245,21 @@ namespace COTLMP.Ui
             {
                 COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
                                                "Failed to add the Voice Chat setting, expect problems with mod initialization!");
+                return Success;
+            }
+
+            /* Add the "Protect Server" setting */
+            Callbacks = new ActionCallbacks(COTLMP.Game.Callbacks.ProtectServerCallback, null);
+            Success = AddSetting(SETTING_TYPE.Toggle,
+                                 MultiplayerModLocalization.UI.Settings.MultiplayerSettings_ProtectServer,
+                                 null,
+                                 null,
+                                 Plugin.Globals.ProtectServer,
+                                 Callbacks);
+            if (!Success)
+            {
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
+                                               "Failed to add the Protect Server setting, expect problems with mod initialization!");
                 return Success;
             }
 
