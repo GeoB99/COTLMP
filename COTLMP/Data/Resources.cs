@@ -132,6 +132,14 @@ namespace I2.Loc
                         return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/VoiceChat");
                     }
                 }
+
+                public static string MultiplayerSettings_ProtectServer
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/Settings/ProtectServer");
+                    }
+                }
             }
 
             public static class ServerList

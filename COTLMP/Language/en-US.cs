@@ -32,6 +32,7 @@ namespace COTLMP.Language
             new("Multiplayer/UI/Settings/GameMode", "Game Mode", false),
             new("Multiplayer/UI/Settings/PlayerCount", "Number of maximum players to join", false),
             new("Multiplayer/UI/Settings/VoiceChat", "Enable Voice Chat", false),
+            new("Multiplayer/UI/Settings/ProtectServer", "Protect the server with a password", false),
 
             /* Servers browser UI resource strings */
             new("Multiplayer/UI/ServerList/BackButton", "Back", false),
