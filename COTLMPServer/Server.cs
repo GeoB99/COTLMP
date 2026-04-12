@@ -111,20 +111,18 @@ namespace COTLMPServer
                     bool disconnect = false;
                     lock (plr.Lock)
                     {
-                        if (plr.Lag && players.TryRemove(endpoint, out _))
+                        if (plr.Lag)
                         {
-                            lock (idLock)
-                                ids[plr.ID] = false;
                             disconnect = true;
                         }
                         plr.Lag = true;
                     }
                     if (disconnect)
                     {
-                        await DisconnectPlayer(endpoint, plr, "Timed out");
+                        await DisconnectPlayer(endpoint, "Timed out");
                         break;
                     }
-                    await Task.Delay(15000);
+                    await Task.Delay(15000, plr.Cancellation.Token);
                 }
             }
             finally
@@ -146,19 +144,20 @@ namespace COTLMPServer
             }
         }
 
-        private async Task DisconnectPlayer(IPEndPoint endPoint, Player plr, string message = null)
+        private async Task DisconnectPlayer(IPEndPoint endPoint, string message = null)
         {
-            byte[] bytes = new Message(MessageType.Disconnect, plr?.Sequence ?? 1, message == null ? null : Encoding.UTF8.GetBytes(message)).Serialize();
+            Message msg = new Message(MessageType.Disconnect, 1, message == null ? null : Encoding.UTF8.GetBytes(message));
             if (players.TryRemove(endPoint, out var removed))
             {
                 logger?.LogInfo($"{endPoint} ({removed.Username}) disconnected: {message ?? "No reason provided"}");
                 removed.Cancellation.Cancel();
+                msg.Sequence = removed.Sequence;
                 lock (idLock)
                 {
                     ids[removed.ID] = false;
                 }
             }
-            await Send(endPoint, bytes);
+            await Send(endPoint, msg.Serialize());
         }
 
         /**
@@ -192,7 +191,7 @@ namespace COTLMPServer
 
                     if (result.Buffer.Length > 2500)
                     {
-                        await DisconnectPlayer(result.RemoteEndPoint, null);
+                        await DisconnectPlayer(result.RemoteEndPoint);
                     }
 
                     try
@@ -203,10 +202,12 @@ namespace COTLMPServer
                         {
                             if (message.Sequence < plr.Sequence && message.Type != MessageType.Disconnect)
                                 continue;
-                            if (message.Sequence > plr.Sequence)
-                                plr.Sequence = message.Sequence + 1;
-                            lock (plr.Lock)
-                                plr.Lag = false;
+                            if (message.Sequence >= plr.Sequence)
+                                lock(plr.Lock)
+                                {
+                                    plr.Sequence = message.Sequence + 1;
+                                    plr.Lag = false;
+                                }
                         }
 
 
@@ -223,7 +224,7 @@ namespace COTLMPServer
 
                                 if (!data.GameVersion.Equals(gameVersion))
                                 {
-                                    await DisconnectPlayer(result.RemoteEndPoint, null, $"Game version mismatch! server {gameVersion} client {data.GameVersion}");
+                                    await DisconnectPlayer(result.RemoteEndPoint, $"Game version mismatch! server {gameVersion} client {data.GameVersion}");
                                     break;
                                 }
 
@@ -244,7 +245,7 @@ namespace COTLMPServer
 
                                 if (id == -1)
                                 {
-                                    await DisconnectPlayer(result.RemoteEndPoint, null, "The server is full!");
+                                    await DisconnectPlayer(result.RemoteEndPoint, "The server is full!");
                                     break;
                                 }
 
@@ -282,7 +283,7 @@ namespace COTLMPServer
                                 {
                                     lock (idLock)
                                         ids[id] = false;
-                                    await DisconnectPlayer(result.RemoteEndPoint, null, "The server is full!");
+                                    await DisconnectPlayer(result.RemoteEndPoint, "The server is full!");
                                     player.Cancellation.Dispose();
                                     break;
                                 }
@@ -303,27 +304,15 @@ namespace COTLMPServer
 
                             case MessageType.Ping:
                                 uint seq = plr?.Sequence ?? 0;
-                                if (seq != 0)
-                                {
-                                    plr.Sequence++;
-                                    lock(plr.Lock)
-                                        plr.Lag = false;
-                                }
                                 await Send(result.RemoteEndPoint, new Message(MessageType.Ping, seq).Serialize());
                                 break;
                         }
                     }
                     catch (Exception e) when (e is InvalidDataException || e is ArgumentNullException)
                     {
-                        if (players.TryRemove(result.RemoteEndPoint, out Player plr))
-                        {
-                            lock (idLock)
-                                ids[plr.ID] = false;
-                            plr.Cancellation.Cancel();
-                        }
                         try
                         {
-                            await DisconnectPlayer(result.RemoteEndPoint, plr, "Client sent invalid data");
+                            await DisconnectPlayer(result.RemoteEndPoint, "Client sent invalid data");
                         }
                         catch { }
                     }
