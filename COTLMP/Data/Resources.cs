@@ -192,6 +192,33 @@ namespace I2.Loc
                     }
                 }
             }
+
+            public static class PasswordPrompt
+            {
+                public static string PasswordPrompt_OkButton
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/PasswordPrompt/OkButton");
+                    }
+                }
+
+                public static string PasswordPrompt_CancelButton
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/PasswordPrompt/CancelButton");
+                    }
+                }
+
+                public static string PasswordPrompt_Description
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/PasswordPrompt/PromptDescription");
+                    }
+                }
+            }
         }
     }
 }
