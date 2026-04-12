@@ -167,7 +167,7 @@ namespace COTLMPServer
          * @remarks
          * Only one instance of this method can run at a time
          */
-        public async Task Run(int maxPlayers)
+        public async Task Run()
         {
             if (disposedValue)
                 throw new ObjectDisposedException(nameof(Server));
