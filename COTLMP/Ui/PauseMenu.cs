@@ -17,6 +17,7 @@ using src.UI;
 using src.UINavigator;
 using System.Threading;
 using TMPro;
+using UnityEngine;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -148,7 +149,7 @@ namespace COTLMP.Ui
             {
                 try
                 {
-                    Server = new Server(cancellationToken:tokenSource.Token, log:new ServerLogger());
+                    Server = new Server(Application.version, Plugin.Globals.MaxNumPlayers, cancellationToken:tokenSource.Token, log:new ServerLogger());
                 }
                 catch
                 {
