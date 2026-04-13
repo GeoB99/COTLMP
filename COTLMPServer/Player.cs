@@ -69,7 +69,7 @@ namespace COTLMPServer
             Cancellation = cancellation;
             Lock = new object();
             Lag = false;
-            Sequence = 2; // start at 2 because of handshake
+            Sequence = 3; // start at 3 because of handshake
         }
     }
 }
