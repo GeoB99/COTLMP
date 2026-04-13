@@ -57,9 +57,13 @@ namespace COTLMPServer.Messages
                 int skin = reader.ReadInt32();
 
                 byte[] userBytes = Utils.ReadBytes(reader) ?? throw new InvalidDataException("Corrupt username string");
+                if (userBytes.Length > 35)
+                    throw new InvalidDataException("Username string too long");
                 string user = Encoding.UTF8.GetString(userBytes);
 
                 byte[] verBytes = Utils.ReadBytes(reader) ?? throw new InvalidDataException("Corrupt version string");
+                if (verBytes.Length > 45)
+                    throw new InvalidDataException("Version string too long");
                 string ver = Encoding.UTF8.GetString(verBytes);
 
                 if (string.IsNullOrWhiteSpace(user) || string.IsNullOrWhiteSpace(ver) || skin < 0)

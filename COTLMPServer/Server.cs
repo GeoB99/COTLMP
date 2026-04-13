@@ -149,7 +149,7 @@ namespace COTLMPServer
             Message msg = new Message(MessageType.Disconnect, 1, message == null ? null : Encoding.UTF8.GetBytes(message));
             if (players.TryRemove(endPoint, out var removed))
             {
-                logger?.LogInfo($"{endPoint} ({removed.Username}) disconnected: {message ?? "No reason provided"}");
+                logger?.LogInfo($"{removed.Username} ({endPoint}) disconnected: {message ?? "No reason provided"}");
                 removed.Cancellation.Cancel();
                 msg.Sequence = removed.Sequence;
                 lock (idLock)
@@ -214,13 +214,10 @@ namespace COTLMPServer
                         switch (message.Type)
                         {
                             case MessageType.Handshake:
-                                if (message.Sequence != 0 || players.ContainsKey(result.RemoteEndPoint))
+                                if (message.Sequence != 1 || players.ContainsKey(result.RemoteEndPoint))
                                     throw new InvalidDataException();
 
                                 var data = HandshakeClient.Deserialize(message.Data);
-
-                                if (data.Username.Length > 35 || data.GameVersion.Length > 30)
-                                    throw new InvalidDataException();
 
                                 if (!data.GameVersion.Equals(gameVersion))
                                 {
@@ -249,16 +246,10 @@ namespace COTLMPServer
                                     break;
                                 }
 
-
-                                HandshakeServer.Player[] pubPlayers = players.Values.Select(HandshakeServer.Player.FromInternal).ToArray();
-
                                 byte[] acceptBytes = new Message(
                                     MessageType.Handshake,
-                                    1,
-                                    new HandshakeServer(
-                                        pubPlayers,
-                                        id: id
-                                    ).Serialize()
+                                    2,
+                                    BitConverter.GetBytes(id)
                                     ).Serialize();
 
                                 try
@@ -290,16 +281,12 @@ namespace COTLMPServer
 
                                 _ = PlayerHeartBeat(player, result.RemoteEndPoint);
 
+                                logger?.LogInfo($"{player.Username} ({result.RemoteEndPoint}) joined the game");
+
                                 break;
 
                             case MessageType.Disconnect:
-                                if (players.TryRemove(result.RemoteEndPoint, out var remove))
-                                {
-                                    logger?.LogInfo(remove.Username + " left the game");
-                                    remove.Cancellation.Cancel();
-                                    lock (idLock)
-                                        ids[remove.ID] = false;
-                                }
+                                await DisconnectPlayer(result.RemoteEndPoint, "Disconnected");
                                 break;
 
                             case MessageType.Ping:
