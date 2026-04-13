@@ -168,7 +168,7 @@ namespace COTLMP.Ui
              * Wait for at least one frame for Unity to initialize all the UI elements
              * and then proceed to initialize the rest of the UI in our own.
              */
-            COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "BindUiElements() called");
+            COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "UiInitializationWorker() called");
             yield return null;
 
             /* Bind the "Back" button to its handler */
