@@ -21,7 +21,9 @@ namespace COTLMPServer.Messages
     {
         Ping,
         Handshake,
-        Disconnect
+        Disconnect,
+        PositionUpdate,
+        StateUpdate
     }
 }
 

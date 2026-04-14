@@ -150,6 +150,23 @@ namespace COTLMP.Game
 
         /*
          * @brief
+         * Check if a managed player exists
+         * 
+         * @param[in] plr
+         * The managed player ID
+         * 
+         * @returns
+         * Whether a managed player exists or not
+         */
+        public static bool DoesPlayerExist(uint plr)
+        {
+            if (plr > players.Length - 1)
+                return false;
+            return players[plr] != null;
+        }
+
+        /*
+         * @brief
          * Set the state of a given managed player
          * 
          * @param[in] plr
