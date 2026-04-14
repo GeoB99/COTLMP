@@ -133,7 +133,7 @@ namespace COTLMPServer
 
         private async Task Send(IPEndPoint endPoint, byte[] data)
         {
-            await sendLock.WaitAsync();
+            await sendLock.WaitAsync(token);
             try
             {
                 await client.SendAsync(data, data.Length, endPoint);
