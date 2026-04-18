@@ -23,11 +23,30 @@ using System.Collections;
 
 namespace COTLMP.Ui
 {
+
+    /*
+     * @brief
+     * Type of the server password dialog box to be displayed
+     * onto the screen.
+     *
+     * @field PromptPassword
+     * The password prompt dialog box (asking the player to type
+     * the password to join).
+     *
+     * @field InvalidPassword
+     * The invalid password disclaimer dialog box.
+     */
+    public enum DIALOG_BOX_TYPE
+    {
+        PromptPassword = 0,
+        InvalidPassword
+    }
+
     internal static class PasswordPrompt
     {
-        private static Image PromptBox;
-        private static TMP_Text PromptDescription;
-        private static Button OkButton;
+        private static Image PromptBox, InvalidPasswordBox;
+        private static TMP_Text PromptHeader, InvalidPasswordHeader;
+        private static Button OkButton, OkButtonInvalidPassowrd;
         private static Button CancelButton;
         private static TMP_InputField PromptInput;
 
@@ -38,6 +57,7 @@ namespace COTLMP.Ui
          */
         private static void CancelButtonHandler()
         {
+            COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "CancelButtonHandler() called");
             PromptInput.gameObject.SetActive(false);
             Object.Destroy(PromptInput);
 
@@ -60,30 +80,85 @@ namespace COTLMP.Ui
 
         /*
          * @brief
+         * The OK button callback handler. This is called whenever the player
+         * clicks on "OK". The callback destroys the invalid password dialog box
+         * and displays back the password prompt box.
+         */
+        private static void OkButtonHnadlerInvalidPassword()
+        {
+            COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "OkButtonHnadlerInvalidPassword() called");
+            InvalidPasswordBox.gameObject.SetActive(false);
+            Object.Destroy(InvalidPasswordBox);
+            PromptInput.gameObject.SetActive(true);
+            PromptBox.gameObject.SetActive(true);
+            PromptInput.ActivateInputField();
+        }
+
+        /*
+         * @brief
          * Localizes the server password prompt dialog box to the
          * specific chosen language locale in the game.
+         *
+         * @param[in] Type
+         * The type of the server password dialog box to be localized,
+         * at the time of the dialog box being displayed.
          */
-        private static void LocalizeUi()
+        private static void LocalizeUi(DIALOG_BOX_TYPE Type)
         {
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "LocalizeUi() called");
 
-            /* Localize the buttons */
+            /* Localize the invalid password dialog box */
+            if (Type.Equals(DIALOG_BOX_TYPE.InvalidPassword))
+            {
+                OkButtonInvalidPassowrd.GetComponentInChildren<TMP_Text>().text = MultiplayerModLocalization.UI.PasswordPrompt.PasswordPrompt_OkButton;
+                InvalidPasswordHeader.text = MultiplayerModLocalization.UI.PasswordPrompt.PasswordPrompt_InvalidPassword;
+                return;
+            }
+
+            /* Localize the password prompt dialog box instead */
+            PromptHeader.text = MultiplayerModLocalization.UI.PasswordPrompt.PasswordPrompt_Description;
             OkButton.GetComponentInChildren<TMP_Text>().text = MultiplayerModLocalization.UI.PasswordPrompt.PasswordPrompt_OkButton;
             CancelButton.GetComponentInChildren<TMP_Text>().text = MultiplayerModLocalization.UI.PasswordPrompt.PasswordPrompt_CancelButton;
-
-            /* Localize the prompt description header */
-            PromptDescription.text = MultiplayerModLocalization.UI.PasswordPrompt.PasswordPrompt_Description;
         }
 
         /*
          * @brief
          * Initializes the UI of the server password prompt box.
+         *
+         * @param[in] Type
+         * The type of the server password dialog box of which
+         * the worker is to initialize the gamne objects and
+         * other stuff accordingly.
          */
-        private static IEnumerator UiInitializationWorker()
+        private static IEnumerator UiInitializationWorker(DIALOG_BOX_TYPE Type)
         {
             /* Wait at least one frame for the UI game objects to be initialized */
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "UiInitializationWorker() called");
             yield return null;
+
+            /* Cache the gameobjects of the invalid password dialog box */
+            if (Type.Equals(DIALOG_BOX_TYPE.InvalidPassword))
+            {
+                InvalidPasswordBox = GameObject.Find("DialogBox").GetComponent<Image>();
+                COTLMP.Debug.Assertions.Assert(InvalidPasswordBox != null, false, "InvalidPasswordBox gameobject returned NULL!", null);
+
+                InvalidPasswordHeader = GameObject.Find("HeaderText").GetComponent<TMP_Text>();
+                COTLMP.Debug.Assertions.Assert(InvalidPasswordHeader != null, false, "InvalidPasswordHeader gameobject returned NULL!", null);
+
+                OkButtonInvalidPassowrd = GameObject.Find("OkButtonInvalid").GetComponent<Button>();
+                COTLMP.Debug.Assertions.Assert(OkButtonInvalidPassowrd != null, false, "OkButtonInvalidPassowrd gameobject returned NULL!", null);
+                OkButtonInvalidPassowrd.onClick.AddListener(OkButtonHnadlerInvalidPassword);
+
+                LocalizeUi(DIALOG_BOX_TYPE.InvalidPassword);
+
+                /*
+                 * Ensure that neither the passowrd prompt and the invalid password overlap
+                 * with each other so hide the password prompt box from display view.
+                 */
+                PromptInput.gameObject.SetActive(false);
+                PromptBox.gameObject.SetActive(false);
+                yield break;
+            }
 
             /* Cache all the UI gameobjects of the prompt box */
             PromptBox = GameObject.Find("PromptBox").GetComponent<Image>();
@@ -95,10 +170,10 @@ namespace COTLMP.Ui
 
             OkButton = GameObject.Find("OkButton").GetComponent<Button>();
             COTLMP.Debug.Assertions.Assert(OkButton != null, false, "OkButton gameobject returned NULL!", null);
-            CancelButton.onClick.AddListener(OkButtonHandler);
+            OkButton.onClick.AddListener(OkButtonHandler);
 
-            PromptDescription = GameObject.Find("PromptDescription").GetComponent<TMP_Text>();
-            COTLMP.Debug.Assertions.Assert(PromptDescription != null, false, "PromptDescription gameobject returned NULL!", null);
+            PromptHeader = GameObject.Find("PromptDescription").GetComponent<TMP_Text>();
+            COTLMP.Debug.Assertions.Assert(PromptHeader != null, false, "PromptHeader gameobject returned NULL!", null);
 
             PromptInput = GameObject.Find("PromptInput").GetComponent<TMP_InputField>();
             COTLMP.Debug.Assertions.Assert(PromptInput != null, false, "PromptInput gameobject returned NULL!", null);
@@ -110,7 +185,7 @@ namespace COTLMP.Ui
             PromptInput.ActivateInputField();
 
             /* Localize the prompt dialog box */
-            LocalizeUi();
+            LocalizeUi(DIALOG_BOX_TYPE.PromptPassword);
             yield break;
         }
 
@@ -118,11 +193,21 @@ namespace COTLMP.Ui
          * @brief
          * Displays the server password prompt box when a player joins a
          * password-protected server.
+         *
+         * @param[in] Type
+         * The type of the server password dialog box to be displayed.
          */
-        public static void DisplayUi()
+        public static void DisplayUi(DIALOG_BOX_TYPE Type)
         {
-            COTLMP.Api.Assets.ShowScene("PasswordPromptUI", true, null);
-            Plugin.MonoInstance.StartCoroutine(UiInitializationWorker());
+            bool ShowPasswordPromptUi = true;
+
+            if (Type.Equals(DIALOG_BOX_TYPE.InvalidPassword))
+            {
+                ShowPasswordPromptUi = false;
+            }
+
+            COTLMP.Api.Assets.ShowScene(ShowPasswordPromptUi ? "PasswordPromptUI" : "InvalidPasswordUI", true, null);
+            Plugin.MonoInstance.StartCoroutine(UiInitializationWorker(ShowPasswordPromptUi ? DIALOG_BOX_TYPE.PromptPassword : DIALOG_BOX_TYPE.InvalidPassword));
         }
     }
 }

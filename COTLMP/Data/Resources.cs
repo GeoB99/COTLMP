@@ -218,6 +218,14 @@ namespace I2.Loc
                         return LocalizationManager.GetTranslation("Multiplayer/UI/PasswordPrompt/PromptDescription");
                     }
                 }
+
+                public static string PasswordPrompt_InvalidPassword
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/PasswordPrompt/InvalidPassword");
+                    }
+                }
             }
         }
     }

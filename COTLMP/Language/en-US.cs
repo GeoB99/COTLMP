@@ -46,6 +46,7 @@ namespace COTLMP.Language
             new("Multiplayer/UI/PasswordPrompt/OkButton", "OK", false),
             new("Multiplayer/UI/PasswordPrompt/CancelButton", "Cancel", false),
             new("Multiplayer/UI/PasswordPrompt/PromptDescription", "This server is password protected. Type the password in order to join.", false),
+            new("Multiplayer/UI/PasswordPrompt/InvalidPassword", "The submitted password is not valid!", false),
 
             /* Game mod resource strings */
             new("Multiplayer/Game/Join", "{0} has joined the server", false),
