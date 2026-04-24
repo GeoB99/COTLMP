@@ -23,10 +23,14 @@ namespace COTLMPServer
      * 
      * @field Reason
      * The reason for which the server was stopped
+     * 
+     * @field What
+     * If an error ocurred, the description of the error
      */
     public class ServerStoppedArgs : EventArgs
     {
         public ServerStopReason Reason;
+        public string What;
 
         /**
          * @brief
@@ -34,10 +38,14 @@ namespace COTLMPServer
          * 
          * @param[in] reason
          * The value to initialize Reason with
+         * 
+         * @param[in] what
+         * The value to initialize What with
          */
-        public ServerStoppedArgs(ServerStopReason reason)
+        public ServerStoppedArgs(ServerStopReason reason, string what)
         {
             Reason = reason;
+            What = what;
         }
     }
 

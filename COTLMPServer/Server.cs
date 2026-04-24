@@ -9,9 +9,15 @@
 
 using COTLMPServer.Messages;
 using System;
+using System.Collections.Concurrent;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -28,160 +34,331 @@ namespace COTLMPServer
      * @field Port
      * The port on which the server is running on
      *
+     * The port that the server is running on
+     * 
      * @field ServerStopped
-     * The event that gets invoked when the server is stopped
-     *
-     * @field _client
-     * The UdpClient that the server listens with
-     *
+     * The event that is invoked when the server is stopped
+     * 
+     * @field running
+     * 1 if server is running, 0 if not
+     * 
      * @field disposedValue
-     * If true, the server was disposed.
-     *
-     * @field _logger
-     * The logger provided by the owner of the instance
-     *
-     * @field _reason
-     * The reason that the server will be stopped for
-     *
-     * @field _started
-     * If true, the server was already started in this process
+     * Whether if the Server object was disposed
+     * 
+     * @field client
+     * The UdpClient object that the server uses for listening
+     * 
+     * @field token
+     * The user-provided cancellation token that is canceled to stop the server
+     * 
+     * @field logger
+     * The user-provided logger
      */
     public sealed class Server : IDisposable
     {
         public readonly int Port;
         public event EventHandler<ServerStoppedArgs> ServerStopped;
 
-        private UdpClient _client;
-        private bool disposedValue;
-        private ILogger _logger;
-        private ServerStopReason _reason = ServerStopReason.NormalShutdown;
-        private static bool _started = false;
+        private volatile int running;
+        private volatile bool disposedValue;
+        private readonly UdpClient client;
+        private readonly CancellationToken token;
+        private readonly ILogger logger;
+        private readonly string gameVersion;
+        private readonly ConcurrentDictionary<IPEndPoint, Player> players;
+        private readonly SemaphoreSlim sendLock;
+        private readonly bool[] ids;
+        private readonly object idLock;
 
         /**
          * @brief
-         * The constructor for the Server class
-         *
+         * The Server class constructor
+         * 
          * @param[in] port
-         * The port to bind (0 for any)
-         *
+         * The port that the server should listen on. 0 for any ephemeral port.
+         * 
+         * @param[in] cancellationToken
+         * The cancellation token to stop the server. Null if none.
+         * 
          * @param[in] logger
-         * The logger class (can be null)
-         *
-         * @throws SocketException
-         * If UdpClient creation fails
-         *
-         * @throws ArgumentOutOfRangeException
-         * If UdpClient creation fails
+         * The logger that the server should use. Null if none.
          */
-        private Server(int port, ILogger logger)
+        public Server(string ver, int maxPlayers, int port = 0, CancellationToken? cancellationToken = null, ILogger log = null)
         {
-            _logger = logger;
-            _client = new UdpClient(port);
-            StartRecieve();
-            Port = ((IPEndPoint)_client.Client.LocalEndPoint).Port;
-            _logger?.LogInfo("Server started!");
+            client = new UdpClient(port);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                client.Client.IOControl(-1744830452, new byte[] { 0 }, null);
+            logger = log;
+            running = 0;
+            players = new ConcurrentDictionary<IPEndPoint, Player>();
+            Port = (client.Client.LocalEndPoint as IPEndPoint)?.Port ?? 0;
+            gameVersion = ver;
+            if (cancellationToken == null)
+                token = CancellationToken.None;
+            else
+                token = cancellationToken.Value;
+            sendLock = new SemaphoreSlim(1, 1);
+            ids = new bool[maxPlayers];
+            idLock = new object();
+        }
+
+        private async Task PlayerHeartBeat(Player plr, IPEndPoint endpoint)
+        {
+            try
+            {
+                while (!plr.Cancellation.Token.IsCancellationRequested)
+                {
+                    bool disconnect = false;
+                    lock (plr.Lock)
+                    {
+                        if (plr.Lag)
+                        {
+                            disconnect = true;
+                        }
+                        plr.Lag = true;
+                    }
+                    if (disconnect)
+                    {
+                        await DisconnectPlayer(endpoint, "Timed out");
+                        break;
+                    }
+                    await Task.Delay(15000, plr.Cancellation.Token);
+                }
+            }
+            finally
+            {
+                plr.Cancellation.Dispose();
+            }
+        }
+
+        private async Task Send(IPEndPoint endPoint, byte[] data)
+        {
+            await sendLock.WaitAsync(token);
+            try
+            {
+                await client.SendAsync(data, data.Length, endPoint);
+            } // don't catch anything, let the caller do it
+            finally
+            {
+                sendLock.Release();
+            }
+        }
+
+        private async Task DisconnectPlayer(IPEndPoint endPoint, string message = null)
+        {
+            Message msg = new Message(MessageType.Disconnect, 1, message == null ? null : Encoding.UTF8.GetBytes(message));
+            if (players.TryRemove(endPoint, out var removed))
+            {
+                logger?.LogInfo($"{removed.Username} ({endPoint}) disconnected: {message ?? "No reason provided"}");
+                removed.Cancellation.Cancel();
+                msg.Sequence = removed.Sequence;
+                lock (idLock)
+                {
+                    ids[removed.ID] = false;
+                }
+            }
+            await Send(endPoint, msg.Serialize());
         }
 
         /**
          * @brief
-         * A method that processes all packets that come into the server
-         *
-         * @param[in] result
-         * The result value generated by the client
+         * Main server logic
+         * 
+         * @remarks
+         * Only one instance of this method can run at a time
          */
-        private void PacketRecieve(IAsyncResult result)
+        public async Task Run()
         {
             if (disposedValue)
-                return;
+                throw new ObjectDisposedException(nameof(Server));
 
-            IPEndPoint endpoint = null;
-            byte[] recieved;
+            if (Interlocked.CompareExchange(ref running, 1, 0) != 0)
+            {
+                return;
+            }
+
+            var args = new ServerStoppedArgs(ServerStopReason.NormalShutdown, "");
+            CancellationTokenRegistration registration = token.Register(client.Dispose);
+            logger?.LogInfo("Started server at port " + Port + "!");
+
             try
             {
-                recieved = _client.EndReceive(result, ref endpoint);
+                while (true)
+                {
+                    token.ThrowIfCancellationRequested();
+
+                    UdpReceiveResult result = await client.ReceiveAsync();
+
+                    if (result.Buffer.Length > 2500)
+                    {
+                        await DisconnectPlayer(result.RemoteEndPoint);
+                    }
+
+                    try
+                    {
+                        Message message = Message.Deserialize(result.Buffer);
+
+                        if (players.TryGetValue(result.RemoteEndPoint, out var plr))
+                        {
+                            if (message.Sequence < plr.Sequence && message.Type != MessageType.Disconnect)
+                                continue;
+                            if (message.Sequence >= plr.Sequence)
+                                lock(plr.Lock)
+                                {
+                                    plr.Sequence = message.Sequence + 1;
+                                    plr.Lag = false;
+                                }
+                        }
+
+
+                        switch (message.Type)
+                        {
+                            case MessageType.Handshake:
+                                if (message.Sequence != 1 || players.ContainsKey(result.RemoteEndPoint))
+                                    throw new InvalidDataException();
+
+                                var data = HandshakeClient.Deserialize(message.Data);
+
+                                if (!data.GameVersion.Equals(gameVersion))
+                                {
+                                    await DisconnectPlayer(result.RemoteEndPoint, $"Game version mismatch! server {gameVersion} client {data.GameVersion}");
+                                    break;
+                                }
+
+                                int id = -1;
+
+                                lock (idLock)
+                                {
+                                    for (int i = 0; i < ids.Length; ++i)
+                                    {
+                                        if (!ids[i])
+                                        {
+                                            id = i;
+                                            ids[i] = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (id == -1)
+                                {
+                                    await DisconnectPlayer(result.RemoteEndPoint, "The server is full!");
+                                    break;
+                                }
+
+                                byte[] acceptBytes = new Message(
+                                    MessageType.Handshake,
+                                    2,
+                                    BitConverter.GetBytes(id)
+                                    ).Serialize();
+
+                                try
+                                {
+                                    await Send(result.RemoteEndPoint, acceptBytes);
+                                }
+                                catch
+                                {
+                                    lock (idLock)
+                                        ids[id] = false;
+                                    break;
+                                }
+
+                                var player = new Player(
+                                    id,
+                                    data.Skin,
+                                    data.Username,
+                                    "Base Biome 1", // the main cult
+                                    new PlayerState(PlayerState.State.Idle, 0, 0, false, 0, new Vector3()),
+                                    CancellationTokenSource.CreateLinkedTokenSource(token));
+                                if (!players.TryAdd(result.RemoteEndPoint, player))
+                                {
+                                    lock (idLock)
+                                        ids[id] = false;
+                                    await DisconnectPlayer(result.RemoteEndPoint, "The server is full!");
+                                    player.Cancellation.Dispose();
+                                    break;
+                                }
+
+                                _ = PlayerHeartBeat(player, result.RemoteEndPoint);
+
+                                logger?.LogInfo($"{player.Username} ({result.RemoteEndPoint}) joined the game");
+
+                                break;
+
+                            case MessageType.Disconnect:
+                                await DisconnectPlayer(result.RemoteEndPoint, "Disconnected");
+                                break;
+
+                            case MessageType.Ping:
+                                uint seq = plr?.Sequence ?? 0;
+                                await Send(result.RemoteEndPoint, new Message(MessageType.Ping, seq).Serialize());
+                                break;
+                        }
+                    }
+                    catch (Exception e) when (e is InvalidDataException || e is ArgumentNullException)
+                    {
+                        try
+                        {
+                            await DisconnectPlayer(result.RemoteEndPoint, "Client sent invalid data");
+                        }
+                        catch { }
+                    }
+                    catch (SocketException e)
+                    {
+                        if (players.TryRemove(result.RemoteEndPoint, out var removed))
+                        {
+                            removed.Cancellation.Cancel();
+                            lock (idLock)
+                                ids[removed.ID] = false;
+                            logger?.LogInfo($"{result.RemoteEndPoint} ({removed.Username}) disconnected: {e.Message}");
+                        }
+                    }
+                }
             }
-            catch (SocketException e)
+            catch (OperationCanceledException)
             {
-                _logger?.LogFatal(e.Message);
-                _reason = ServerStopReason.Error;
-                Dispose(true);
-                return;
+                logger?.LogInfo("Stopping server...");
+            }
+            catch (ObjectDisposedException) when (token.IsCancellationRequested)
+            {
+                logger?.LogInfo("Stopping server...");
             }
             catch (Exception e)
             {
-                _logger?.LogFatal($"An unknown error happened while running the server: {e.Message}");
-                _reason = ServerStopReason.Error;
-                Dispose(true);
-                return;
+                logger?.LogFatal(e.ToString());
+                args.Reason = ServerStopReason.Error;
+                args.What = e.ToString();
             }
-
-            Message message;
-            try
+            finally
             {
-                message = Message.Deserialize(recieved);
+                registration.Dispose();
+                client.Dispose();
+                ServerStopped?.Invoke(this, args);
             }
-            catch (InvalidDataException e)
-            {
-                _logger?.LogError($"Corrupt message recieved, error: {e.Message}");
-                StartRecieve();
-                return;
-            }
-            catch (ArgumentNullException e)
-            {
-                _logger?.LogError($"Corrupt message recieved, error: {e.Message}");
-                StartRecieve();
-                return;
-            }
-
-            switch (message.Type)
-            {
-                case MessageType.Test:
-                    _logger?.LogInfo("A message has been recieved!");
-                    break;
-            }
-
-            StartRecieve();
         }
 
         /**
          * @brief
-         * A wrapper for _client.BeginRecieve()
-         */
-        private void StartRecieve()
-        {
-            if (disposedValue)
-                return;
-            _client.BeginReceive(PacketRecieve, null);
-        }
-
-        /**
-         * @brief
-         * Inner dispose method that actually disposes of resources
-         *
+         * Dispose of unmanaged resources
+         * 
          * @param[in] disposing
-         * Whether the dispose method was called manually or by the destructor
+         * Whether if the Dispose() method was called manually
          */
         private void Dispose(bool disposing)
         {
             if (!disposedValue)
             {
-                disposedValue = true;
-
                 if (disposing)
                 {
-                    _client?.Dispose();
-                    _logger?.LogInfo("Server stopped!");
+                    client.Dispose();
                 }
-                _client = null;
-                _logger = null;
-                _started = false;
-                ServerStopped?.Invoke(this, new ServerStoppedArgs(_reason));
+                disposedValue = true;
             }
         }
 
         /**
          * @brief
-         * Destructor that just calls the inner Dispose
+         * The server destructor
          */
         ~Server()
         {
@@ -190,50 +367,12 @@ namespace COTLMPServer
 
         /**
          * @brief
-         * Dispose of the Server instance
+         * Dispose of unmanaged resources 
          */
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
-        }
-
-        /**
-         * @brief
-         * Creates a new instance of the class
-         *
-         * @param[in] port
-         * The port to bind the server to
-         *
-         * @param[in] logger
-         * The logger to use for the server
-         *
-         * @returns
-         * If the creation was successful, the instance of the class. Otherwise, null.
-         */
-        public static Server Start(int port = 0, ILogger logger = null)
-        {
-            if (_started) // make sure only one instance of the server can run in the process
-                return null;
-            _started = true;
-            try
-            {
-                return new Server(port, logger);
-            }
-            catch (SocketException e)
-            {
-                logger?.LogFatal(e.Message);
-                return null;
-            }
-            catch (ArgumentOutOfRangeException e)
-            {
-                logger?.LogFatal(e.Message);
-                return null;
-            }
-            catch
-            {
-                return null;
-            }
         }
     }
 }

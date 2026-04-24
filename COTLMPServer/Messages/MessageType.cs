@@ -19,7 +19,15 @@ namespace COTLMPServer.Messages
      */
     public enum MessageType
     {
-        Test
+        Ping,
+        Handshake,
+        Disconnect,
+        PositionUpdate,
+        StateUpdate,
+        Transition,
+        CustomAnimation,
+        PlayerLeft,
+        GetLocation
     }
 }
 

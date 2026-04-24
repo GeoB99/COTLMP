@@ -15,7 +15,9 @@ using Lamb.UI.PauseMenu;
 using MMTools;
 using src.UI;
 using src.UINavigator;
+using System.Threading;
 using TMPro;
+using UnityEngine;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -45,6 +47,7 @@ namespace COTLMP.Ui
         public static Server Server = null;
         public static string Message = null;
         public static bool Quitting = false;
+        private static CancellationTokenSource tokenSource = new();
 
         /**
          * @brief
@@ -140,33 +143,23 @@ namespace COTLMP.Ui
             {
                 UIMenuConfirmationWindow window = __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate);
                 window.Configure(MultiplayerModLocalization.UI.ServerStarted, MultiplayerModLocalization.UI.ServerStopConfirm);
-                window.OnConfirm += () => { 
-                    Server.Dispose();
-                    Server = null;
-                };
-            }
+                window.OnConfirm += StopServer;
+            } 
             else
             {
-                /* It hasn't been created, create one now */
-                Server = Server.Start(0, new ServerLogger());
-                if (Server == null)
-                    __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Failed to start server!", "", true);
-                else
+                try
                 {
-                    __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Started server!", $"Port: {Server.Port}", true);
-                    Server.ServerStopped += ServerStopped;
-
-                    /*
-                     * The server has been started, the player is currently in session.
-                     * Acknowledge the player hosts the server through LAN which makes
-                     * themselves a server so to speak.
-                     */
-                    Plugin.GlobalsInternal.InGameSession = true;
-                    Plugin.GlobalsInternal.IsServerCreator = true;
-
-                    /* Start the saychat mechanism */
-                    COTLMP.Ui.SayChat.StartSayChat();
+                    Server = new Server(Application.version, Plugin.Globals.MaxNumPlayers, cancellationToken:tokenSource.Token, log:new ServerLogger());
                 }
+                catch
+                {
+                    __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Failed to start server!", "", true);
+                    return false;
+                }
+
+                __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Started server!", $"Port: {Server.Port}", true);
+                Server.ServerStopped += ServerStopped;
+                _ = Server.Run();
             }
             return false;
         }
@@ -209,6 +202,17 @@ namespace COTLMP.Ui
             /* The server has been stopped, the player is no longer in session */
             Plugin.GlobalsInternal.InGameSession = false;
             Plugin.GlobalsInternal.IsServerCreator = false;
+        }
+
+        /**
+         * @brief
+         * Stops the integrated server.
+         */
+        public static void StopServer()
+        {
+            tokenSource.Cancel();
+            tokenSource = new();
+            Server = null;
         }
 
         /**
