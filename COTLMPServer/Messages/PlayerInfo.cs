@@ -8,14 +8,14 @@ namespace COTLMPServer.Messages
 {
     public readonly struct PlayerInfo
     {
-        public readonly int ID;
+        public readonly uint ID;
         public readonly int Skin;
         public readonly string Username;
         public readonly PlayerState State;
 
         public PlayerInfo(PlayerState state, string username = "", int id = -1, int skin = 0)
         {
-            ID = id;
+            ID = (uint)id;
             State = state;
             Skin = skin;
             Username = username;

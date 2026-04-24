@@ -23,7 +23,11 @@ namespace COTLMPServer.Messages
         Handshake,
         Disconnect,
         PositionUpdate,
-        StateUpdate
+        StateUpdate,
+        Transition,
+        CustomAnimation,
+        PlayerLeft,
+        GetLocation
     }
 }
 
