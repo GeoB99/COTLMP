@@ -38,6 +38,25 @@ namespace COTLMP.Game
         {
             return new PlayerState((PlayerState.State)machine.CURRENT_STATE, machine.facingAngle, machine.LookAngle, machine.isDefending, machine.Timer, position);
         }
+
+        /*
+         * @brief
+         * Convert a PlayerState instance to StateMachine
+         * 
+         * @returns
+         * A StateMachine instance that represents the same thing as the PlayerInstance instance
+         */
+        public static StateMachine ToUnity(this PlayerState state)
+        {
+            return new StateMachine()
+            {
+                Timer = state.Timer,
+                CURRENT_STATE = (StateMachine.State)state.Current,
+                facingAngle = state.Facing,
+                LookAngle = state.Look,
+                isDefending = state.Defending,
+            };
+        }
     }
 }
 

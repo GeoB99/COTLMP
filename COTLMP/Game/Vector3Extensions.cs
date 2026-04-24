@@ -34,6 +34,18 @@ namespace COTLMP.Game
         {
             return new COTLMPServer.Vector3(vec.x, vec.y, vec.z);
         }
+
+        /*
+         * @brief
+         * Convert a network Vector 3 to a Unity Vector3
+         * 
+         * @returns
+         * A Unity Vector3 instance that represents the same thing as the network one
+         */
+        public static Vector3 ToUnity(this COTLMPServer.Vector3 vec)
+        {
+            return new Vector3(vec.X, vec.Y, vec.Z);
+        }
     }
 }
 
