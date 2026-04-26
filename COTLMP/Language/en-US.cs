@@ -40,6 +40,8 @@ namespace COTLMP.Language
             new("Multiplayer/UI/ServerList/ServerNameDescription", "Enter the server name", false),
             new("Multiplayer/UI/ServerList/MainDescription", "Browse the servers list and click Connect to join a server", false),
             new("Multiplayer/UI/ServerList/NoneFound", "No servers could be found", false),
+            new("Multiplayer/UI/ServerList/MasterFail", "Failed to connect to the masterserver", false),
+            new("Multiplayer/UI/ServerList/ScanProgress", "Searching for reachable servers in progress...", false),
             new("Multiplayer/UI/ServerList/ConnectButton", "Connect", false),
 
             /* Server password prompt UI resource strings */

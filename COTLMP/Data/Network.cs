@@ -8,6 +8,8 @@
 /* IMPORTS ********************************************************************/
 
 using COTLMP;
+using UnityEngine;
+using UnityEngine.UI;
 using System.Net;
 
 /* CLASSES & CODE *************************************************************/
@@ -50,7 +52,10 @@ namespace COTLMP.Data
 
             /* Port and IP address of the server */
             internal IPAddress Address;
-            internal int Port;
+            internal ushort Port;
+
+            /* The instance of an object that represents the server entry item in the browser */
+            internal GameObject InstanceObject;
 
             public ServerEntry(string Name,
                                int JoinedPlayers,
@@ -59,7 +64,8 @@ namespace COTLMP.Data
                                bool NeedPw,
                                bool Favorite,
                                IPAddress Addr,
-                               int PortNum)
+                               ushort PortNum,
+                               GameObject Instance)
             {
                 ServerName = Name;
                 OnlinePlayers = JoinedPlayers;
@@ -69,6 +75,7 @@ namespace COTLMP.Data
                 IsFavorite = Favorite;
                 Address = Addr;
                 Port = PortNum;
+                InstanceObject = Instance;
             }
         }
     }
