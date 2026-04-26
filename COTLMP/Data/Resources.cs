@@ -184,6 +184,22 @@ namespace I2.Loc
                     }
                 }
 
+                public static string ServerList_MasterFail
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/MasterFail");
+                    }
+                }
+
+                public static string ServerList_ScanProgress
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/ServerList/ScanProgress");
+                    }
+                }
+
                 public static string ServerList_ConnectButton
                 {
                     get
