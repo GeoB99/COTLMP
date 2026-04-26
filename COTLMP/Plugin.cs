@@ -46,6 +46,7 @@ public class Plugin : BaseUnityPlugin
     internal static ModDataGlobals Globals;
     internal static InternalData GlobalsInternal;
     internal static AssetBundle ModScenesBundle;
+    internal static AssetBundle ModPrefabsBundle;
     internal static MonoBehaviour MonoInstance;
     private Harmony HarmonyInstance;
 
@@ -234,6 +235,15 @@ public class Plugin : BaseUnityPlugin
         if (ModScenesBundle == null)
         {
             Logger.LogFatal("Failed to open the COTLMP scenes bundle file!");
+            HarmonyInstance.UnpatchSelf();
+            return;
+        }
+
+        /* Load all the COTLMP prefabs in memory */
+        ModPrefabsBundle = COTLMP.Api.Assets.OpenAssetBundleFile("cotlmpprefabs");
+        if (ModPrefabsBundle == null)
+        {
+            Logger.LogFatal("Failed to open the COTLMP prefabs bundle file!");
             HarmonyInstance.UnpatchSelf();
             return;
         }
