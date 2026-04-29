@@ -225,11 +225,11 @@ namespace COTLMPServer
                                     break;
                                 }
 
-                                int id = -1;
+                                uint id = 9999;
 
                                 lock (idLock)
                                 {
-                                    for (int i = 0; i < ids.Length; ++i)
+                                    for (uint i = 0; i < ids.Length; ++i)
                                     {
                                         if (!ids[i])
                                         {
@@ -240,7 +240,7 @@ namespace COTLMPServer
                                     }
                                 }
 
-                                if (id == -1)
+                                if (id == 9999)
                                 {
                                     await DisconnectPlayer(result.RemoteEndPoint, "The server is full!");
                                     break;
@@ -249,7 +249,7 @@ namespace COTLMPServer
                                 byte[] acceptBytes = new Message(
                                     MessageType.Handshake,
                                     2,
-                                    BitConverter.GetBytes(id)
+                                    (BitConverter.IsLittleEndian) ? BitConverter.GetBytes(id) : BitConverter.GetBytes(id).Reverse().ToArray()
                                     ).Serialize();
 
                                 try

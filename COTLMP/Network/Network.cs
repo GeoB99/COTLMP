@@ -149,9 +149,12 @@ namespace COTLMP.Network
                     {
                         case MessageType.PositionUpdate:
                             uint id = BitConverter.ToUInt32(msg.Data, 0);
-                            var arr = new byte[msg.Data.Length - 4];
-                            Array.ConstrainedCopy(msg.Data, 4, arr, 0, msg.Data.Length - 4);
-                            var pos = COTLMPServer.Vector3.Deserialize(arr);
+                            if(!BitConverter.IsLittleEndian) // the data in the message is in little endian, convert
+                                id =  ((id & 0x000000FFU) << 24 |
+                                      (id & 0x0000FF00U) << 8 |
+                                      (id & 0x00FF0000U) >> 8 |
+                                      (id & 0xFF000000U) >> 24);
+                            var pos = COTLMPServer.Vector3.Deserialize(msg.Data, sizeof(uint), out _);
 
                             if (!PlayerManager.DoesPlayerExist(id))
                                 PlayerManager.CreatePlayer(id, pos.ToUnity());

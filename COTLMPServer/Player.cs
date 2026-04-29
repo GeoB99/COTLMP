@@ -36,7 +36,7 @@ namespace COTLMPServer
      */
     internal class Player
     {
-        public int ID;
+        public uint ID;
         public int Skin;
         public string Username;
         public string Biome;
@@ -59,7 +59,7 @@ namespace COTLMPServer
          * @param[in] Cancellation
          * The cancellation token for everything related to the player
          */
-        public Player(int id, int skin, string username, string biome, PlayerState state, CancellationTokenSource cancellation)
+        public Player(uint id, int skin, string username, string biome, PlayerState state, CancellationTokenSource cancellation)
         {
             ID = id;
             Skin = skin;
