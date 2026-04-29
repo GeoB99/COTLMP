@@ -42,6 +42,9 @@ namespace COTLMPServer.Messages
      * @field Position
      * The player position
      * 
+     * @field SerializedSize
+     * The minimum amount of bytes the structure will take up serialized
+     * 
      * @field MagicNumber
      * The magic number to be used for verification when sent over the network
      */
@@ -54,6 +57,7 @@ namespace COTLMPServer.Messages
         public float Timer;
         public Vector3 Position;
         public const int MagicNumber = 0xAB3245;
+        public const int SerializedSize = (sizeof(int) * 2 + sizeof(float) * 3 + sizeof(byte));
 
         /**
          * @brief
@@ -134,19 +138,15 @@ namespace COTLMPServer.Messages
          * @throws InvalidDataException
          * When the data contained in the byte array is invalid
          */
-        public static PlayerState Deserialize(IReadOnlyList<byte> data)
+        public static PlayerState Deserialize(byte[] data)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
 
-            if (data.Count < (sizeof(int) * 2 +
-                sizeof(float) * 3 +
-                sizeof(byte)))
+            if (data.Length < SerializedSize)
                 throw new InvalidDataException("Data too small");
 
-            byte[] buffer = data as byte[] ?? data.ToArray();
-
-            using (MemoryStream stream = new MemoryStream(buffer, false))
+            using (MemoryStream stream = new MemoryStream(data, false))
             using (BinaryReader reader = new BinaryReader(stream))
             {
                 if (reader.ReadInt32() != MagicNumber)
@@ -155,7 +155,7 @@ namespace COTLMPServer.Messages
                 State state = (State)reader.ReadInt32();
                 if (!Enum.IsDefined(typeof(State), state))
                     throw new InvalidDataException("State not defined in enum");
-                return new PlayerState(state, reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadSingle(), Vector3.Deserialize(Messages.Utils.ReadBytes(reader)));
+                return new PlayerState(state, reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadSingle(), Vector3.Deserialize(Messages.Utils.ReadBytes(reader), 0, out _));
             }
         }
 

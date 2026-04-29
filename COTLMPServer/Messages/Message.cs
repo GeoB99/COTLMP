@@ -8,9 +8,7 @@
 /* IMPORTS ********************************************************************/
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -31,7 +29,7 @@ namespace COTLMPServer.Messages
      * Actual message data (depends on the message type)
      *
      * @field MagicNumber
-     * Magic number to identify messages
+     * The magic number to be used for verification when sent over the network
      */
     public sealed class Message
     {
@@ -39,6 +37,7 @@ namespace COTLMPServer.Messages
         public uint Sequence;
         public byte[] Data;
         public const int MagicNumber = 0x173495;
+        public const int SerializedSize = sizeof(int) * 3;
 
         /**
          * @brief
@@ -99,18 +98,16 @@ namespace COTLMPServer.Messages
          * @throws ArgumentNullException
          * If any of the arguments are null
          */
-        public static Message Deserialize(IReadOnlyList<byte> data)
+        public static Message Deserialize(byte[] data)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
-            if (data.Count < (sizeof(int) * 3))
+            if (data.Length < SerializedSize)
                 throw new InvalidDataException("data is too small!");
-            if (data.Count > 3000)
+            if (data.Length > 1500)
                 throw new InvalidDataException("data is too big!");
 
-            byte[] buffer = data as byte[] ?? data.ToArray();
-
-            using (MemoryStream stream = new MemoryStream(buffer, false))
+            using (MemoryStream stream = new MemoryStream(data, false))
             using (BinaryReader reader = new BinaryReader(stream))
             {
                 if (reader.ReadInt32() != MagicNumber)

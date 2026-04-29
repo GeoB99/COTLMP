@@ -35,12 +35,16 @@ namespace COTLMPServer
      * 
      * @field MagicNumber
      * The magic number to be used for verification when sent over the network
+     * 
+     * @field SerializedSize
+     * The minimum amount of bytes the structure will take up serialized
      */
     public readonly struct Vector3
     {
         public readonly float X;
         public readonly float Y;
         public readonly float Z;
+        public const int SerializedSize = (sizeof(float) * 3) + sizeof(int);
         public const int MagicNumber = 0xDE33789;
 
         /**
@@ -70,6 +74,12 @@ namespace COTLMPServer
          * @param[in] data
          * The byte array to be processed
          * 
+         * @param[in] offset
+         * The offset to use when processing the byte array
+         * 
+         * @param[out] after
+         * The offset that 
+         * 
          * @returns
          * The resulting object
          * 
@@ -78,21 +88,24 @@ namespace COTLMPServer
          * 
          * @throws InvalidDataException
          * When the data contained in the byte array is invalid
+         * 
+         * @remarks
+         * This is the only Deserialize() method to accept an offset and after parameter because a vector3 can be encountered in contexts where you might want to read it from the middle
+         * of a byte array
          */
-        public static Vector3 Deserialize(IReadOnlyList<byte> data)
+        public static Vector3 Deserialize(byte[] data, int offset, out int after)
         {
             if (data == null)
                 throw new ArgumentNullException(nameof(data));
-            if (data.Count < (sizeof(float) * 3 + sizeof(int)))
+            if (data.Length - offset < SerializedSize)
                 throw new InvalidDataException("Data is too small!");
 
-            byte[] buffer = data as byte[] ?? data.ToArray();
-
-            using (MemoryStream stream = new MemoryStream(buffer, false))
+            using (MemoryStream stream = new MemoryStream(data, offset, SerializedSize, false))
             using (BinaryReader reader = new BinaryReader(stream))
             {
                 if (reader.ReadInt32() != MagicNumber)
                     throw new InvalidDataException("Magic number doesn't match");
+                after = offset + SerializedSize;
                 return new Vector3(reader.ReadSingle(), reader.ReadSingle(), reader.ReadSingle());
             }
         }
