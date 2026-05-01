@@ -23,6 +23,7 @@ using System.Collections;
 using System.Text;
 using System.IO;
 using COTLMP.Debug;
+using Rewired.Utils.Interfaces;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -39,17 +40,20 @@ namespace COTLMP.Network
     internal static class Network
     {
         public static event Action OnDisconnect;
+        public static bool IsConnected => online != 0;
+
         private static UdpClient client;
         private static PlayerFarming localPlayer;
         private static CancellationToken cancelToken;
         private static Vector3 lastPosition;
         private static SemaphoreSlim sendLock;
-        private static bool walking;
         private static int online;
         private static CancellationTokenRegistration registration;
-        private static int localID;
+        private static uint localID;
         private static object seqLock;
         private static uint sequence;
+
+        private const float updateFrequencySec = 1f / 30f; // 30hz
 
         private static async System.Threading.Tasks.Task Send(Message msg)
         {
@@ -97,7 +101,7 @@ namespace COTLMP.Network
         public static IEnumerator SendUpdates()
         {
             float lastMessage = Time.time;
-            var wait = new WaitForSecondsRealtime(1f / 30f); // 30hz
+            var wait = new WaitForSecondsRealtime(updateFrequencySec);
             while (!cancelToken.IsCancellationRequested)
             {
                 if(Time.time - lastMessage > 15f)
@@ -106,7 +110,7 @@ namespace COTLMP.Network
                     lastMessage = Time.time;
                     _ = Send(ping);
                 }
-                if (walking && (lastPosition -(localPlayer?.transform.position ?? new())).sqrMagnitude > 0.0001f)
+                if ((lastPosition -(localPlayer?.transform.position ?? new())).sqrMagnitude > 0.0001f)
                 {
                     lastPosition = localPlayer?.transform.position ?? new();
                     Message msg = new(MessageType.PositionUpdate, 0, lastPosition.ToNetwork().Serialize());
@@ -117,12 +121,22 @@ namespace COTLMP.Network
             }
         }
 
+        private static uint ReverseEndianness(uint val)
+        {
+            return ((val & 0x000000FFU) << 24 |
+                    (val & 0x0000FF00U) << 8 |
+                    (val & 0x00FF0000U) >> 8 |
+                    (val & 0xFF000000U) >> 24);
+        }
+
         public static IEnumerator PollServer()
         {
             var wait = new WaitForTask(null);
             bool keepLooping = true;
             while(!cancelToken.IsCancellationRequested && keepLooping)
             {
+                yield return null; // let the game run for one frame
+
                 var recv = Get();
                 wait.what = recv;
                 yield return wait;
@@ -143,23 +157,27 @@ namespace COTLMP.Network
                         sequence = msg.Sequence + 1;
                 }
 
+                if (localPlayer == null && msg.Type != MessageType.Disconnect) // don't process messages if we're not in game
+                    continue;
+
                 try
                 {
                     switch(msg.Type)
                     {
                         case MessageType.PositionUpdate:
+                            if (msg.Data.Length < sizeof(uint) + COTLMPServer.Vector3.SerializedSize)
+                                throw new InvalidDataException("data too small!");
+
                             uint id = BitConverter.ToUInt32(msg.Data, 0);
-                            if(!BitConverter.IsLittleEndian) // the data in the message is in little endian, convert
-                                id =  ((id & 0x000000FFU) << 24 |
-                                      (id & 0x0000FF00U) << 8 |
-                                      (id & 0x00FF0000U) >> 8 |
-                                      (id & 0xFF000000U) >> 24);
+                            if (!BitConverter.IsLittleEndian) // the data in the message is in little endian, convert
+                                id = ReverseEndianness(id);
+
                             var pos = COTLMPServer.Vector3.Deserialize(msg.Data, sizeof(uint), out _);
 
                             if (!PlayerManager.DoesPlayerExist(id))
                                 PlayerManager.CreatePlayer(id, pos.ToUnity());
                             else
-                                PlayerManager.MovePlayer(id, pos.ToUnity(), 1f / 30f); // clients send position updates at 30hz
+                                PlayerManager.MovePlayer(id, pos.ToUnity(), updateFrequencySec);
                             break;
 
                         case MessageType.StateUpdate:
@@ -171,7 +189,10 @@ namespace COTLMP.Network
                                 PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
                             }
                             else
+                            {
+                                PlayerManager.MovePlayer(plrinfo.ID, plrinfo.State.Position.ToUnity(), 0);
                                 PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
+                            }
                             break;
 
                         case MessageType.Disconnect:
@@ -183,13 +204,17 @@ namespace COTLMP.Network
                 }
                 catch (InvalidDataException e)
                 {
-                    PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, $"Server sent invalid data: {e.Message}");
+                    PrintLogger.Print(DebugLevel.FATAL_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, $"Server sent invalid data: {e.Message}");
                     PauseMenuPatches.Message = e.Message;
                     break;
                 }
+                catch (Exception e) when ((e is OperationCanceledException) || (e is ObjectDisposedException && cancelToken.IsCancellationRequested))  
+                {
+                    PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, "Disconnected.");
+                }
                 catch (Exception e)
                 {
-                    PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, e.Message);
+                    PrintLogger.Print(DebugLevel.FATAL_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, e.Message);
                     PauseMenuPatches.Message = e.Message;
                     break;
                 }
@@ -212,7 +237,6 @@ namespace COTLMP.Network
                 return false;
 
             cancelToken = token;
-            walking = false;
             lastPosition = new();
             sequence = 3;
             sendLock = new(1, 1);
@@ -235,14 +259,18 @@ namespace COTLMP.Network
                     throw new Exception();
 
                 Message msg = Message.Deserialize(result.Buffer);
-                if (msg.Type != MessageType.Handshake || msg.Sequence != 2)
+                if (msg.Type != MessageType.Handshake || msg.Sequence != 2 || msg.Data.Length < sizeof(uint))
                 {
                     if (msg.Type == MessageType.Disconnect && msg.Data != null)
                         PauseMenuPatches.Message = Encoding.UTF8.GetString(msg.Data);
                     throw new Exception();
                 }
 
-                localID = BitConverter.ToInt32(msg.Data, 0);
+                localID = BitConverter.ToUInt32(msg.Data, 0);
+                if (!BitConverter.IsLittleEndian)
+                {
+                    localID = ReverseEndianness(localID);
+                }
 
                 Plugin.MonoInstance.StartCoroutine(PollServer());
                 return true;
@@ -288,11 +316,8 @@ namespace COTLMP.Network
 
         private async static void OnStateChanged(StateMachine.State newState, StateMachine.State _)
         {
-            if (newState == StateMachine.State.CustomAnimation || localPlayer == null)
+            if (newState == StateMachine.State.CustomAnimation || newState == StateMachine.State.Moving || localPlayer == null)
                 return;
-            if (newState == StateMachine.State.Moving)
-                walking = true;
-            walking = false;
             await Send(new Message(MessageType.StateUpdate, 0, localPlayer.state.ToNetwork(localPlayer.transform.position.ToNetwork()).Serialize()));
         }
 

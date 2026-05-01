@@ -89,7 +89,7 @@ namespace COTLMP.Game
          * The fleece ID to put on the new player
          * 
          * @remarks
-         * If the ID is already taken, the existing player is given the specified skin and position instead
+         * If the ID is already taken, the existing player is deleted and recreated.
          */
         public static void CreatePlayer(uint id, Vector3 pos = new(), int skin = 0)
         {
@@ -97,11 +97,7 @@ namespace COTLMP.Game
                 return;
             if (players[id] != null)
             {
-                var plrsk = players[id].PlayerSkin = new Spine.Skin("Player Skin");
-                plrsk.AddSkin(players[id].Spine.Skeleton.Data.FindSkin($"Lamb_{skin}"));
-                players[id].gameObject?.transform.position = pos;
-                players[id]._state = new StateMachine();
-                return;
+                DeletePlayer(id);
             }
 
             GameObject plr = GameObject.Instantiate(CoopManager.Instance.playerPrefab);
@@ -126,6 +122,8 @@ namespace COTLMP.Game
 
             var playerskin = farming.PlayerSkin = new Spine.Skin("Player Skin");
             playerskin.AddSkin(farming.Spine.Skeleton.Data.FindSkin($"Lamb_{skin}"));
+            farming.Spine.Skeleton.SetSkin(playerskin);
+            farming.Spine.Skeleton.SetToSetupPose();
         }
 
         /*
