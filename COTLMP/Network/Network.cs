@@ -24,6 +24,7 @@ using System.Text;
 using System.IO;
 using COTLMP.Debug;
 using Rewired.Utils.Interfaces;
+using System.Runtime.InteropServices;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -165,33 +166,62 @@ namespace COTLMP.Network
                     switch(msg.Type)
                     {
                         case MessageType.PositionUpdate:
-                            if (msg.Data.Length < sizeof(uint) + COTLMPServer.Vector3.SerializedSize)
-                                throw new InvalidDataException("data too small!");
+                            {
+                                if (msg.Data.Length < sizeof(uint) + COTLMPServer.Vector3.SerializedSize)
+                                    throw new InvalidDataException("data too small!");
 
-                            uint id = BitConverter.ToUInt32(msg.Data, 0);
-                            if (!BitConverter.IsLittleEndian) // the data in the message is in little endian, convert
-                                id = ReverseEndianness(id);
+                                uint id = BitConverter.ToUInt32(msg.Data, 0);
+                                if (!BitConverter.IsLittleEndian) // the data in the message is in little endian, convert
+                                    id = ReverseEndianness(id);
 
-                            var pos = COTLMPServer.Vector3.Deserialize(msg.Data, sizeof(uint), out _);
+                                var pos = COTLMPServer.Vector3.Deserialize(msg.Data, sizeof(uint), out _);
 
-                            if (!PlayerManager.DoesPlayerExist(id))
-                                PlayerManager.CreatePlayer(id, pos.ToUnity());
-                            else
-                                PlayerManager.MovePlayer(id, pos.ToUnity(), updateFrequencySec);
+                                if (!PlayerManager.DoesPlayerExist(id))
+                                    PlayerManager.CreatePlayer(id, pos.ToUnity());
+                                else
+                                    PlayerManager.MovePlayer(id, pos.ToUnity(), updateFrequencySec);
+                            }
                             break;
 
                         case MessageType.StateUpdate:
-                            var plrinfo = PlayerInfo.Deserialize(msg.Data);
+                            {
+                                var plrinfo = PlayerInfo.Deserialize(msg.Data);
 
-                            if (!PlayerManager.DoesPlayerExist(plrinfo.ID))
-                            {
-                                PlayerManager.CreatePlayer(plrinfo.ID, plrinfo.State.Position.ToUnity(), plrinfo.Skin);
-                                PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
+                                if (!PlayerManager.DoesPlayerExist(plrinfo.ID))
+                                {
+                                    PlayerManager.CreatePlayer(plrinfo.ID, plrinfo.State.Position.ToUnity(), plrinfo.Skin);
+                                    PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
+                                }
+                                else
+                                {
+                                    PlayerManager.MovePlayer(plrinfo.ID, plrinfo.State.Position.ToUnity(), 0);
+                                    PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
+                                }
                             }
-                            else
+                            break;
+
+                        case MessageType.PlayerLeft:
                             {
-                                PlayerManager.MovePlayer(plrinfo.ID, plrinfo.State.Position.ToUnity(), 0);
-                                PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
+                                if (msg.Data.Length < sizeof(uint))
+                                    throw new InvalidDataException("data too small!");
+
+                                uint id = BitConverter.ToUInt32(msg.Data, 0);
+                                if (!BitConverter.IsLittleEndian)
+                                    id = ReverseEndianness(id);
+                                PlayerManager.DeletePlayer(id);
+                            }
+                            break;
+
+                        case MessageType.CustomAnimation:
+                            {
+                                var info = CustomAnimationInfo.Deserialize(msg.Data);
+
+                                if (!PlayerManager.DoesPlayerExist(info.ID))
+                                    PlayerManager.CreatePlayer(info.ID, info.Position.ToUnity());
+                                else
+                                    PlayerManager.MovePlayer(info.ID, info.Position.ToUnity(), 0);
+
+                                PlayerManager.SetPlayerState(info.ID, null, true, info.Name, info.Loop);
                             }
                             break;
 
@@ -321,11 +351,17 @@ namespace COTLMP.Network
             await Send(new Message(MessageType.StateUpdate, 0, localPlayer.state.ToNetwork(localPlayer.transform.position.ToNetwork()).Serialize()));
         }
 
-        private static void OnTransitionComplete()
+        private static async void OnTransitionComplete()
         {
             localPlayer?.state.OnStateChange -= OnStateChanged;
             localPlayer = PlayerFarming.Instance;
-            localPlayer?.state.OnStateChange += OnStateChanged;
+            
+            if(localPlayer != null)
+            {
+                localPlayer.state.OnStateChange += OnStateChanged;
+                Message msg = new Message(MessageType.Transition, 0, Encoding.UTF8.GetBytes(SceneManager.GetActiveScene().name));
+                await Send(msg);
+            }
         }
 
         private static void OnBeginTransition()
