@@ -144,7 +144,8 @@ namespace COTLMP.Network
 
                 if (recv.IsFaulted || recv.IsCanceled)
                 {
-                    PauseMenuPatches.Message = "Disconnected";
+                    PauseMenuPatches.Message = recv.IsFaulted ? recv.Exception?.InnerException?.Message : "Disconnected";
+                    PrintLogger.Print(DebugLevel.FATAL_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, recv.Exception?.InnerException?.Message);
                     break;
                 }
 
