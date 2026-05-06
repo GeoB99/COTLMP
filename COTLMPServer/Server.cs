@@ -10,10 +10,12 @@
 using COTLMPServer.Messages;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -158,6 +160,37 @@ namespace COTLMPServer
                 }
             }
             await Send(endPoint, msg.Serialize());
+            await SendToBiome(removed.Biome, MessageType.PlayerLeft, BitConverter.GetBytes(BitConverter.IsLittleEndian ? removed.ID : ReverseEndianness(removed.ID)), null);
+        }
+
+        private static uint ReverseEndianness(uint val)
+        {
+            return ((val & 0x000000FFU) << 24 |
+                    (val & 0x0000FF00U) << 8 |
+                    (val & 0x00FF0000U) >> 8 |
+                    (val & 0xFF000000U) >> 24);
+        }
+
+        private async Task SendToBiome(string name, MessageType type, byte[] data, Player except)
+        {
+            var pairs = players.ToArray().Where(p => p.Value.Biome == name);
+
+            Message msg = new Message(type, 0, data);
+            var tasks = new List<Task>();
+            foreach(var pair in pairs)
+            {
+                if (pair.Value == except)
+                    continue;
+
+                byte[] bytes;
+                lock (pair.Value.Lock)
+                {
+                    msg.Sequence = pair.Value.Sequence++;
+                    bytes = msg.Serialize();
+                }
+                tasks.Add(Send(pair.Key, bytes));
+            }
+            await Task.WhenAll(tasks);
         }
 
         /**
@@ -203,23 +236,24 @@ namespace COTLMPServer
                             if (message.Sequence < plr.Sequence && message.Type != MessageType.Disconnect)
                                 continue;
                             if (message.Sequence >= plr.Sequence)
-                                lock(plr.Lock)
+                                lock (plr.Lock)
                                 {
                                     plr.Sequence = message.Sequence + 1;
                                     plr.Lag = false;
                                 }
                         }
-
+                        else if (message.Type != MessageType.Ping && message.Type != MessageType.Handshake)
+                            continue;
 
                         switch (message.Type)
                         {
                             case MessageType.Handshake:
-                                if (message.Sequence != 1 || players.ContainsKey(result.RemoteEndPoint))
+                                if (message.Sequence != 1 || plr != null)
                                     throw new InvalidDataException();
 
                                 var data = HandshakeClient.Deserialize(message.Data);
 
-                                if (!data.GameVersion.Equals(gameVersion))
+                                if (data.GameVersion != gameVersion)
                                 {
                                     await DisconnectPlayer(result.RemoteEndPoint, $"Game version mismatch! server {gameVersion} client {data.GameVersion}");
                                     break;
@@ -283,6 +317,55 @@ namespace COTLMPServer
 
                                 logger?.LogInfo($"{player.Username} ({result.RemoteEndPoint}) joined the game");
 
+                                break;
+
+                            case MessageType.Transition:
+                                {
+                                    if (message.Data == null)
+                                        throw new InvalidDataException("data too small!");
+
+                                    plr.Biome = Encoding.UTF8.GetString(message.Data);
+                                    var pairs = players.ToArray().Where(p => p.Value.Biome == plr.Biome);
+
+                                    var msg = new Message(MessageType.StateUpdate, 0, null);
+                                    byte[] localInfo = PlayerInfo.FromInternal(plr).Serialize();
+
+                                    var tasks = new List<Task>();
+                                    foreach (var pair in pairs)
+                                    {
+                                        byte[] bytes;
+                                        lock (plr.Lock)
+                                        {
+                                            msg.Sequence = plr.Sequence++;
+                                            msg.Data = PlayerInfo.FromInternal(pair.Value).Serialize();
+                                            bytes = msg.Serialize();
+                                        }
+                                        tasks.Add(Send(result.RemoteEndPoint, bytes));
+
+                                        lock (pair.Value.Lock)
+                                        {
+                                            msg.Sequence = plr.Sequence++;
+                                            msg.Data = localInfo;
+                                            bytes = msg.Serialize();
+                                        }
+                                        tasks.Add(Send(pair.Key, bytes));
+                                    }
+                                    await Task.WhenAll(tasks);
+                                }
+                                break;
+
+                            case MessageType.PositionUpdate:
+                                {
+                                    if (message.Data == null)
+                                        throw new InvalidDataException("data too small!");
+
+                                    Vector3.Deserialize(message.Data, 0, out _); // to check the format
+                                    byte[] bytes = new byte[sizeof(uint) + Vector3.SerializedSize];
+                                    Array.Copy(BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : ReverseEndianness(plr.ID)), bytes, sizeof(uint));
+                                    Array.Copy(message.Data, sizeof(uint), bytes, sizeof(uint), Vector3.SerializedSize);
+
+                                    await SendToBiome(plr.Biome, MessageType.PositionUpdate, bytes, plr);
+                                }
                                 break;
 
                             case MessageType.Disconnect:
