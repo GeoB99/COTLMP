@@ -321,9 +321,6 @@ namespace COTLMPServer
 
                             case MessageType.Transition:
                                 {
-                                    if (message.Data == null)
-                                        throw new InvalidDataException("data too small!");
-
                                     plr.Biome = Encoding.UTF8.GetString(message.Data);
                                     var pairs = players.ToArray().Where(p => p.Value.Biome == plr.Biome);
 
@@ -356,13 +353,10 @@ namespace COTLMPServer
 
                             case MessageType.PositionUpdate:
                                 {
-                                    if (message.Data == null)
-                                        throw new InvalidDataException("data too small!");
-
                                     Vector3.Deserialize(message.Data, 0, out _); // to check the format
                                     byte[] bytes = new byte[sizeof(uint) + Vector3.SerializedSize];
                                     Array.Copy(BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : ReverseEndianness(plr.ID)), bytes, sizeof(uint));
-                                    Array.Copy(message.Data, sizeof(uint), bytes, sizeof(uint), Vector3.SerializedSize);
+                                    Array.Copy(message.Data, 0, bytes, sizeof(uint), Vector3.SerializedSize);
 
                                     await SendToBiome(plr.Biome, MessageType.PositionUpdate, bytes, plr);
                                 }
