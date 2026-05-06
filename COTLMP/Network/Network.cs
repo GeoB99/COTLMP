@@ -105,7 +105,7 @@ namespace COTLMP.Network
             var wait = new WaitForSecondsRealtime(updateFrequencySec);
             while (!cancelToken.IsCancellationRequested)
             {
-                if(Time.time - lastMessage > 15f)
+                if(Time.time - lastMessage > 7.5f)
                 {
                     Message ping = new(MessageType.Ping, 0);
                     lastMessage = Time.time;
@@ -304,6 +304,7 @@ namespace COTLMP.Network
                 }
 
                 Plugin.MonoInstance.StartCoroutine(PollServer());
+                Plugin.MonoInstance.StartCoroutine(SendUpdates());
                 return true;
             } catch
             {
