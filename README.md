@@ -9,7 +9,7 @@ COTLMP (aka Cult of the Lamb Multiplayer) is a game modification of which implem
 **BepInEx** and the **COTL API** library mod are needed for installation of this mod.
 
 1. You can install BepInEx by [following this guide](https://docs.bepinex.dev/articles/user_guide/installation/index.html). After that follow the instructions on how to setup BepInEx for the game for the first time. **NOTE** that the mod uses [**BepInEx 5.4.23.5**](https://github.com/BepInEx/BepInEx/releases/tag/v5.4.23.5)!
-2. You can get the COTL API mod [from here](https://github.com/xhayper/COTL_API/releases/tag/v0.3.3). **NOTE** that the mod uses **COTL API v0.3.3**! The API library must be installed manually!
+2. You can get the COTL API mod [from here](https://github.com/xhayper/COTL_API/releases/tag/v0.3.4). **NOTE** that the mod uses **COTL API v0.3.4**! The API library must be installed manually!
 3. Once BepInEx is fully configured, extract the **COTLMP** folder to the `Cult of the Lamb\BepInEx\plugins` destination folder. **DO NOT FORGET** to put **COTL_API.dll** into the mod folder otherwise COTLMP won't run!
 4. In the `Cult of the Lamb\BepInEx\config` folder path, open the `BepInEx.cfg` file and edit the value of the `Assembly` field to `Assembly-CSharp.dll` and of `Type` to `TwitchManager` respectively! 
 
