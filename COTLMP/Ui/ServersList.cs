@@ -389,7 +389,7 @@ namespace COTLMP.Ui
             ConfigEntry<string> SettingEntry;
 
             /* Retrieve the section name for the setting */
-            Section = COTLMP.Api.Configuration.GetSectionName(CONFIGURATION_SECTION.ServerSettings);
+            Section = COTLMP.Api.Configuration.GetSectionName(CONFIGURATION_SECTION.ModSettings);
 
             /* Get the Player Name setting */
             Definition = new ConfigDefinition(Section, "Player Name");

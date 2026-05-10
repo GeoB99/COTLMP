@@ -106,6 +106,21 @@ public class Plugin : BaseUnityPlugin
         /* Retrieve the setting data from the setting object */
         ToggleMod = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData);
 
+        /* Initialize the "Player Name" setting */
+        SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ModSettings,
+                                                             "Player Name",
+                                                             "The name of the player in-game",
+                                                             "The Player");
+        if (SettingData == null)
+        {
+            Logger.LogFatal("Failed to set default or load the \"Player Name\" setting!");
+            HarmonyInstance.UnpatchSelf();
+            return;
+        }
+
+        /* Retrieve the setting data from the setting object */
+        PlayerName = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
+
         /* Initialize the "Game Mode" setting */
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
                                                              "Game Mode",
@@ -120,21 +135,6 @@ public class Plugin : BaseUnityPlugin
 
         /* Retrieve the setting data from the setting object */
         GameMode = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
-
-        /* Initialize the "Player Name" setting */
-        SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
-                                                             "Player Name",
-                                                             "The name of the player in-game",
-                                                             "The Player");
-        if (SettingData == null)
-        {
-            Logger.LogFatal("Failed to set default or load the \"Player Name\" setting!");
-            HarmonyInstance.UnpatchSelf();
-            return;
-        }
-
-        /* Retrieve the setting data from the setting object */
-        PlayerName = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
 
         /* Initialize the "Server Name" setting */
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
