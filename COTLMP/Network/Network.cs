@@ -25,6 +25,8 @@ using System.IO;
 using COTLMP.Debug;
 using Rewired.Utils.Interfaces;
 using System.Runtime.InteropServices;
+using System.Collections.Concurrent;
+using HarmonyLib;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -46,18 +48,22 @@ namespace COTLMP.Network
         private static UdpClient client;
         private static PlayerFarming localPlayer;
         private static CancellationToken cancelToken;
-        private static Vector3 lastPosition;
         private static SemaphoreSlim sendLock;
         private static int online;
         private static CancellationTokenRegistration registration;
-        private static uint localID;
         private static object seqLock;
         private static uint sequence;
+        private static bool transitionHappened;
+        private static ConcurrentQueue<Message> messageQueue;
 
-        private const float updateFrequencySec = 1f / 30f; // 30hz
+        private const float updateFrequencySec = 1f / 15f; // 15hz
+        private const uint maxProcessPerFrame = 100;
 
         private static async System.Threading.Tasks.Task Send(Message msg)
         {
+            if (online == 0)
+                return;
+
             await sendLock.WaitAsync(cancelToken);
             try
             {
@@ -72,50 +78,58 @@ namespace COTLMP.Network
             }
         }
 
-        private static async System.Threading.Tasks.Task<Message> Get()
+        private static async System.Threading.Tasks.Task HeartBeat()
         {
-            using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancelToken);
+            var ping = new Message(MessageType.Ping, 0);
+            while(!cancelToken.IsCancellationRequested && online != 0)
+            {
+                _ = Send(ping);
+                await System.Threading.Tasks.Task.Delay(10000, cancelToken);
+            }
+        }
+
+        private static async System.Threading.Tasks.Task Recv()
+        {
             try
             {
-                var limit = System.Threading.Tasks.Task.Delay(30000, cts.Token);
-                var recv = client.ReceiveAsync();
-                if(await System.Threading.Tasks.Task.WhenAny(limit, recv) == limit)
+                while(!cancelToken.IsCancellationRequested && online != 0)
                 {
-                    throw new Exception();
+                    using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancelToken);
+
+                    var limit = System.Threading.Tasks.Task.Delay(30000, cts.Token);
+                    var recv = client.ReceiveAsync();
+
+                    if (await System.Threading.Tasks.Task.WhenAny(limit, recv) == limit)
+                        throw new TimeoutException("Timed out");
+                    cts.Cancel();
+
+                    var result = await recv;
+
+                    messageQueue.Enqueue(Message.Deserialize(result.Buffer));
                 }
-                UdpReceiveResult result = await recv;
-                if (result.Buffer.Length > 1500)
-                    throw new Exception();
-                return Message.Deserialize(result.Buffer);
             }
-            catch
+            catch(OperationCanceledException)
             {
-                lock (seqLock)
-                    return new(MessageType.Disconnect, sequence++, Encoding.UTF8.GetBytes("Disconnected"));
+                PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, "Disconnecting...");
             }
-            finally
+            catch (Exception e)
             {
-                cts.Cancel();
+                PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, $"Recieve error type {e.GetType().Name} message {e.Message}");
+                while (messageQueue.TryDequeue(out _)) ;
+                messageQueue.Enqueue(new Message(MessageType.Disconnect, 0, Encoding.UTF8.GetBytes(e.Message)));
             }
         }
 
         public static IEnumerator SendUpdates()
         {
-            float lastMessage = Time.time;
             var wait = new WaitForSecondsRealtime(updateFrequencySec);
-            while (!cancelToken.IsCancellationRequested)
+            Vector3 lastPosition = new();
+            while (!cancelToken.IsCancellationRequested && online != 0)
             {
-                if(Time.time - lastMessage > 7.5f)
-                {
-                    Message ping = new(MessageType.Ping, 0);
-                    lastMessage = Time.time;
-                    _ = Send(ping);
-                }
                 if ((lastPosition -(localPlayer?.transform.position ?? new())).sqrMagnitude > 0.0001f)
                 {
                     lastPosition = localPlayer?.transform.position ?? new();
                     Message msg = new(MessageType.PositionUpdate, 0, lastPosition.ToNetwork().Serialize());
-                    lastMessage = Time.time;
                     _ = Send(msg);
                 }
                 yield return wait;
@@ -134,22 +148,25 @@ namespace COTLMP.Network
         {
             var wait = new WaitForTask(null);
             bool keepLooping = true;
+            int processedThisFrame = 0;
             while(!cancelToken.IsCancellationRequested && keepLooping)
             {
-                yield return null; // let the game run for one frame
-
-                var recv = Get();
-                wait.what = recv;
-                yield return wait;
-
-                if (recv.IsFaulted || recv.IsCanceled)
+                if(processedThisFrame == maxProcessPerFrame)
                 {
-                    PauseMenuPatches.Message = recv.IsFaulted ? recv.Exception?.InnerException?.Message : "Disconnected";
-                    PrintLogger.Print(DebugLevel.FATAL_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, recv.Exception?.InnerException?.Message);
-                    break;
+                    if (messageQueue.TryPeek(out _))
+                        PrintLogger.Print(DebugLevel.WARNING_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, "Can't keep up! Is the game overloaded?");
+                    processedThisFrame = 0;
+                    yield return null;
                 }
 
-                Message msg = recv.Result;
+                Message msg;
+                while (!messageQueue.TryDequeue(out msg))
+                {
+                    processedThisFrame = 0;
+                    yield return null;
+                }
+
+                ++processedThisFrame;
 
                 lock(seqLock)
                 {
@@ -159,8 +176,20 @@ namespace COTLMP.Network
                         sequence = msg.Sequence + 1;
                 }
 
-                if (localPlayer == null && msg.Type != MessageType.Disconnect) // don't process messages if we're not in game
-                    continue;
+                if (localPlayer == null) // try to get the localplayer again if its null
+                {
+                    localPlayer = PlayerFarming.Instance;
+                    localPlayer?.state.OnStateChange += OnStateChanged;
+                }
+
+                // FIXME: this doesn't seem to work to differentiate between the crusade select place and the main cult
+                if(localPlayer != null && transitionHappened)
+                {
+                    _ = Send(new Message(MessageType.Transition,
+                        0,
+                        Encoding.UTF8.GetBytes(SceneManager.GetActiveScene().name)));
+                    transitionHappened = false;
+                }
 
                 try
                 {
@@ -177,10 +206,10 @@ namespace COTLMP.Network
 
                                 var pos = COTLMPServer.Vector3.Deserialize(msg.Data, sizeof(uint), out _);
 
-                                if (!PlayerManager.DoesPlayerExist(id))
+                                if (!PlayerManager.DoesPlayerExist(id) && PlayerFarming.Instance != null)
                                     PlayerManager.CreatePlayer(id, pos.ToUnity());
                                 else
-                                    PlayerManager.MovePlayer(id, pos.ToUnity(), updateFrequencySec);
+                                    PlayerManager.MovePlayer(id, pos.ToUnity(), 1); // just use 1 as a timeout to get smooth animation
                             }
                             break;
 
@@ -188,7 +217,7 @@ namespace COTLMP.Network
                             {
                                 var plrinfo = PlayerInfo.Deserialize(msg.Data);
 
-                                if (!PlayerManager.DoesPlayerExist(plrinfo.ID))
+                                if (!PlayerManager.DoesPlayerExist(plrinfo.ID) && PlayerFarming.Instance != null)
                                 {
                                     PlayerManager.CreatePlayer(plrinfo.ID, plrinfo.State.Position.ToUnity(), plrinfo.Skin);
                                     PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
@@ -209,6 +238,7 @@ namespace COTLMP.Network
                                 uint id = BitConverter.ToUInt32(msg.Data, 0);
                                 if (!BitConverter.IsLittleEndian)
                                     id = ReverseEndianness(id);
+
                                 PlayerManager.DeletePlayer(id);
                             }
                             break;
@@ -217,10 +247,10 @@ namespace COTLMP.Network
                             {
                                 var info = CustomAnimationInfo.Deserialize(msg.Data);
 
-                                if (!PlayerManager.DoesPlayerExist(info.ID))
+                                if (!PlayerManager.DoesPlayerExist(info.ID) && PlayerFarming.Instance != null)
                                     PlayerManager.CreatePlayer(info.ID, info.Position.ToUnity());
                                 else
-                                    PlayerManager.MovePlayer(info.ID, info.Position.ToUnity(), 0);
+                                    PlayerManager.MovePlayerNow(info.ID, info.Position.ToUnity());
 
                                 PlayerManager.SetPlayerState(info.ID, null, true, info.Name, info.Loop);
                             }
@@ -235,7 +265,7 @@ namespace COTLMP.Network
                 }
                 catch (InvalidDataException e)
                 {
-                    PrintLogger.Print(DebugLevel.FATAL_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, $"Server sent invalid data: {e.Message}");
+                    PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, $"Server sent invalid data: {e.Message}");
                     PauseMenuPatches.Message = e.Message;
                     break;
                 }
@@ -245,7 +275,7 @@ namespace COTLMP.Network
                 }
                 catch (Exception e)
                 {
-                    PrintLogger.Print(DebugLevel.FATAL_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, e.Message);
+                    PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, $"Unknown error {e.GetType().Name} {e}");
                     PauseMenuPatches.Message = e.Message;
                     break;
                 }
@@ -268,11 +298,12 @@ namespace COTLMP.Network
                 return false;
 
             cancelToken = token;
-            lastPosition = new();
             sequence = 3;
             sendLock = new(1, 1);
             client = new();
             seqLock = new();
+            messageQueue = new();
+            transitionHappened = false;
             client.Connect(server);
 
             registration = cancelToken.Register(client.Dispose);
@@ -297,14 +328,10 @@ namespace COTLMP.Network
                     throw new Exception();
                 }
 
-                localID = BitConverter.ToUInt32(msg.Data, 0);
-                if (!BitConverter.IsLittleEndian)
-                {
-                    localID = ReverseEndianness(localID);
-                }
-
                 Plugin.MonoInstance.StartCoroutine(PollServer());
                 Plugin.MonoInstance.StartCoroutine(SendUpdates());
+                _ = System.Threading.Tasks.Task.Run(Recv);
+                _ = System.Threading.Tasks.Task.Run(HeartBeat);
                 return true;
             } catch
             {
@@ -348,29 +375,31 @@ namespace COTLMP.Network
 
         private async static void OnStateChanged(StateMachine.State newState, StateMachine.State _)
         {
-            if (newState == StateMachine.State.CustomAnimation || newState == StateMachine.State.Moving || localPlayer == null)
+            if (newState == StateMachine.State.CustomAnimation || newState == StateMachine.State.Moving || newState == StateMachine.State.Idle || localPlayer == null)
                 return;
             await Send(new Message(MessageType.StateUpdate, 0, localPlayer.state.ToNetwork(localPlayer.transform.position.ToNetwork()).Serialize()));
         }
 
         private static async void OnTransitionComplete()
         {
-            localPlayer?.state.OnStateChange -= OnStateChanged;
-            localPlayer = PlayerFarming.Instance;
-            
-            if(localPlayer != null)
+            string sceneName = SceneManager.GetActiveScene().name;
+            if (sceneName != "Main Menu")
             {
-                localPlayer.state.OnStateChange += OnStateChanged;
-                Message msg = new Message(MessageType.Transition, 0, Encoding.UTF8.GetBytes(SceneManager.GetActiveScene().name));
-                await Send(msg);
+                transitionHappened = true;
+            }
+            else
+            {
+                while (messageQueue.TryDequeue(out _)) ;
+                messageQueue.Enqueue(new Message(MessageType.Disconnect,
+                    0,
+                    Encoding.UTF8.GetBytes("Disconnected")));
             }
         }
 
         private static void OnBeginTransition()
         {
-            if (online != 0)
-                for (uint i = 0; i < InternalData.MaxPlayersPerServerInternal; ++i)
-                    PlayerManager.DeletePlayer(i);
+            localPlayer?.state.OnStateChange -= OnStateChanged;
+            localPlayer = null;
         }
 
         /**
@@ -383,6 +412,30 @@ namespace COTLMP.Network
             Application.quitting += OnQuitting;
             MMTransition.OnTransitionCompelte += OnTransitionComplete;
             MMTransition.OnBeginTransition += OnBeginTransition;
+        }
+
+        /**
+         * @brief
+         * Game patches related to networking
+         */
+        [HarmonyPatch]
+        private static class NetworkPatches
+        {
+            [HarmonyPatch(typeof(PlayerFarming), nameof(PlayerFarming.CustomAnimation))]
+            [HarmonyPostfix]
+            private static void CustomAnimation(string Animation, bool Loop, PlayerFarming __instance)
+            {
+                if (__instance != PlayerFarming.Instance)
+                    return;
+
+                var msg = new Message(MessageType.CustomAnimation,
+                    0,
+                    new CustomAnimationInfo(Animation, 
+                    loop: Loop,
+                    pos: __instance.gameObject.transform.position.ToNetwork()).Serialize());
+
+                _ = Send(msg);
+            }
         }
     }
 }

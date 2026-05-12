@@ -15,7 +15,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -124,7 +123,7 @@ namespace COTLMPServer
                         await DisconnectPlayer(endpoint, "Timed out");
                         break;
                     }
-                    await Task.Delay(15000, plr.Cancellation.Token);
+                    await Task.Delay(30000, plr.Cancellation.Token);
                 }
             }
             finally
@@ -177,7 +176,7 @@ namespace COTLMPServer
 
             Message msg = new Message(type, 0, data);
             var tasks = new List<Task>();
-            foreach(var pair in pairs)
+            foreach (var pair in pairs)
             {
                 if (pair.Value == except)
                     continue;
@@ -321,6 +320,8 @@ namespace COTLMPServer
 
                             case MessageType.Transition:
                                 {
+                                    await SendToBiome(plr.Biome, MessageType.PlayerLeft, BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : ReverseEndianness(ReverseEndianness(plr.ID))), plr);
+
                                     plr.Biome = Encoding.UTF8.GetString(message.Data);
                                     var pairs = players.ToArray().Where(p => p.Value.Biome == plr.Biome);
 
@@ -331,13 +332,16 @@ namespace COTLMPServer
                                     foreach (var pair in pairs)
                                     {
                                         byte[] bytes;
-                                        lock (plr.Lock)
+                                        if (plr.ID != pair.Value.ID)
                                         {
-                                            msg.Sequence = plr.Sequence++;
-                                            msg.Data = PlayerInfo.FromInternal(pair.Value).Serialize();
-                                            bytes = msg.Serialize();
+                                            lock (plr.Lock)
+                                            {
+                                                msg.Sequence = plr.Sequence++;
+                                                msg.Data = PlayerInfo.FromInternal(pair.Value).Serialize();
+                                                bytes = msg.Serialize();
+                                            }
+                                            tasks.Add(Send(result.RemoteEndPoint, bytes));
                                         }
-                                        tasks.Add(Send(result.RemoteEndPoint, bytes));
 
                                         lock (pair.Value.Lock)
                                         {
@@ -353,12 +357,28 @@ namespace COTLMPServer
 
                             case MessageType.PositionUpdate:
                                 {
-                                    Vector3.Deserialize(message.Data, 0, out _); // to check the format
+                                    plr.State.Position = Vector3.Deserialize(message.Data, 0, out _);
                                     byte[] bytes = new byte[sizeof(uint) + Vector3.SerializedSize];
                                     Array.Copy(BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : ReverseEndianness(plr.ID)), bytes, sizeof(uint));
                                     Array.Copy(message.Data, 0, bytes, sizeof(uint), Vector3.SerializedSize);
 
                                     await SendToBiome(plr.Biome, MessageType.PositionUpdate, bytes, plr);
+                                }
+                                break;
+
+                            case MessageType.StateUpdate:
+                                {
+                                    var info = PlayerState.Deserialize(message.Data);
+                                    plr.State = info;
+                                    await SendToBiome(plr.Biome, MessageType.StateUpdate, PlayerInfo.FromInternal(plr).Serialize(), plr);
+                                }
+                                break;
+
+                            case MessageType.CustomAnimation:
+                                {
+                                    CustomAnimationInfo.Deserialize(message.Data); // make sure the format is right, if its corrupt, it'll throw.
+                                    plr.State.Current = PlayerState.State.CustomAnimation;
+                                    await SendToBiome(plr.Biome, MessageType.CustomAnimation, message.Data, plr);
                                 }
                                 break;
 
