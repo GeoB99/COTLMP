@@ -10,6 +10,8 @@
 using COTLMP.Data;
 using HarmonyLib;
 using MMTools;
+using System;
+using System.Collections;
 using UnityEngine;
 
 /* CLASSES & CODE *************************************************************/
@@ -26,18 +28,56 @@ namespace COTLMP.Game
      * 
      * @field players
      * A fixed-size array of players managed by the class
+     * 
+     * @field moveCommands
+     * A fixed-size array of move commands managed by the class
      */
     internal static class PlayerManager
     {
+        /*
+         * @brief
+         * The struct representing a command to move a player
+         * 
+         * @field Point
+         * The point to move to
+         * 
+         * @field Timeout
+         * The timeout of the move command
+         */
+        private readonly struct MoveInfo(Vector3 point, float timeout)
+        {
+            public readonly Vector3 Point = point;
+            public readonly float Timeout = timeout;
+        }
+
         private readonly static PlayerFarming[] players;
+        private readonly static MoveInfo?[] moveCommands;
 
         /*
          * @brief
-         * Static constructor. Initializes the array.
+         * Static constructor. Initializes the arrays and starts the move player coroutine.
          */
         static PlayerManager()
         {
             players = new PlayerFarming[InternalData.MaxPlayersPerServerInternal];
+            moveCommands = new MoveInfo?[InternalData.MaxPlayersPerServerInternal];
+            Plugin.MonoInstance.StartCoroutine(MovePlayers());
+        }
+
+        private static IEnumerator MovePlayers()
+        {
+            while (true)
+            {
+                for (uint i = 0; i < moveCommands.Length; ++i)
+                {
+                    if (moveCommands[i].HasValue)
+                    {
+                        players[i]?.GoToAndStop(moveCommands[i].Value.Point, maxDuration: moveCommands[i].Value.Timeout, forcePositionOnTimeout: true, groupAbortCurrentGoto: false);
+                        moveCommands[i] = null;
+                    }
+                }
+                yield return null;
+            }
         }
 
         /*
@@ -57,7 +97,25 @@ namespace COTLMP.Game
         {
             if (plr > players.Length - 1 || players[plr] == null)
                 return;
-            players[plr].GoToAndStop(point, maxDuration: timeout);
+            moveCommands[plr] = new MoveInfo(point, timeout);
+        }
+
+        /*
+         * @brief
+         * Move a managed player with a given ID instantly to the point provided
+         * 
+         * @param[in] plr
+         * The ID of the player you want to move
+         * 
+         * @param[in] point
+         * The point you want to move the player to
+         */
+        public static void MovePlayerNow(uint plr, Vector3 point)
+        {
+            if (plr > players.Length - 1 || players[plr] == null)
+                return;
+
+            players[plr].gameObject.transform.position = point;
         }
 
         /*
@@ -71,6 +129,7 @@ namespace COTLMP.Game
         {
             if (plr > players.Length - 1 || players[plr] == null)
                 return;
+
             GameObject.Destroy(players[plr].gameObject);
             players[plr] = null;
         }
@@ -95,12 +154,16 @@ namespace COTLMP.Game
         {
             if (id > players.Length - 1)
                 return;
+
             if (players[id] != null)
             {
                 DeletePlayer(id);
             }
 
-            GameObject plr = GameObject.Instantiate(CoopManager.Instance.playerPrefab);
+            GameObject plr = GameObject.Instantiate(CoopManager.Instance?.playerPrefab);
+            if (plr == null)
+                return;
+
             plr.transform.position = pos;
 
             var farming = plr.GetComponent<PlayerFarming>();
@@ -110,16 +173,24 @@ namespace COTLMP.Game
                 return;
             }
 
-            players[id] = farming;
-            farming.isLamb = true;
-            farming.EnableCoopFeatures = false;
-            farming.playerID = 1; // afaik the player id here doesn't matter
-            farming.Init();
-            farming.rewiredPlayer = null;
-            farming.transform.parent = PlayerFarming.players[0]?.transform.parent;
-            plr.SetActive(true);
-            farming.Spine.GetComponent<MeshRenderer>()?.enabled = true;
+            try
+            {
+                farming.isLamb = true;
+                farming.EnableCoopFeatures = false;
+                farming.playerID = 1; // afaik the player id here doesn't matter
+                farming.Init();
+                farming.rewiredPlayer = null;
+                farming.transform.parent = PlayerFarming.players[0]?.transform.parent;
+                plr.SetActive(true);
+                farming.Spine.GetComponent<MeshRenderer>()?.enabled = true;
+            }
+            catch (NullReferenceException)
+            {
+                GameObject.Destroy(plr);
+                return;
+            }
 
+            players[id] = farming;
             var playerskin = farming.PlayerSkin = new Spine.Skin("Player Skin");
             playerskin.AddSkin(farming.Spine.Skeleton.Data.FindSkin($"Lamb_{skin}"));
             farming.Spine.Skeleton.SetSkin(playerskin);
@@ -192,7 +263,7 @@ namespace COTLMP.Game
 
             PlayerFarming farming = players[plr];
             farming.AbortGoTo();
-            if(isCustomAnimation)
+            if (isCustomAnimation)
             {
                 farming.CustomAnimation(customAnimation, customAnimationLoop);
             }
@@ -285,7 +356,7 @@ namespace COTLMP.Game
             [HarmonyPostfix]
             private static void MMTransitionPlay()
             {
-                for(uint i = 0; i < players.Length; ++i)
+                for (uint i = 0; i < players.Length; ++i)
                 {
                     DeletePlayer(i);
                 }
