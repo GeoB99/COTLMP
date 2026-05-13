@@ -7,26 +7,23 @@
 
 /* IMPORTS ********************************************************************/
 
+using COTLMP.Debug;
+using COTLMP.Game;
 using COTLMP.Ui;
+using COTLMPServer.Messages;
+using HarmonyLib;
+using MMTools;
+using System;
+using System.Collections;
+using System.Collections.Concurrent;
+using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using COTLMPServer.Messages;
-using System;
-using MMTools;
-using COTLMP.Game;
-using COTLMP.Data;
-using System.Collections;
-using System.Text;
-using System.IO;
-using COTLMP.Debug;
-using Rewired.Utils.Interfaces;
-using System.Runtime.InteropServices;
-using System.Collections.Concurrent;
-using HarmonyLib;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -39,6 +36,48 @@ namespace COTLMP.Network
     /**
      * @brief
      * The main class for network features
+     * 
+     * @field OnDisconnect
+     * The event that will be invoked upon a disconnect
+     * 
+     * @field IsConnected
+     * Whether the game is online or not
+     * 
+     * @field client
+     * The main UdpClient for the connection
+     * 
+     * @field localPlayer
+     * The local player instance
+     * 
+     * @field cancelToken
+     * The cancellation token used to cancel online functions
+     * 
+     * @field sendLock
+     * The lock used to protect UdpClient.SendAsync()
+     * 
+     * @field online
+     * Whether the game is online or not (internal)
+     * 
+     * @field registration
+     * The cancellation token cancellation for disposing of the UdpClient once the token is cancelled
+     * 
+     * @field seqLock
+     * The lock to protect sequence
+     * 
+     * @field sequence
+     * The sequence number of the next message
+     * 
+     * @field transitionHappened
+     * Whether a transition happened
+     * 
+     * @field messageQueue
+     * A queue of messages
+     * 
+     * @field updateFrequencySec
+     * How often the game sends position updates (in seconds)
+     * 
+     * @field maxProcessPerFrame
+     * How many messages the game will process in one frame
      */
     internal static class Network
     {
@@ -59,6 +98,16 @@ namespace COTLMP.Network
         private const float updateFrequencySec = 1f / 15f; // 15hz
         private const uint maxProcessPerFrame = 100;
 
+        /**
+         * @brief
+         * Safely concurrently send messages
+         * 
+         * @param[in] msg
+         * What message to send
+         * 
+         * @remarks
+         * The sequence number in msg is ignored and overwritten in the method
+         */
         private static async System.Threading.Tasks.Task Send(Message msg)
         {
             if (online == 0)
@@ -67,7 +116,7 @@ namespace COTLMP.Network
             await sendLock.WaitAsync(cancelToken);
             try
             {
-                lock(seqLock)
+                lock (seqLock)
                     msg.Sequence = sequence++;
                 byte[] bytes = msg.Serialize();
                 await client.SendAsync(bytes, bytes.Length);
@@ -78,21 +127,29 @@ namespace COTLMP.Network
             }
         }
 
+        /**
+         * @brief
+         * Monitor if the server has stopped responding and send pings at regular intervals
+         */
         private static async System.Threading.Tasks.Task HeartBeat()
         {
             var ping = new Message(MessageType.Ping, 0);
-            while(!cancelToken.IsCancellationRequested && online != 0)
+            while (!cancelToken.IsCancellationRequested && online != 0)
             {
                 _ = Send(ping);
                 await System.Threading.Tasks.Task.Delay(10000, cancelToken);
             }
         }
 
+        /**
+         * @brief
+         * Run in a loop recieving messages from the client
+         */
         private static async System.Threading.Tasks.Task Recv()
         {
             try
             {
-                while(!cancelToken.IsCancellationRequested && online != 0)
+                while (!cancelToken.IsCancellationRequested && online != 0)
                 {
                     using var cts = CancellationTokenSource.CreateLinkedTokenSource(cancelToken);
 
@@ -108,7 +165,7 @@ namespace COTLMP.Network
                     messageQueue.Enqueue(Message.Deserialize(result.Buffer));
                 }
             }
-            catch(OperationCanceledException)
+            catch (OperationCanceledException)
             {
                 PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, "Disconnecting...");
             }
@@ -120,13 +177,17 @@ namespace COTLMP.Network
             }
         }
 
+        /**
+         * @brief
+         * Send position updates
+         */
         public static IEnumerator SendUpdates()
         {
             var wait = new WaitForSecondsRealtime(updateFrequencySec);
             Vector3 lastPosition = new();
             while (!cancelToken.IsCancellationRequested && online != 0)
             {
-                if ((lastPosition -(localPlayer?.transform.position ?? new())).sqrMagnitude > 0.0001f)
+                if ((lastPosition - (localPlayer?.transform.position ?? new())).sqrMagnitude > 0.0001f)
                 {
                     lastPosition = localPlayer?.transform.position ?? new();
                     Message msg = new(MessageType.PositionUpdate, 0, lastPosition.ToNetwork().Serialize());
@@ -136,6 +197,16 @@ namespace COTLMP.Network
             }
         }
 
+        /**
+         * @brief
+         * Reverse the endianness of a uint
+         * 
+         * @param[in] val
+         * The uint
+         * 
+         * @returns
+         * The uint with its byte order reversed
+         */
         private static uint ReverseEndianness(uint val)
         {
             return ((val & 0x000000FFU) << 24 |
@@ -144,14 +215,18 @@ namespace COTLMP.Network
                     (val & 0xFF000000U) >> 24);
         }
 
+        /**
+         * @brief
+         * Main message processing loop
+         */
         public static IEnumerator PollServer()
         {
             var wait = new WaitForTask(null);
             bool keepLooping = true;
             int processedThisFrame = 0;
-            while(!cancelToken.IsCancellationRequested && keepLooping)
+            while (!cancelToken.IsCancellationRequested && keepLooping)
             {
-                if(processedThisFrame == maxProcessPerFrame)
+                if (processedThisFrame == maxProcessPerFrame)
                 {
                     if (messageQueue.TryPeek(out _))
                         PrintLogger.Print(DebugLevel.WARNING_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, "Can't keep up! Is the game overloaded?");
@@ -168,7 +243,7 @@ namespace COTLMP.Network
 
                 ++processedThisFrame;
 
-                lock(seqLock)
+                lock (seqLock)
                 {
                     if (msg.Sequence < sequence && msg.Type != MessageType.Disconnect)
                         continue;
@@ -183,7 +258,7 @@ namespace COTLMP.Network
                 }
 
                 // FIXME: this doesn't seem to work to differentiate between the crusade select place and the main cult
-                if(localPlayer != null && transitionHappened)
+                if (localPlayer != null && transitionHappened)
                 {
                     _ = Send(new Message(MessageType.Transition,
                         0,
@@ -193,7 +268,7 @@ namespace COTLMP.Network
 
                 try
                 {
-                    switch(msg.Type)
+                    switch (msg.Type)
                     {
                         case MessageType.PositionUpdate:
                             {
@@ -269,7 +344,7 @@ namespace COTLMP.Network
                     PauseMenuPatches.Message = e.Message;
                     break;
                 }
-                catch (Exception e) when ((e is OperationCanceledException) || (e is ObjectDisposedException && cancelToken.IsCancellationRequested))  
+                catch (Exception e) when ((e is OperationCanceledException) || (e is ObjectDisposedException && cancelToken.IsCancellationRequested))
                 {
                     PrintLogger.Print(DebugLevel.INFO_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, "Disconnected.");
                 }
@@ -286,12 +361,23 @@ namespace COTLMP.Network
             yield return wait;
 
             client.Dispose();
+            client = null;
             registration.Dispose();
             OnDisconnect?.Invoke();
             Interlocked.Exchange(ref online, 0);
             yield break;
         }
 
+        /**
+         * @brief
+         * Attempt to connect to a server
+         * 
+         * @param[in] server
+         * The server's endpoint
+         * 
+         * @param[in] token
+         * The cancellation token to use for this connection
+         */
         public async static Task<bool> Connect(IPEndPoint server, CancellationToken token)
         {
             if (Interlocked.CompareExchange(ref online, 1, 0) != 0)
@@ -333,7 +419,8 @@ namespace COTLMP.Network
                 _ = System.Threading.Tasks.Task.Run(Recv);
                 _ = System.Threading.Tasks.Task.Run(HeartBeat);
                 return true;
-            } catch
+            }
+            catch
             {
                 client.Dispose();
                 registration.Dispose();
@@ -373,6 +460,13 @@ namespace COTLMP.Network
             PauseMenuPatches.Server?.Dispose();
         }
 
+        /**
+         * @brief
+         * When the local player state changes, update the server
+         * 
+         * @param[in] newState
+         * The new player state
+         */
         private async static void OnStateChanged(StateMachine.State newState, StateMachine.State _)
         {
             if (newState == StateMachine.State.CustomAnimation || newState == StateMachine.State.Moving || newState == StateMachine.State.Idle || localPlayer == null)
@@ -380,6 +474,10 @@ namespace COTLMP.Network
             await Send(new Message(MessageType.StateUpdate, 0, localPlayer.state.ToNetwork(localPlayer.transform.position.ToNetwork()).Serialize()));
         }
 
+        /**
+         * @brief
+         * When a transition completes, update the server
+         */
         private static async void OnTransitionComplete()
         {
             string sceneName = SceneManager.GetActiveScene().name;
@@ -396,6 +494,10 @@ namespace COTLMP.Network
             }
         }
 
+        /**
+         * @brief
+         * When a transition begins, remove the localPlayer reference
+         */
         private static void OnBeginTransition()
         {
             localPlayer?.state.OnStateChange -= OnStateChanged;
@@ -422,7 +524,7 @@ namespace COTLMP.Network
         private static class NetworkPatches
         {
             [HarmonyPatch(typeof(PlayerFarming), nameof(PlayerFarming.CustomAnimation))]
-            [HarmonyPostfix]
+            [HarmonyPrefix]
             private static void CustomAnimation(string Animation, bool Loop, PlayerFarming __instance)
             {
                 if (__instance != PlayerFarming.Instance)
@@ -430,7 +532,55 @@ namespace COTLMP.Network
 
                 var msg = new Message(MessageType.CustomAnimation,
                     0,
-                    new CustomAnimationInfo(Animation, 
+                    new CustomAnimationInfo(Animation,
+                    loop: Loop,
+                    pos: __instance.gameObject.transform.position.ToNetwork()).Serialize());
+
+                _ = Send(msg);
+            }
+
+            [HarmonyPatch(typeof(PlayerFarming), nameof(PlayerFarming.CustomAnimationRoutine))]
+            [HarmonyPrefix]
+            private static void CustomAnimationRoutine(string Animation, bool Loop, PlayerFarming __instance)
+            {
+                if (__instance != PlayerFarming.Instance)
+                    return;
+
+                var msg = new Message(MessageType.CustomAnimation,
+                    0,
+                    new CustomAnimationInfo(Animation,
+                    loop: Loop,
+                    pos: __instance.gameObject.transform.position.ToNetwork()).Serialize());
+
+                _ = Send(msg);
+            }
+
+            [HarmonyPatch(typeof(PlayerFarming), nameof(PlayerFarming.CustomAnimationWithCallback))]
+            [HarmonyPrefix]
+            private static void CustomAnimationWithCallback(string Animation, bool Loop, PlayerFarming __instance)
+            {
+                if (__instance != PlayerFarming.Instance)
+                    return;
+
+                var msg = new Message(MessageType.CustomAnimation,
+                    0,
+                    new CustomAnimationInfo(Animation,
+                    loop: Loop,
+                    pos: __instance.gameObject.transform.position.ToNetwork()).Serialize());
+
+                _ = Send(msg);
+            }
+
+            [HarmonyPatch(typeof(PlayerFarming), nameof(PlayerFarming.CustomAnimationWithCallBackRoutine))]
+            [HarmonyPrefix]
+            private static void CustomAnimationWithCallbackRoutine(string Animation, bool Loop, PlayerFarming __instance)
+            {
+                if (__instance != PlayerFarming.Instance)
+                    return;
+
+                var msg = new Message(MessageType.CustomAnimation,
+                    0,
+                    new CustomAnimationInfo(Animation,
                     loop: Loop,
                     pos: __instance.gameObject.transform.position.ToNetwork()).Serialize());
 

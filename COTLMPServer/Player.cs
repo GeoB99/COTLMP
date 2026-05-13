@@ -33,6 +33,24 @@ namespace COTLMPServer
      * 
      * @field Mutex
      * The mutex for this instance of the class
+     * 
+     * @field Skin
+     * The player skin
+     * 
+     * @field Username
+     * The player username
+     * 
+     * @field Biome
+     * The biome that the player is currently in
+     * 
+     * @field Lock
+     * A lock object for the player
+     * 
+     * @field Lag
+     * Whether the player is inresponsive or not
+     * 
+     * @field Sequence
+     * The sequence number that should be used for the next message
      */
     internal class Player
     {
@@ -42,7 +60,7 @@ namespace COTLMPServer
         public string Biome;
         public PlayerState State;
         public CancellationTokenSource Cancellation;
-        public object Lock;
+        public readonly object Lock;
         public bool Lag;
         public uint Sequence;
 
@@ -50,14 +68,23 @@ namespace COTLMPServer
          * @brief
          * The constructor
          * 
-         * @param[in] ID
+         * @param[in] id
          * The server-size player ID
          * 
-         * @param[in] State
+         * @param[in] state
          * The player state
          * 
-         * @param[in] Cancellation
+         * @param[in] cancellation
          * The cancellation token for everything related to the player
+         * 
+         * @param[in] skin
+         * The player skin
+         * 
+         * @param[in] username
+         * The player username
+         * 
+         * @param[in] biome
+         * The player biome
          */
         public Player(uint id, int skin, string username, string biome, PlayerState state, CancellationTokenSource cancellation)
         {
