@@ -54,6 +54,21 @@ namespace COTLMPServer
      * 
      * @field logger
      * The user-provided logger
+     * 
+     * @field ids
+     * An array of player IDs, true if taken, false if not
+     * 
+     * @field idLock
+     * A lock to protect the ids array
+     * 
+     * @field sendLock
+     * A lock to protect UdpClient.SendAsync()
+     * 
+     * @field players
+     * A dictionary for storing players currently in the game
+     * 
+     * @field gameVersion
+     * The game version which the server is supposed to support
      */
     public sealed class Server : IDisposable
     {
@@ -83,6 +98,15 @@ namespace COTLMPServer
          * 
          * @param[in] logger
          * The logger that the server should use. Null if none.
+         * 
+         * @param[in] ver
+         * The game version
+         * 
+         * @param[in] maxPlayers
+         * The player cap
+         * 
+         * @param[in] log
+         * The logger that the server should use
          */
         public Server(string ver, int maxPlayers, int port = 0, CancellationToken? cancellationToken = null, ILogger log = null)
         {
@@ -103,6 +127,16 @@ namespace COTLMPServer
             idLock = new object();
         }
 
+        /**
+         * @brief
+         * A method responsible for disconnecting inresponsive players
+         * 
+         * @param[in]
+         * The player that should be monitored
+         * 
+         * @param[in] endpoint
+         * The endpoint of the player
+         */
         private async Task PlayerHeartBeat(Player plr, IPEndPoint endpoint)
         {
             try
@@ -132,6 +166,16 @@ namespace COTLMPServer
             }
         }
 
+        /**
+         * @brief
+         * Safely concurrently send bytes to an endpoint
+         * 
+         * @param[in] endPoint
+         * The endpoint to send the bytes to
+         * 
+         * @param[in] data
+         * The bytes to send
+         */
         private async Task Send(IPEndPoint endPoint, byte[] data)
         {
             await sendLock.WaitAsync(token);
@@ -145,6 +189,16 @@ namespace COTLMPServer
             }
         }
 
+        /**
+         * @brief
+         * Disconnect a player
+         * 
+         * @param[in] endPoint
+         * The endpoint of the player
+         * 
+         * @param[in] message
+         * The message to attach to the disconnect message
+         */
         private async Task DisconnectPlayer(IPEndPoint endPoint, string message = null)
         {
             Message msg = new Message(MessageType.Disconnect, 1, message == null ? null : Encoding.UTF8.GetBytes(message));
@@ -162,6 +216,16 @@ namespace COTLMPServer
             await SendToBiome(removed.Biome, MessageType.PlayerLeft, BitConverter.GetBytes(BitConverter.IsLittleEndian ? removed.ID : ReverseEndianness(removed.ID)), null);
         }
 
+        /**
+         * @brief
+         * Reverse the endianness of a uint
+         * 
+         * @param[in] val
+         * The uint
+         * 
+         * @returns
+         * The uint with its byte order reversed
+         */
         private static uint ReverseEndianness(uint val)
         {
             return ((val & 0x000000FFU) << 24 |
@@ -170,6 +234,22 @@ namespace COTLMPServer
                     (val & 0xFF000000U) >> 24);
         }
 
+        /**
+         * @brief
+         * Send a message to all players within a biome
+         * 
+         * @param[in] name
+         * The name of the biome
+         * 
+         * @param[in] type
+         * The message type
+         * 
+         * @param[in] data
+         * The data that should be included in the message
+         * 
+         * @param[in] except
+         * The player in the biome to which the message shouldn't be sent
+         */
         private async Task SendToBiome(string name, MessageType type, byte[] data, Player except)
         {
             var pairs = players.ToArray().Where(p => p.Value.Biome == name);
