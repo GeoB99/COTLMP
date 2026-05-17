@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 17
-VisualStudioVersion = 17.14.36310.24
+# Visual Studio Version 18
+VisualStudioVersion = 18.5.11723.231
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COTLMP", "COTLMP\COTLMP.csproj", "{75CAB2D0-F823-DEFE-5EF0-A25BC117280F}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "COTLMPServer", "COTLMPServer\COTLMPServer.csproj", "{9476AA40-C94F-43C7-BF81-9427F4329E8F}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DedicatedServer", "COTLMPServer\DedicatedServer\DedicatedServer.csproj", "{1D6C6C2A-38F4-4574-918D-24A33F1FB8C6}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{9476AA40-C94F-43C7-BF81-9427F4329E8F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9476AA40-C94F-43C7-BF81-9427F4329E8F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9476AA40-C94F-43C7-BF81-9427F4329E8F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D6C6C2A-38F4-4574-918D-24A33F1FB8C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D6C6C2A-38F4-4574-918D-24A33F1FB8C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D6C6C2A-38F4-4574-918D-24A33F1FB8C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D6C6C2A-38F4-4574-918D-24A33F1FB8C6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
