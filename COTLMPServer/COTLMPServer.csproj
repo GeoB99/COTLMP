@@ -2,6 +2,10 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <Product>Cult of the Lamb Core Server Library</Product>
+    <Version>0.0.0.5</Version>
+    <Copyright>Copyright (c) 2026 GeoB99 &amp; Neco-Arc</Copyright>
+    <RootNamespace>COTLMPServer</RootNamespace>
   </PropertyGroup>
 
 </Project>
