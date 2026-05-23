@@ -1,4 +1,7 @@
-# COTLMP
+<p align = center>
+  <img alt = "COTLMP Banner" src = "https://raw.githubusercontent.com/GeoB99/COTLMP/refs/heads/master/Media/Banner.png">
+</p>
+
 ## What is this?
 COTLMP (aka Cult of the Lamb Multiplayer) is a game modification of which implements multiplayer functionality for the critically acclaimed game **Cult of the Lamb**, developed by Massive Monster and published by Devolver Digital.
 
