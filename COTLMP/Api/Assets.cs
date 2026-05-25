@@ -21,29 +21,15 @@ using UnityEngine.UI;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains the classes and code for the Unity Assets management.
- *
- * @class Assets
- * The class for Scenes API management.
- */
 namespace COTLMP.Api
 {
     internal static class Assets
     {
-        /*
-         * @brief
-         * Opens an assets bundle file and loads it into memory.
-         *
-         * @param[in] BundleName
-         * A string that points to the name of the bundle file to be
-         * opened.
-         *
-         * @returns
-         * Returns the asset bundle object to the caller. NULL is returned
-         * if said scene asset couldn't be found within the Assets folder.
-         */
+        /// <summary>
+        /// Opens an assets bundle file and loads it into memory.
+        /// </summary>
+        /// <param name = "BundleName">A string that points to the name of the bundle file to be opened.</param>
+        /// <returns>Returns the asset bundle object to the caller. NULL is returned if said scene asset couldn't be found within the Assets folder.</returns>
         public static AssetBundle OpenAssetBundleFile(string BundleName)
         {
             AssetBundle Bundle;
@@ -70,25 +56,14 @@ namespace COTLMP.Api
             return Bundle;
         }
 
-        /*
-         * @brief
-         * Loads a scene and shows it to the screen, given its name.
-         *
-         * @param[in] SceneName
-         * A string to the name of the scene of which to be loaded.
-         *
-         * @param[in] Overlay
-         * If set to TRUE, the scene will be shown overlapping the other existing scene.
-         * Otherwise set this to FALSE for the scene to entirely replace the existing active
-         * scene.
-         *
-         * @param[in] ActionToTakeCallback
-         * An action callback provided by the caller. The method executes
-         * this callback if the scene name is "Main Menu" of which it
-         * performs a specific action depending on the pointed callback.
-         * This parameter is optional and ignored for every other scene name.
-         *
-         */
+        /// <summary>
+        /// Loads a scene and shows it to the screen, given its name.
+        /// </summary>
+        /// <param name = "SceneName">A string to the name of the scene of which to be loaded.</param>
+        /// <param name = "Overlay">If set to TRUE, the scene will be shown overlapping the other existing scene.
+        /// Otherwise set this to FALSE for the scene to entirely replace the existing active scene.</param>
+        /// <param name = "ActionToTakeCallback">An action callback provided by the caller. The method executes this callback if the scene name is "Main Menu"
+        /// of which it performs a specific action depending on the pointed callback. This parameter is optional and ignored for every other scene name.</param>
         public static void ShowScene(string SceneName, bool Overlay, Action ActionToTakeCallback)
         {
             /*

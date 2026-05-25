@@ -18,35 +18,24 @@ using src.UI;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains the classes and code for the main menu interface
- * of the Multiplayer functionality.
- *
- * @class MainMenuPatches
- * Contains harmony patches of which hook up with the original
- * game source code methods and data. Specifically, the patches
- * serve to change the aspect of the main menu.
- */
 namespace COTLMP.Ui
 {
+    /// <summary>
+    /// Contains harmony patches of which hook up with the original
+    /// game source code methods and data. Specifically, the patches
+    /// serve to change the aspect of the main menu.
+    /// </summary>
     internal static class Mainmenu
     {
         [HarmonyPatch]
         internal static class MainMenuPatches
         {
-            /*
-             * @brief
-             * Patches the private DLC on-click button private method, of which
-             * we hook up our Multiplayer dialog.
-             *
-             * @param[in] __instance
-             * The current instance value of the method being patched.
-             *
-             * @return
-             * Returns TRUE if tthe original method of the game is to be executed.
-             * FALSE if our method is to be executed instead.
-             */
+            /// <summary>
+            /// Patches the private DLC on-click button private method, of which
+            /// we hook up our Multiplayer dialog.
+            /// </summary>
+            /// <param name = "__instance">The type of the server password dialog box to be displayed.</param>
+            /// <returns>Returns TRUE if tthe original method of the game is to be executed. FALSE if our method is to be executed instead.</returns>
             [HarmonyPatch(typeof(MainMenu), "OnDLCButtonClicked")]
             [HarmonyPrefix]
             private static bool OnMultiplayerButtonClickedPatch(MainMenu __instance)
@@ -57,10 +46,9 @@ namespace COTLMP.Ui
                 return false;
             }
 
-            /**
-             * @brief
-             * Show a message when returning to main menu, when needed
-             */
+            /// <summary>
+            /// Show a message when returning to main menu, when needed.
+            /// </summary>
             [HarmonyPatch(typeof(MainMenu), "Start")]
             [HarmonyPostfix]
             private static void Start(MainMenu __instance)

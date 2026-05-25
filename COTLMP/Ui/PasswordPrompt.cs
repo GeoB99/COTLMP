@@ -23,22 +23,19 @@ using System.Collections;
 
 namespace COTLMP.Ui
 {
-
-    /*
-     * @brief
-     * Type of the server password dialog box to be displayed
-     * onto the screen.
-     *
-     * @field PromptPassword
-     * The password prompt dialog box (asking the player to type
-     * the password to join).
-     *
-     * @field InvalidPassword
-     * The invalid password disclaimer dialog box.
-     */
+    /// <summary>
+    /// Type of the server password dialog box to be displayed onto the screen.
+    /// </summary>
     public enum DIALOG_BOX_TYPE
     {
+        /// <summary>
+        /// The password prompt dialog box (asking the player to type the password to join).
+        /// </summary>
         PromptPassword = 0,
+
+        /// <summary>
+        /// The invalid password disclaimer dialog box.
+        /// </summary>
         InvalidPassword
     }
 
@@ -50,11 +47,10 @@ namespace COTLMP.Ui
         private static Button CancelButton;
         private static TMP_InputField PromptInput;
 
-        /*
-         * @brief
-         * The Cancel button callback handler. This is called whenever the player
-         * clicks on "Cancel". The callback destroys the password prompt dialog box.
-         */
+        /// <summary>
+        /// The Cancel button callback handler. This is called whenever the player
+        /// clicks on "Cancel". The callback destroys the password prompt dialog box.
+        /// </summary>
         private static void CancelButtonHandler()
         {
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "CancelButtonHandler() called");
@@ -65,12 +61,11 @@ namespace COTLMP.Ui
             Object.Destroy(PromptBox);
         }
 
-        /*
-         * @brief
-         * The OK button callback handler. This is called whenever the player
-         * clicks on "OK". This submits the password written from the input
-         * and checks it against the server's password for matching comparison.
-         */
+        /// <summary>
+        /// The OK button callback handler. This is called whenever the player
+        /// clicks on "OK". This submits the password written from the input
+        /// and checks it against the server's password for matching comparison.
+        /// </summary>
         private static void OkButtonHandler()
         {
             // TODO: Retrieve the password from the target server and implement hash checksums with SHA256
@@ -78,12 +73,11 @@ namespace COTLMP.Ui
             return;
         }
 
-        /*
-         * @brief
-         * The OK button callback handler. This is called whenever the player
-         * clicks on "OK". The callback destroys the invalid password dialog box
-         * and displays back the password prompt box.
-         */
+        /// <summary>
+        /// The OK button callback handler. This is called whenever the player
+        /// clicks on "OK". The callback destroys the invalid password dialog box
+        /// and displays back the password prompt box.
+        /// </summary>
         private static void OkButtonHnadlerInvalidPassword()
         {
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "OkButtonHnadlerInvalidPassword() called");
@@ -94,15 +88,11 @@ namespace COTLMP.Ui
             PromptInput.ActivateInputField();
         }
 
-        /*
-         * @brief
-         * Localizes the server password prompt dialog box to the
-         * specific chosen language locale in the game.
-         *
-         * @param[in] Type
-         * The type of the server password dialog box to be localized,
-         * at the time of the dialog box being displayed.
-         */
+        /// <summary>
+        /// Localizes the server password prompt dialog box to the
+        /// specific chosen language locale in the game.
+        /// </summary>
+        /// <param name = "Type">The type of the server password dialog box to be localized, at the time of the dialog box being displayed.</param>
         private static void LocalizeUi(DIALOG_BOX_TYPE Type)
         {
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "LocalizeUi() called");
@@ -121,15 +111,10 @@ namespace COTLMP.Ui
             CancelButton.GetComponentInChildren<TMP_Text>().text = MultiplayerModLocalization.UI.PasswordPrompt.PasswordPrompt_CancelButton;
         }
 
-        /*
-         * @brief
-         * Initializes the UI of the server password prompt box.
-         *
-         * @param[in] Type
-         * The type of the server password dialog box of which
-         * the worker is to initialize the gamne objects and
-         * other stuff accordingly.
-         */
+        /// <summary>
+        /// Initializes the UI of the server password prompt box.
+        /// </summary>
+        /// <param name = "Type">The type of the server password dialog box of which the worker is to initialize the gamne objects and other stuff accordingly.</param>
         private static IEnumerator UiInitializationWorker(DIALOG_BOX_TYPE Type)
         {
             /* Wait at least one frame for the UI game objects to be initialized */
@@ -189,14 +174,10 @@ namespace COTLMP.Ui
             yield break;
         }
 
-        /*
-         * @brief
-         * Displays the server password prompt box when a player joins a
-         * password-protected server.
-         *
-         * @param[in] Type
-         * The type of the server password dialog box to be displayed.
-         */
+        /// <summary>
+        /// Displays the server password prompt box when a player joins a password-protected server.
+        /// </summary>
+        /// <param name = "Type">The type of the server password dialog box to be displayed.</param>
         public static void DisplayUi(DIALOG_BOX_TYPE Type)
         {
             bool ShowPasswordPromptUi = true;

@@ -11,36 +11,33 @@ using COTLMP;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains the implementation of game teams.
- */
 namespace COTLMP.Game
 {
     public class Teams
     {
-        /*
-         * @brief
-         * Teams enumeration. Each player is assigned to a team
-         * with their own specific team player skin.
-         *
-         * @field Lamb
-         * The lamb team. This is the default supported by the game.
-         *
-         * @field Goat
-         * The goat team. This is the default supported by the game.
-         *
-         * @field Owl
-         * The owl team. This is currently not supported yet in the mod.
-         *
-         * @field Snake
-         * The snake team. This is currently not supported yet in the mod.
-         */
+        /// <summary>
+        /// Teams enumeration. Each player is assigned to a team with their own specific team player skin.
+        /// </summary>
         public enum Team
         {
+            /// <summary>
+            /// The lamb team. This is the default supported by the game.
+            /// </summary>
             Lamb = 0,
+
+            /// <summary>
+            /// The goat team. This is the default supported by the game.
+            /// </summary>
             Goat,
+
+            /// <summary>
+            /// The owl team. This is currently not supported yet in the mod.
+            /// </summary>
             Owl,
+
+            /// <summary>
+            /// The snake team. This is currently not supported yet in the mod.
+            /// </summary>
             Snake
         }
     }

@@ -28,31 +28,20 @@ However for multi-line comments it's recommended to use the first option when po
 
 ## Documentation
 Documenting code is an important part when contributing to the mod as it helps other contributors and future potential contributors (or collaborators) to understand what it tries to do and why.
+Note that the mod uses the general C# .NET coding style convention!
 Typically a documentation header looks like this:
 ```
-/*
- * @brief
- * It does cool stuff and also does cool stuff there too.
- *
- * @param[in,out] Param1
- * Param1 is beautiful.
- *
- * @return
- * Returns something cool.
- *
- * @remarks
- * But also it does super stuff too!
- */
+/// <summary>
+/// It does cool stuff and also does cool stuff there too.
+/// </summary>
+/// <param name = "Param1">Param1 is beautiful.</param>
+/// <returns>Returns something cool.</returns>
+/// <remarks>But also it does super stuff too!</remarks>
 ```
-`@brief` denotes the description of something that is being documented, `@param[in,out]` to denote that the following part is a parameter and `@return` describes what stuff does it return.
+`<summary>` denotes the description of something that is being documented, `<param name = "PARAM_NAME">` to denote that the following part is a parameter and `<returns>` describes what stuff does it return.
+`<remarks>` is used to describe some important remarks. Usually you want to describe some considerations or notes about the construct you are documenting. Don't add this section if you have no remarks to describe about!
 Typically such a header like this is used to document methods inside a class.
-To document other parts of the code like namespaces, structures and whatnot you must include different sections in the documentation header. The allowed sections are:
-
-`@field` - Used to describe a member field or an enumeration field. Use this if you are documenting an enumeration or a data structure.
-`@class` - Used to describe a class. Use this if you are documenting a class of which a namespace implements.
-`@param[in,out]` - Used to describe a parameter. `in` is an annotation which describes the following parameter takes an argument from the caller, whilst `out` means some data is returned to the caller to that parameter. The caller is responsible to host stack space for that parameter. If a parameter does the following two things, like typically taking an argument and initializing it with stuff, then you must use `in,out` within the brackets.
-`@return` - Used to describe what kind of data is returned after a method finishes execution. This is EXCLUSIVELY USED when documenting methods! If a method doesn't return anything (aka a method is `void`) then you mustn't include this section in the documentation header.
-`@remarks` - Used to describe some important remarks. Usually you want to describe some considerations or notes about the construct you are documenting. Don't add this section if you have no remarks to describe about!
+To document other parts of the code like namespaces, structures and whatnot you must include different sections in the documentation header by consulting the [C# coding style guidelines and rules](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/language-specification/documentation-comments).
 
 ## File Sections
 When creating a file you must categorize the parts of your file into sections:

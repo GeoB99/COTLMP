@@ -11,39 +11,51 @@ using COTLMP;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains global mod data.
- *
- * @class ModDataGlobals
- * Main class of which mod data is stored.
- */
 namespace COTLMP.Data
 {
+    /// <summary>
+    /// Main class of which mod data is stored.
+    /// </summary>
     internal sealed class ModDataGlobals
     {
-        /* Enable or Disable the execution of the mod */
+        /// <summary>
+        /// Enable or Disable the execution of the mod.
+        /// </summary>
         public bool EnableMod;
 
-        /* The current executing game-play mode */
+        /// <summary>
+        /// The current executing game-play mode.
+        /// </summary>
         public string GameMode;
 
-        /* The name of the player in-game */
+        /// <summary>
+        /// The name of the player in-game
+        /// </summary>
         public string PlayerName;
 
-        /* The name of the server */
+        /// <summary>
+        /// The name of the server.
+        /// </summary>
         public string ServerName;
 
-        /* The maximum allowed number of players */
+        /// <summary>
+        /// The maximum allowed number of players.
+        /// </summary>
         public int MaxNumPlayers;
 
-        /* Enable or Disable voice chat */
+        /// <summary>
+        /// Enable or Disable voice chat.
+        /// </summary>
         public bool EnableVoiceChat;
 
-        /* The password of the server */
+        /// <summary>
+        /// The password of the server.
+        /// </summary>
         public string ServerPassowrd;
 
-        /* Should the server be protected with a password or not upon joining */
+        /// <summary>
+        /// Should the server be protected with a password or not upon joining.
+        /// </summary>
         public bool ProtectServer;
 
         public ModDataGlobals(bool Enable,

@@ -17,91 +17,88 @@ using System.IO;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains classes and code for the Configuration API.
- *
- * @class Configuration
- * Main class of which implements methods for manipulation
- * of user configuration settings, loading and saving them.
- */
 namespace COTLMP.Api
 {
-    /*
-     * @brief
-     * Configuration category enumeration. This is used to regroup
-     * individual settings in separate configuration sections.
-     *
-     * @field ServerSettings
-     * The server settings category.
-     *
-     * @field ModSettings
-     * The mod settings category.
-     */
+    /// <summary>
+    /// Configuration category enumeration. This is used to regroup
+    /// individual settings in separate configuration sections.
+    /// </summary>
     public enum CONFIGURATION_SECTION
     {
+        /// <summary>
+        /// The server settings category.
+        /// </summary>
         ServerSettings = 0,
+
+        /// <summary>
+        /// The mod settings category.
+        /// </summary>
         ModSettings
     }
 
     internal static class Configuration
     {
-        /*
-         * @brief
-         * Data type enumeration. This divides the setting data
-         * into several different types.
-         *
-         * @field StringType
-         * The setting data is a string type.
-         *
-         * @field IntType
-         * The setting data is an integer type.
-         *
-         * @field BoolType
-         * The setting data is a boolean type.
-         */
+        /// <summary>
+        /// Data type enumeration. This divides the setting data into several different types.
+        /// </summary>
         internal enum TYPE_DATA
         {
+            /// <summary>
+            /// The setting data is a string type.
+            /// </summary>
             StringType = 0,
+
+            /// <summary>
+            /// The setting data is an integer type.
+            /// </summary>
             IntType,
+
+            /// <summary>
+            /// The setting data is a boolean type.
+            /// </summary>
             BoolType
         }
 
-        /*
-         * @brief
-         * Configuration data structure. This is internally used by the
-         * Configuration API to encapsulate the arguments provided by the caller such
-         * as setting name, value and such and pass it down to the private helpers.
-         *
-         * @field Section
-         * The section category of the setting.
-         *
-         * @field ValueName
-         * The name of the value setting.
-         *
-         * @field ValueDescription
-         * The description of the value setting.
-         *
-         * @field TypeData
-         * The type of the setting.
-         *
-         * @field ValueStringData
-         * The data of the setting, as a string.
-         *
-         * @field ValueBoolData
-         * The data of the setting, as a boolean.
-         *
-         * @field ValueIntData
-         * The data of the setting, as an integer.
-         */
+        /// <summary>
+        /// Configuration data structure. This is internally used by the
+        /// Configuration API to encapsulate the arguments provided by the caller such
+        /// as setting name, value and such and pass it down to the private helpers.
+        /// </summary>
         internal struct ConfigurationData
         {
+            /// <summary>
+            /// The section category of the setting.
+            /// </summary>
             internal readonly CONFIGURATION_SECTION Section;
+
+            /// <summary>
+            /// The name of the value setting.
+            /// </summary>
             internal string ValueName;
+
+            /// <summary>
+            /// The description of the value setting.
+            /// </summary>
             internal string ValueDescription;
+
+            /// <summary>
+            /// The type of the setting.
+            /// </summary>
             internal readonly TYPE_DATA TypeData;
+
+            /// <summary>
+            /// The data of the setting, as a boolean.
+            /// </summary>
             internal string ValueStringData;
+
+            /// <summary>
+            /// The data of the setting, as a boolean.
+            /// </summary>
             internal bool ValueBoolData;
+
+            /// <summary>
+            /// The data of the setting, as an integer.
+            /// </summary>
             internal int ValueIntData;
 
             internal ConfigurationData(CONFIGURATION_SECTION Sect,
@@ -122,17 +119,11 @@ namespace COTLMP.Api
             }
         }
 
-        /*
-         * @brief
-         * Converts the configuration section into a string label.
-         *
-         * @param[in] Section
-         * The section category.
-         *
-         * @return
-         * Returns the label string that represents the category section,
-         * otherwise NULL is returned if the given section is not supported.
-         */
+        /// <summary>
+        /// Converts the configuration section into a string label.
+        /// </summary>
+        /// <param name = "Section">The section category.</param>
+        /// <returns>Returns the label string that represents the category section, otherwise NULL is returned if the given section is not supported.</returns>
         private static string ConfigSectionToLabel(CONFIGURATION_SECTION Section)
         {
             string LabelName;
@@ -161,17 +152,11 @@ namespace COTLMP.Api
             return LabelName;
         }
 
-        /*
-         * @brief
-         * Creates a setting as a boolean.
-         *
-         * @param[in] SettingData
-         * Data structure with configuration data of the setting, filled by the caller.
-         *
-         * @return
-         * Returns an object to a configuration entry that represents the setting,
-         * otherwise NULL is returned if the operation fails.
-         */
+        /// <summary>
+        /// Creates a setting as a boolean.
+        /// </summary>
+        /// <param name = "SettingData">Data structure with configuration data of the setting, filled by the caller.</param>
+        /// <returns>Returns an object to a configuration entry that represents the setting, otherwise NULL is returned if the operation fails.</returns>
         private static ConfigEntry<bool> CreateSettingAsBool(ConfigurationData SettingData)
         {
             string LabelName;
@@ -204,17 +189,11 @@ namespace COTLMP.Api
             return BoolSettingEntry;
         }
 
-        /*
-         * @brief
-         * Creates a setting as a string.
-         *
-         * @param[in] SettingData
-         * Data structure with configuration data of the setting, filled by the caller.
-         *
-         * @return
-         * Returns an object to a configuration entry that represents the setting,
-         * otherwise NULL is returned if the operation fails.
-         */
+        /// <summary>
+        /// Creates a setting as a string.
+        /// </summary>
+        /// <param name = "SettingData">Data structure with configuration data of the setting, filled by the caller.</param>
+        /// <returns>Returns an object to a configuration entry that represents the setting, otherwise NULL is returned if the operation fails.</returns>
         private static ConfigEntry<string> CreateSettingAsString(ConfigurationData SettingData)
         {
             string LabelName;
@@ -247,17 +226,11 @@ namespace COTLMP.Api
             return StringSettingEntry;
         }
 
-        /*
-         * @brief
-         * Creates a setting as an integer.
-         *
-         * @param[in] SettingData
-         * Data structure with configuration data of the setting, filled by the caller.
-         *
-         * @return
-         * Returns an object to a configuration entry that represents the setting,
-         * otherwise NULL is returned if the operation fails.
-         */
+        /// <summary>
+        /// Creates a setting as an integer.
+        /// </summary>
+        /// <param name = "SettingData">Data structure with configuration data of the setting, filled by the caller.</param>
+        /// <returns>Returns an object to a configuration entry that represents the setting, otherwise NULL is returned if the operation fails.</returns>
         private static ConfigEntry<int> CreateSettingAsInt(ConfigurationData SettingData)
         {
             string LabelName;
@@ -290,32 +263,16 @@ namespace COTLMP.Api
             return IntSettingEntry;
         }
 
-        /*
-         * @brief
-         * Creates a user configuration setting.
-         *
-         * @param[in] ConfigSection
-         * The configuration category section of the setting.
-         *
-         * @param[in] ValueName
-         * The name of the setting.
-         *
-         * @param[in] ValueDescription
-         * The description of the setting, which is displayed within the user
-         * configuration file of the mod.
-         *
-         * @param[in] ValueData
-         * An arbitrary type of the value data of the setting, provided by the caller.
-         * This can be either a boolean, integer or a string.
-         *
-         * @return
-         * Returns an object to the setting value that has been created, NULL otherwise.
-         *
-         * @remarks
-         * If the setting has already been created it will open the already created
-         * setting by returning the existent config entry. The caller is expected
-         * to retrieve the value data of the setting by using the GetSettingData method.
-         */
+        /// <summary>
+        /// Creates a user configuration setting.
+        /// </summary>
+        /// <param name = "ConfigSection">The configuration category section of the setting.</param>
+        /// <param name = "ValueName">The name of the setting.</param>
+        /// <param name = "ValueDescription">The description of the setting, which is displayed within the user configuration file of the mod.</param>
+        /// <param name = "ValueData">An arbitrary type of the value data of the setting, provided by the caller. This can be either a boolean, integer or a string.</param>
+        /// <returns>Returns an object to the setting value that has been created, NULL otherwise.</returns>
+        /// <remarks>If the setting has already been created it will open the already created setting by returning the existent config entry.
+        /// The caller is expected to retrieve the value data of the setting by using the GetSettingData method.</remarks>
         public static Object CreateSetting<T>(CONFIGURATION_SECTION ConfigSection, string ValueName, string ValueDescription, T ValueData)
         {
             Object ReturnedData;
@@ -399,18 +356,11 @@ namespace COTLMP.Api
             return ReturnedData;
         }
 
-        /*
-         * @brief
-         * Retrieves a config entry of the setting that has already
-         * been created.
-         *
-         * @param[in] Definition
-         * Data structure with configuration definition data that represents
-         * the setting of which an entry is to be retrieved, filled by the caller.
-         *
-         * @return
-         * Returns a config entry of the setting, NULL otherwise if it fails.
-         */
+        /// <summary>
+        /// Retrieves a config entry of the setting that has already been created.
+        /// </summary>
+        /// <param name = "Definition">Data structure with configuration definition data that represents the setting of which an entry is to be retrieved, filled by the caller.</param>
+        /// <returns>Returns a config entry of the setting, NULL otherwise if it fails.</returns>
         public static ConfigEntry<T> GetSettingEntry<T>(ConfigDefinition Definition)
         {
             ConfigEntry<T> Entry;
@@ -420,10 +370,9 @@ namespace COTLMP.Api
             return Entry;
         }
 
-        /*
-         * @brief
-         * For more documentation information, see ConfigSectionToLabel.
-         */
+        /// <summary>
+        /// For more documentation information, see ConfigSectionToLabel.
+        /// </summary>
         public static string GetSectionName(CONFIGURATION_SECTION Section)
         {
             string Name;
@@ -433,27 +382,20 @@ namespace COTLMP.Api
             return Name;
         }
 
-        /*
-         * @brief
-         * Flushes the dirty settings data from RAM back to the
-         * physical backing storage.
-         */
+        /// <summary>
+        /// Flushes the dirty settings data from RAM back to the physical backing storage.
+        /// </summary>
         public static void FlushSettings()
         {
             /* Execute the Config API call to flush all the settings to disk */
             Plugin.Config.Save();
         }
 
-        /*
-         * @brief
-         * Retrieves the data of the setting.
-         *
-         * @param[in] ConfigObject
-         * An object to a configuration setting.
-         *
-         * @return
-         * Returns the type data of the setting.
-         */
+        /// <summary>
+        /// Retrieves the data of the setting.
+        /// </summary>
+        /// <param name = "ConfigObject">An object to a configuration setting.</param>
+        /// <returns>Returns the type data of the setting.</returns>
         public static T GetSettingData<T>(Object ConfigObject)
         {
             /* NULL objects is illegal here */

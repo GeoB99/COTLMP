@@ -27,14 +27,6 @@ using static COTLMP.Data.Network;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains the classes and code for the server list user interface.
- *
- * @class ServerList
- * The main server list UI class of which it contains UI management
- * code and related stuff.
- */
 namespace COTLMP.Ui
 {
     public static class ServerList
@@ -53,49 +45,49 @@ namespace COTLMP.Ui
         private static LinkedList<ServerEntry> ServerLanEntries;
         private static readonly object ServerListLock = new object();
 
-        /*
-         * @brief
-         * Global server browser status to be displayed to the player.
-         *
-         * @field NoneFound
-         * No reachable servers could be found within the network.
-         *
-         * @field MasterserverConnectFail
-         * Failed to connect to the masterserver in order to search
-         * for reachable game servers.
-         *
-         * @field ScanInProgress
-         * The searching of servers is in progress.
-         */
+        /// <summary>
+        /// Global server browser status to be displayed to the player.
+        /// </summary>
         private enum SERVER_BROWSER_STATUS
         {
+            /// <summary>
+            /// No reachable servers could be found within the network.
+            /// </summary>
             NoneFound = 0,
+
+            /// <summary>
+            /// Failed to connect to the masterserver in order to search
+            /// for reachable game servers.
+            /// </summary>
             MasterserverConnectFail,
+
+            /// <summary>
+            /// The searching of servers is in progress.
+            /// </summary>
             ScanInProgress
         }
 
-        /*
-         * @brief
-         * Enumeration used to determine which kind of server list
-         * is to be refreshed (Internet or LAN).
-         *
-         * @field InternetList
-         * The Internet servers list to be refreshed.
-         *
-         * @field LanList
-         * The LAN servers list to be refreshed.
-         */
+        /// <summary>
+        /// Enumeration used to determine which kind of server list
+        /// is to be refreshed (Internet or LAN).
+        /// </summary>
         private enum REFRESH_WHAT
         {
+            /// <summary>
+            /// The Internet servers list to be refreshed.
+            /// </summary>
             InternetList = 0,
+
+            /// <summary>
+            /// The LAN servers list to be refreshed.
+            /// </summary>
             LanList
         }
 
-        /*
-         * @brief
-         * Main UI element handler for the "Back" button.
-         * It gets executed whenever the button is clicked.
-         */
+        /// <summary>
+        /// Main UI element handler for the "Back" button.
+        /// It gets executed whenever the button is clicked.
+        /// </summary>
         private static void BackButtonHandler()
         {
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "BackButtonHandler() called");
@@ -127,14 +119,11 @@ namespace COTLMP.Ui
             COTLMP.Api.Assets.ShowScene("Main Menu", false, null);
         }
 
-        /*
-         * @brief
-         * Handler that gets invoked by Unity whenever the player selects
-         * a different server category from the dropdown.
-         *
-         * @param[in] Dropdown
-         * The dropdown of which the player selected a different server category.
-         */
+        /// <summary>
+        /// Handler that gets invoked by Unity whenever the player selects
+        /// a different server category from the dropdown.
+        /// </summary>
+        /// <param name = "Dropdown">The dropdown of which the player selected a different server category.</param>
         private static void OnValueChangeDropdownHandler(TMP_Dropdown Dropdown)
         {
             /* 0 translates to the first item from the dropdown which is Internet */
@@ -155,18 +144,12 @@ namespace COTLMP.Ui
             RefreshServersList(REFRESH_WHAT.LanList);
         }
 
-        /*
-         * @brief
-         * Sets a global server browser status indicating the state
-         * of the server browser (e.g. No Servers could be found).
-         *
-         * @param[in] Status
-         * The type of setting to be added.
-         *
-         * @param[in] DisplayStatus
-         * Set this to TRUE if the status message should be displayed,
-         * otherwise set this to FALSE.
-         */
+        /// <summary>
+        /// Sets a global server browser status indicating the state
+        /// of the server browser (e.g. No Servers could be found).
+        /// </summary>
+        /// <param name = "Status">The status message to be displayed to the server browser.</param>
+        /// <param name = "DisplayStatus">Set this to TRUE if the status message should be displayed, otherwise set this to FALSE.</param>
         private static void SetServerBrowserStatus(SERVER_BROWSER_STATUS Status, bool DisplayStatus)
         {
             string StatusMessage;
@@ -203,39 +186,18 @@ namespace COTLMP.Ui
             ServerBrowserStatus.gameObject.SetActive(DisplayStatus);
         }
 
-        /*
-         * @brief
-         * Creates a server entry and displays it to the browser scroll listview.
-         *
-         * @param[in] ServerName
-         * The name of the server.
-         *
-         * @param[in] IP
-         * The IP address of the server.
-         *
-         * @param[in] IsLan
-         * If the following server is bound to the LAN network, this must be set
-         * to TRUE. Otherwise set this to FALSE.
-         *
-         * @param[in] Port
-         * The port number that is used to create the server.
-         *
-         * @param[in] GameMode
-         * The game mode of the server.
-         *
-         * @param[in] ActivePlayers
-         * The count of active playing players.
-         *
-         * @param[in] MaxPlayers
-         * The count of maximum players the server can take.
-         *
-         * @return
-         * Returns the newly allocated server entry.
-         *
-         * @remarks
-         * The caller MUST use ReleaseServerEntry to free the allocated server
-         * entry that is returned to him.
-         */
+        /// <summary>
+        /// Creates a server entry and displays it to the browser scroll listview.
+        /// </summary>
+        /// <param name = "ServerName">The name of the server.</param>
+        /// <param name = "IP">The IP address of the server.</param>
+        /// <param name = "IsLan">If the following server is bound to the LAN network, this must be set to TRUE. Otherwise set this to FALSE.</param>
+        /// <param name = "Port">The port number that is used to create the server.</param>
+        /// <param name = "GameMode">The game mode of the server.</param>
+        /// <param name = "ActivePlayers">The count of active playing players.</param>
+        /// <param name = "MaxPlayers">The count of maximum players the server can take.</param>
+        /// <returns>Returns the newly allocated server entry.</returns>
+        /// <remarks>The caller MUST use ReleaseServerEntry to free the allocated server entry that is returned to him.</remarks>
         private static ServerEntry CreateServerEntry(string ServerName, IPAddress IP, bool IsLan, ushort Port, string GameMode, int ActivePlayers, int MaxPlayers)
         {
             GameObject Prefab, InstanceObject;
@@ -300,18 +262,11 @@ namespace COTLMP.Ui
             return Entry;
         }
 
-        /*
-         * @brief
-         * Releases a server entry from memory that was being allocated by
-         * a method call to CreateServerEntry.
-         *
-         * @param[in] Entry
-         * The server entry to be freed.
-         *
-         * @remarks
-         * This method doesn't remove the server entry from the linked list,
-         * it assumes the caller is responsible to do that!
-         */
+        /// <summary>
+        /// Releases a server entry from memory that was being allocated by a method call to CreateServerEntry.
+        /// </summary>
+        /// <param name = "Entry">The server entry to be freed.</param>
+        /// <remarks>This method doesn't remove the server entry from the linked list, it assumes the caller is responsible to do that!</remarks>
         private static void ReleaseServerEntry(ServerEntry Entry)
         {
             Image UiEntry;
@@ -324,15 +279,12 @@ namespace COTLMP.Ui
             UnityEngine.Object.Destroy(InstanceObject);
         }
 
-        /*
-         * @brief
-         * Refreshes the servers list. The scroll view list gets populated with
-         * server entries each time the user receives a heartbeat from active servers.
-         * Data is fetched from the server as the user received the heartbeat.
-         *
-         * @param[in] WhatToRefresh
-         * Determine which kind of server list is to be refreshed.
-         */
+        /// <summary>
+        /// Refreshes the servers list. The scroll view list gets populated with
+        /// server entries each time the user receives a heartbeat from active servers.
+        /// Data is fetched from the server as the user received the heartbeat.
+        /// </summary>
+        /// <param name = "WhatToRefresh">Determine which kind of server list is to be refreshed.</param>
         private static void RefreshServersList(REFRESH_WHAT WhatToRefresh)
         {
             /*
@@ -377,11 +329,9 @@ namespace COTLMP.Ui
             }
         }
 
-        /*
-         * @brief
-         * Main worker handler that is executed each time the player
-         * changes their name.
-         */
+        /// <summary>
+        /// Main worker handler that is executed each time the player changes their name.
+        /// </summary>
         private static void PlayerNameSubmitHandler()
         {
             string Section;
@@ -404,11 +354,9 @@ namespace COTLMP.Ui
             COTLMP.Api.Configuration.FlushSettings();
         }
 
-        /*
-         * @brief
-         * Main worker handler that is executed each time the player
-         * changes the name of their server.
-         */
+        /// <summary>
+        /// Main worker handler that is executed each time the player changes the name of their server.
+        /// </summary>
         private static void ServerNameSubmitHandler()
         {
             string Section;
@@ -431,11 +379,9 @@ namespace COTLMP.Ui
             COTLMP.Api.Configuration.FlushSettings();
         }
 
-        /*
-         * @brief
-         * Localizes the servers list UI to different language that's currently
-         * being chosen in the game.
-         */
+        /// <summary>
+        /// Localizes the servers list UI to different language that's currently being chosen in the game.
+        /// </summary>
         private static void LocalizeUi()
         {
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "LocalizeUi() called");
@@ -454,12 +400,11 @@ namespace COTLMP.Ui
             SetServerBrowserStatus(SERVER_BROWSER_STATUS.MasterserverConnectFail, true);
         }
 
-        /*
-         * @brief
-         * Main UI initialization worker, of which is responsible to bind
-         * every game object to their listeners, setup localization, estabilish
-         * server connection and refresh servers list, etc.
-         */
+        /// <summary>
+        /// Main UI initialization worker, of which is responsible to bind
+        /// every game object to their listeners, setup localization, estabilish
+        /// server connection and refresh servers list, etc.
+        /// </summary>
         private static IEnumerator UiInitializationWorker()
         {
             /*
@@ -539,10 +484,9 @@ namespace COTLMP.Ui
             yield break;
         }
 
-        /*
-         * @brief
-         * Displays the server list UI.
-         */
+        /// <summary>
+        /// Displays the server list UI.
+        /// </summary>
         public static void DisplayUi()
         {
             /* Load the server list UI scene, the asset bundle should be already loaded */

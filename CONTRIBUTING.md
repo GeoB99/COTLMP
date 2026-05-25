@@ -29,6 +29,7 @@ COTLMP
 │   ├───Skins -- Directory containing player skins
 │   └───Ui -- UI/UX module of the mod
 ├───COTLMPServer -- Core dedicated server module of the mod
+├───DedicatedServer -- Standalone dedicated server launcher
 ├───Docs -- Documentation
 └───Media -- Media related stuff (images, banners, etc.)
 ```
@@ -48,7 +49,7 @@ Compiling the mod with Visual Studio should be straightforward as long as you ha
 
 When everything is set up, import the `COTLMP.sln` file within working directory which is the core VSSolution file of the project. Visual Studio will import the project and setups the dependencies and everything needed in order to compile the mod.
 
-To compile the mod, click `Build > Build Solution`. This will generate `COTLMP.dll` and `COTLMPServer.dll` on their rrespective `bin` directories.
+To compile the mod, click `Build > Build Solution`. This will generate `COTLMP.dll`, `COTLMPServer.dll` and `CultOfTheLambServer.exe` on their rrespective `bin` directories.
 
 ### Writing your first patch
 Once you've familiarized with the directory tree, you can edit or add new files however you like depending on what you want to do. Refer to the [coding style guidelines](CODING_STYLE.md) for more information about the coding style rules.

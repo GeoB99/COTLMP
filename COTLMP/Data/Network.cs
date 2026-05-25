@@ -14,47 +14,56 @@ using System.Net;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains network related data such as fields, classes and
- * whatnot for multiplayer support. "Network" is the main parent
- * class that holds all other subsequent classes together.
- *
- * @class ServerEntry
- * Item entry of a server that describes the details of the server.
- * Used by the servers list GUI of which the listview is populated
- * by server entries.
- */
 namespace COTLMP.Data
 {
+    /// <summary>
+    /// Contains network related data such as fields, classes and whatnot for multiplayer support.
+    /// "Network" is the main parent class that holds all other subsequent classes together.
+    /// </summary>
     internal class Network
     {
+        /// <summary>
+        /// Item entry of a server that describes the details of the server.
+        /// Used by the servers list GUI of which the listview is populated by server entries.
+        /// </summary>
         internal sealed class ServerEntry
         {
-            /* Name of the server to be displayed in the servers list GUI */
+            /// <summary>
+            /// Name of the server to be displayed in the servers list GUI.
+            /// </summary>
             internal string ServerName;
 
-            /* Count of active players and maximum players the server can hold */
+            /// <summary>
+            /// Count of active players and maximum players the server can hold.
+            /// </summary>
             internal int OnlinePlayers;
             internal int MaxPlayers;
 
-            /* The game play mode of the server */
+            /// <summary>
+            /// The game play mode of the server.
+            /// </summary>
             internal string GameMode;
 
-            /*
-             * Indicates whether the server is passwordprotected (which in this case
-             * the player is prompted to type the password in order to join).
-             */
+            /// <summary>
+            /// Indicates whether the server is passwordprotected (which in this case
+            /// the player is prompted to type the password in order to join).
+            /// </summary>
             internal bool Protected;
 
-            /* Indicates whether the server is set to Favorites */
+            /// <summary>
+            /// Indicates whether the server is set to Favorites.
+            /// </summary>
             internal bool IsFavorite;
 
-            /* Port and IP address of the server */
+            /// <summary>
+            /// Port and IP address of the server.
+            /// </summary>
             internal IPAddress Address;
             internal ushort Port;
 
-            /* The instance of an object that represents the server entry item in the browser */
+            /// <summary>
+            /// The instance of an object that represents the server entry item in the browser.
+            /// </summary>
             internal GameObject InstanceObject;
 
             public ServerEntry(string Name,

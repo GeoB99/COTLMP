@@ -17,27 +17,14 @@ using System;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains the classes and code for the mod game related stuff.
- *
- * @class Callbacks
- * The callbacks class which contains callback methods for the
- * mod game settings.
- */
 namespace COTLMP.Game
 {
     internal static class Callbacks
     {
-        /*
-         * @brief
-         * A callback that gets called when the Game Mode
-         * setting's value has changed.
-         *
-         * @param[in] Value
-         * An integer value representing the value of the
-         * setting that has changed.
-         */
+        /// <summary>
+        /// A callback that gets called when the Game Mode setting's value has changed.
+        /// </summary>
+        /// <param name = "Value">An integer value representing the value of the setting that has changed.</param>
         public static void GameModeCallback(int Value)
         {
             string Section;
@@ -96,15 +83,10 @@ namespace COTLMP.Game
             COTLMP.Api.Configuration.FlushSettings();
         }
 
-        /*
-         * @brief
-         * A callback that gets called when the Max Players
-         * Count setting's value has changed.
-         *
-         * @param[in] Value
-         * An integer value representing the value of the
-         * setting that has changed.
-         */
+        /// <summary>
+        /// A callback that gets called when the Max Players Count setting's value has changed.
+        /// </summary>
+        /// <param name = "Value">An integer value representing the value of the setting that has changed.</param>
         public static void PlayerCountCallback(int Value)
         {
             string Section;
@@ -132,15 +114,10 @@ namespace COTLMP.Game
             COTLMP.Api.Configuration.FlushSettings();
         }
 
-        /*
-         * @brief
-         * A callback that gets called when the Toggle Voice
-         * Chat setting's value has changed.
-         *
-         * @param[in] Value
-         * A boolean value representing the value of the
-         * setting that has changed.
-         */
+        /// <summary>
+        /// A callback that gets called when the Max Toggle Voice Chat setting's value has changed.
+        /// </summary>
+        /// <param name = "Value">An boolean value representing the value of the setting that has changed.</param>
         public static void VoiceChatCallback(bool Value)
         {
             string Section;
@@ -165,15 +142,10 @@ namespace COTLMP.Game
             COTLMP.Api.Configuration.FlushSettings();
         }
 
-        /*
-         * @brief
-         * A callback that gets called when the Protect Server
-         * setting's value has changed.
-         *
-         * @param[in] Value
-         * A boolean value representing the value of the
-         * setting that has changed.
-         */
+        /// <summary>
+        /// A callback that gets called when the Protect Server setting's value has changed.
+        /// </summary>
+        /// <param name = "Value">An boolean value representing the value of the setting that has changed.</param>
         public static void ProtectServerCallback(bool Value)
         {
             string Section;

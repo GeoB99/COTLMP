@@ -32,11 +32,10 @@ namespace COTLMP.Ui
         private static Component SayComponent;
         private static Player PlayerInstance;
 
-        /*
-         * @brief
-         * Called by the Update() method of the core saychat box mechanism whenever a
-         * message is to be broadcasted to all players in a server.
-         */
+        /// <summary>
+        /// Called by the Update() method of the core saychat box mechanism whenever a
+        /// message is to be broadcasted to all players in a server.
+        /// </summary>
         private static IEnumerator BroadcastSayMessageWorker(string Message)
         {
             // TODO: Dispatch a network message to the server with the supplied message and player name
@@ -47,11 +46,10 @@ namespace COTLMP.Ui
             yield break;
         }
 
-        /*
-         * @brief
-         * The core initialization saychat box worker. It initializes the fields and other stuff
-         * of the inputfield of the saychat box as it gets displayed to the screen.
-         */
+        /// <summary>
+        /// The core initialization saychat box worker. It initializes the fields and other stuff
+        /// of the inputfield of the saychat box as it gets displayed to the screen.
+        /// </summary>
         private static IEnumerator SayChatDisplayWorker()
         {
             /* Wait for at least one frame for Unity to initialize the chatbox gameobject */
@@ -82,10 +80,9 @@ namespace COTLMP.Ui
             yield break;
         }
 
-        /*
-         * @brief
-         * Destroys the saychat box that's been previously spawned by the player client.
-         */
+        /// <summary>
+        /// Destroys the saychat box that's been previously spawned by the player client.
+        /// </summary>
         private static void Cleanup()
         {
             /* Ensure we aren't called when no saychat box was ever spawned */
@@ -104,11 +101,10 @@ namespace COTLMP.Ui
             PlayerInstance.controllers.maps.SetAllMapsEnabled(true);
         }
 
-        /*
-         * @brief
-         * Pools for key events so that the saychat box gets spawned and destroyed
-         * at the right key press events. Unity calls this function on every game frame.
-         */
+        /// <summary>
+        /// Pools for key events so that the saychat box gets spawned and destroyed
+        /// at the right key press events. Unity calls this function on every game frame.
+        /// </summary>
         private void Update()
         {
             string CapturedMessage;
@@ -156,11 +152,9 @@ namespace COTLMP.Ui
             }
         }
 
-        /*
-         * @brief
-         * Shuts down the saychat system mechanism, typically when a
-         * player leaves a server.
-         */
+        /// <summary>
+        /// Shuts down the saychat system mechanism, typically when a player leaves a server.
+        /// </summary>
         public static void Shutdown()
         {
             /* Cease any coroutine execution if any */
@@ -174,10 +168,9 @@ namespace COTLMP.Ui
             BoxSpawned = false;
         }
 
-        /*
-         * @brief
-         * Starts up the saychat system mechanism.
-         */
+        /// <summary>
+        /// Starts up the saychat system mechanism.
+        /// </summary>
         public static void StartSayChat()
         {
             /*

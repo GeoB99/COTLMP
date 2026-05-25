@@ -18,42 +18,29 @@ using System.Collections.Generic;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains the classes and code for the localization API
- * infrastructure of the mod.
- *
- * @class Localization
- * The main localization manager API, containing API methods
- * for manipulation of localized (aka translated) strings of
- * the mod.
- *
- * @class LocalizationManagerPatches
- * Contains harmony patches of which hook up with the main
- * localization manager of the game.
- */
 namespace COTLMP.Api
 {
-    /*
-     * @brief
-     * Localization table data structure. It's used to store
-     * a translated string onto the specific language of a specific term.
-     *
-     * @field Term
-     * The term group of the translation string of which it corresponds to.
-     * An example of a term would be "Multiplayer/UI".
-     *
-     * @field Translation
-     * The actual translated string onto the target language.
-     *
-     * @field Overriden
-     * If this field is initialized to TRUE, it means the specific translation
-     * string overwrites the already existing original string of the Cult of the Lamb game.
-     */
+    /// <summary>
+    /// Localization table data structure. It's used to store
+    /// a translated string onto the specific language of a specific term.
+    /// </summary>
     public struct LocalizationTable
     {
+        /// <summary>
+        /// The term group of the translation string of which it corresponds to.
+        /// An example of a term would be "Multiplayer/UI".
+        /// </summary>
         public string Term;
+
+        /// <summary>
+        /// The actual translated string onto the target language.
+        /// </summary>
         public string Translation;
+
+        /// <summary>
+        /// If this field is initialized to TRUE, it means the specific translation
+        /// string overwrites the already existing original string of the Cult of the Lamb game.
+        /// </summary>
         public bool Overriden;
 
         public LocalizationTable(string TermString, string TranslationString, bool IsOverriden)
@@ -68,16 +55,11 @@ namespace COTLMP.Api
     {
         private static readonly Dictionary<string, Dictionary<string, string>> Translations = new Dictionary<string, Dictionary<string, string>>();
 
-        /*
-         * @brief
-         * Checks if the given language locale is supported by the mod.
-         *
-         * @param[in] Language
-         * A string that points to the language passed by the caller.
-         *
-         * @return
-         * Returns TRUE if the locale is supported, FALSE otherwise.
-         */
+        /// <summary>
+        /// Checks if the given language locale is supported by the mod.
+        /// </summary>
+        /// <param name = "Language">A string that points to the language passed by the caller.</param>
+        /// <returns>Returns TRUE if the locale is supported, FALSE otherwise.</returns>
         private static bool IsLocaleSupported(string Language)
         {
             int LanguageIndex;
@@ -99,18 +81,11 @@ namespace COTLMP.Api
             return false;
         }
 
-        /*
-         * @brief
-         * Initializes the translation strings of a given language from
-         * the locale table.
-         *
-         * @param[in] Table
-         * An array to a table of localized strings of the target language,
-         * passed by the caller.
-         *
-         * @param[in] Language
-         * A string that points to the language passed by the caller.
-         */
+        /// <summary>
+        /// Initializes the translation strings of a given language from the local table.
+        /// </summary>
+        /// <param name = "Table">An array to a table of localized strings of the target language, passed by the caller.</param>
+        /// <param name = "Language">A string that points to the language passed by the caller.</param>
         private static void InitializeTranslationsFromLocaleTable(LocalizationTable[] Table, string Language)
         {
             int TranslationIndex;
@@ -124,20 +99,12 @@ namespace COTLMP.Api
             }
         }
 
-        /*
-         * @brief
-         * Retrieves the translated string of the given term.
-         *
-         * @param[in] Language
-         * A string that points to the language passed by the caller.
-         *
-         * @param[in] Term
-         * The term group of the translation string of which it corresponds to.
-         *
-         * @return
-         * Returns a string which points to the translation of the given term,
-         * otherwise NULL is returned if the translation doesn't exist.
-         */
+        /// <summary>
+        /// Retrieves the translated string of the given term.
+        /// </summary>
+        /// <param name = "Language">A string that points to the language passed by the caller.</param>
+        /// <param name = "Term">The term group of the translation string of which it corresponds to.</param>
+        /// <returns>Returns a string which points to the translation of the given term, otherwise NULL is returned if the translation doesn't exist.</returns>
         private static string TryGetTranslation(string Language, string Term)
         {
             if (!Translations.ContainsKey(Language)) return null;
@@ -145,24 +112,15 @@ namespace COTLMP.Api
             return Translations[Language].TryGetValue(Term, out var value) ? value : null;
         }
 
-        /*
-         * @brief
-         * Adds a translated string into the locale translations dictionary.
-         *
-         * @param[in] Language
-         * A string that points to the language passed by the caller.
-         *
-         * @param[in] Term
-         * The term group of the translation string of which it corresponds to.
-         *
-         * @param[in] Translation
-         * The translated string of the target language.
-         *
-         * @param[in] Overriden
-         * If set to TRUE the method will overwrite the existing translation string
-         * of the given term from the game. If set to FALSE then it indicates the
-         * passed translation string is a new string. This is for debugging purposes.
-         */
+        /// <summary>
+        /// Adds a translated string into the locale translations dictionary.
+        /// </summary>
+        /// <param name = "Language">A string that points to the language passed by the caller.</param>
+        /// <param name = "Term">The term group of the translation string of which it corresponds to.</param>
+        /// <param name = "Translation">The translated string of the target language.</param>
+        /// <param name = "Overriden">If set to TRUE the method will overwrite the existing translation string
+        /// of the given term from the game. If set to FALSE then it indicates the passed translation string is a new string.
+        /// This is for debugging purposes.</param>
         public static void Add(string Language, string Term, string Translation, bool Overriden)
         {
             /* Setup a new dictionary for the given language if we haven't done it before */
@@ -181,16 +139,11 @@ namespace COTLMP.Api
             Translations[Language][Term] = Translation;
         }
 
-        /*
-         * @brief
-         * Removes a translated string from the dictionary.
-         *
-         * @param[in] Language
-         * A string that points to the language passed by the caller.
-         *
-         * @param[in] Term
-         * The term group of the translation string of which it corresponds to.
-         */
+        /// <summary>
+        /// Removes a translated string from the dictionary.
+        /// </summary>
+        /// <param name = "Language">A string that points to the language passed by the caller.</param>
+        /// <param name = "Term">The term group of the translation string of which it corresponds to.</param>
         public static void Remove(string Language, string Term)
         {
             /* Bail out if the following term has no translation */
@@ -202,18 +155,11 @@ namespace COTLMP.Api
             Translations[Language].Remove(Term);
         }
 
-        /*
-         * @brief
-         * Loads a locale.
-         *
-         * @param[in] Language
-         * A string that points to the language passed by the caller to be
-         * loaded.
-         *
-         * @remarks
-         * Generally this method is used to load different language locales
-         * during startup of the mod. DO NOT USE IT ON ANYWHERE PART OF THE CODE!
-         */
+        /// <summary>
+        /// Loads a locale.
+        /// </summary>
+        /// <param name = "Language">A string that points to the language passed by the caller to be loaded.</param>
+        /// <remarks>Generally this method is used to load different language locales during startup of the mod. DO NOT USE IT ON ANYWHERE PART OF THE CODE!</remarks>
         public static void LoadLocale(string Language)
         {
             LocalizationTable[] StringsTable;
@@ -255,28 +201,15 @@ namespace COTLMP.Api
         [HarmonyPatch]
         private static class LocalizationManagerPatches
         {
-            /*
-             * @brief
-             * Patches the GetTranslation method of the localization manager
-             * of the game. Its purpose is to add custom localized strings
-             * provided by the mod into the game.
-             *
-             * @param[in] Term
-             * The term group of the translation string of which it corresponds to.
-             *
-             * @param[in] overrideLanguage
-             * A string that points to language locale being overriden with custom
-             * translation strings. This parameter is optional.
-             *
-             * @param[in,out] __result
-             * The current returned value of the method. Typically this is a translation
-             * string returned by the original method of the game, which is modified on
-             * our end by the returned translation we have provided by the mod.
-             *
-             * @remarks
-             * Returns TRUE if tthe original method of the game is to be executed.
-             * FALSE if our method is to be executed instead.
-             */
+            /// <summary>
+            /// Patches the GetTranslation method of the localization manager of the game.
+            /// Its purpose is to add custom localized strings provided by the mod into the game.
+            /// </summary>
+            /// <param name = "Term">The term group of the translation string of which it corresponds to.</param>
+            /// <param name = "overrideLanguage">A string that points to language locale being overriden with custom translation strings. This parameter is optional.</param>
+            /// <param name = "__result">The current returned value of the method. Typically this is a translation string returned by the original method
+            /// of the game, which is modified on our end by the returned translation we have provided by the mod.</param>
+            /// <remarks>Returns TRUE if tthe original method of the game is to be executed. FALSE if our method is to be executed instead.</remarks>
             [HarmonyPatch(typeof(LocalizationManager), nameof(LocalizationManager.GetTranslation))]
             [HarmonyPrefix]
             private static bool TranslationPatch(string Term, string overrideLanguage, ref string __result)

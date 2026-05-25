@@ -11,16 +11,12 @@ using COTLMP;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains internal global mod data, reserved for developers only.
- * Some of the fields might be changed at runtime.
- *
- * @class InternalData
- * Main class of which mod data is stored.
- */
 namespace COTLMP.Data
 {
+    /// <summary>
+    /// Contains internal global mod data, reserved for developers only.
+    /// Some of the fields might be changed at runtime.
+    /// </summary>
     internal class InternalData
     {
         /******************************************************************************
@@ -28,13 +24,19 @@ namespace COTLMP.Data
          *                 FOR THE MOD. CHANGE THESE VALUES WITH CAUTION!!!           *
          ******************************************************************************/
 
-        /* Enable or disable verbose debug output in the console */
+        /// <summary>
+        /// Enable or disable verbose debug output in the console.
+        /// </summary>
         internal bool VerboseDebug = false;
 
-        /* The internal variable of maximum count of players per server. Used for validation purposes. */
+        /// <summary>
+        /// The internal variable of maximum count of players per server. Used for validation purposes.
+        /// </summary>
         internal const int MaxPlayersPerServerInternal = 12;
 
-        /* Maximum number of characters a player can type in the saychat box */
+        /// <summary>
+        /// Maximum number of characters a player can type in the saychat box.
+        /// </summary>
         internal const int MaxSayCharsLimit = 90;
 
         /******************************************************************************
@@ -42,10 +44,14 @@ namespace COTLMP.Data
          *                    DO NOT CHANGE THE FOLLOWING FIELDS!!!                   *
          ******************************************************************************/
 
-        /* TRUE if the player is currently into a game session, FALSE otherwise */
+        /// <summary>
+        /// TRUE if the player is currently into a game session, FALSE otherwise.
+        /// </summary>
         internal bool InGameSession = false;
 
-        /* The player hosts the server through LAN (tipically via Play > Open to LAN option) */
+        /// <summary>
+        /// The player hosts the server through LAN (tipically via Play > Open to LAN option).
+        /// </summary>
         internal bool IsServerCreator = false;
 
         internal InternalData()

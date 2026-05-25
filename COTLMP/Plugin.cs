@@ -30,14 +30,12 @@ namespace COTLMP;
 /* Initialize the base BepInEx attributes of the mod plug-in */
 [BepInPlugin(COTLMP.Data.Version.CotlMpGuid, COTLMP.Data.Version.CotlMpName, COTLMP.Data.Version.CotlMpVer)]
 
-/* Load the COTL API plugin as a hard dependency */
+/* COTL API is mandatorily required for the mod to run */
 [BepInDependency("io.github.xhayper.COTL_API", BepInDependency.DependencyFlags.HardDependency)]
 
-/*
- * @brief
- * Creates the COTL MP plug-in instance and initializes the critical
- * COTL MP data.
- */
+/// <summary>
+/// Creates the COTL MP plug-in instance and initializes the critical COTL MP data.
+/// </summary>
 public class Plugin : BaseUnityPlugin
 {
     internal static string CotlmpPathLocation;
@@ -50,11 +48,9 @@ public class Plugin : BaseUnityPlugin
     internal static MonoBehaviour MonoInstance;
     private Harmony HarmonyInstance;
 
-    /*
-     * @brief
-     * Executes initialization code as the mod is being loaded
-     * by BepInEx.
-     */
+    /// <summary>
+    /// Executes initialization code as the mod is being loaded by BepInEx.
+    /// </summary>
     private void Awake()
     {
         System.Object SettingData;
@@ -255,11 +251,9 @@ public class Plugin : BaseUnityPlugin
         Logger.LogInfo($"Plugin {MyPluginInfo.PLUGIN_GUID} is loaded!");
     }
 
-    /*
-     * @brief
-     * Performs additional tasks after the successful initialization
-     * of the mod.
-     */
+    /// <summary>
+    /// Performs additional tasks after the successful initialization of the mod.
+    /// </summary>
     private void OnEnable()
     {
         /*
@@ -276,11 +270,9 @@ public class Plugin : BaseUnityPlugin
         Logger.LogMessage($"{HarmonyInstance.GetPatchedMethods().Count()} patches have been applied!");
     }
 
-    /*
-     * @brief
-     * Unloads all the patches hooked into game on quit event
-     * of the game.
-     */
+    /// <summary>
+    /// Unloads all the patches hooked into game on quit event of the game.
+    /// </summary>
     private void OnDisable()
     {
         Logger.LogMessage($"Unloading {MyPluginInfo.PLUGIN_GUID}");
