@@ -34,6 +34,7 @@ namespace COTLMP.Ui
         private static ScrollRect ListView;
         private static Image ServerUiEntry;
         private static Button BackButton;
+        private static Button ConnectIpButton;
         private static TMP_Text MainDescription;
         private static TMP_InputField PlayerNameInput;
         private static TMP_Text PlayerNameDescription;
@@ -82,6 +83,15 @@ namespace COTLMP.Ui
             /// The LAN servers list to be refreshed.
             /// </summary>
             LanList
+        }
+
+        /// <summary>
+        /// Button handler that displays the "Connect by IP" dialog
+        /// box which allows the player to join a server by typing its IP.
+        /// </summary>
+        private static void JoinByIPButtonHandler()
+        {
+            COTLMP.Ui.JoinServer.DisplayUi();
         }
 
         /// <summary>
@@ -418,6 +428,11 @@ namespace COTLMP.Ui
             BackButton = GameObject.Find("BackButton").GetComponent<Button>();
             COTLMP.Debug.Assertions.Assert(BackButton != null, false, "BackButton gameobject returned NULL!", null);
             BackButton.onClick.AddListener(BackButtonHandler);
+
+            /* Retrieve the "Connect by IP" button */
+            ConnectIpButton = GameObject.Find("ConnectByIpButton").GetComponent<Button>();
+            COTLMP.Debug.Assertions.Assert(ConnectIpButton != null, false, "ConnectIpButton gameobject returned NULL!", null);
+            ConnectIpButton.onClick.AddListener(JoinByIPButtonHandler);
 
             /* Retrieve the "Player Name" input field and bind a handler to it */
             PlayerNameInput = GameObject.Find("PlayerNameField").GetComponent<TMP_InputField>();

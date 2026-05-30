@@ -50,6 +50,11 @@ namespace COTLMP.Language
             new("Multiplayer/UI/PasswordPrompt/PromptDescription", "This server is password protected. Type the password in order to join.", false),
             new("Multiplayer/UI/PasswordPrompt/InvalidPassword", "The submitted password is not valid!", false),
 
+            /* Connect by IP dialog box resource strings */
+            new("Multiplayer/UI/JoinByIP/Connect", "Connect", false),
+            new("Multiplayer/UI/JoinByIP/Cancel", "Cancel", false),
+            new("Multiplayer/UI/JoinByIP/Description", "Type the IP address of the server that you want to join. The address must follow the following format as in the example below.\n\nExample: 111.55.222.333:36963", false),
+
             /* Game mod resource strings */
             new("Multiplayer/Game/Join", "{0} has joined the server", false),
             new("Multiplayer/Game/Left", "{0} has left the server", false),

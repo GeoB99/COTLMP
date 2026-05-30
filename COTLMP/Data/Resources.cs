@@ -243,6 +243,33 @@ namespace I2.Loc
                     }
                 }
             }
+
+            public static class ConnectByIp
+            {
+                public static string ConnectByIp_ConnectButton
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/JoinByIP/Connect");
+                    }
+                }
+
+                public static string ConnectByIp_CancelButton
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/JoinByIP/Cancel");
+                    }
+                }
+
+                public static string ConnectByIp_Description
+                {
+                    get
+                    {
+                        return LocalizationManager.GetTranslation("Multiplayer/UI/JoinByIP/Description");
+                    }
+                }
+            }
         }
     }
 }
