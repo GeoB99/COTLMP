@@ -17,34 +17,16 @@ using UnityEngine;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains the classes and code for the mod game related stuff.
- */
 namespace COTLMP.Game
 {
-    /*
-     * @brief
-     * Class to manage local players created for network players
-     * 
-     * @field players
-     * A fixed-size array of players managed by the class
-     * 
-     * @field moveCommands
-     * A fixed-size array of move commands managed by the class
-     */
+    /// <summary>
+    /// Class to manage local players created for network players
+    /// </summary>
     internal static class PlayerManager
     {
-        /*
-         * @brief
-         * The struct representing a command to move a player
-         * 
-         * @field Point
-         * The point to move to
-         * 
-         * @field Timeout
-         * The timeout of the move command
-         */
+        /// <summary>
+        /// The struct representing a command to move a player
+        /// </summary>
         private readonly struct MoveInfo(Vector3 point, float timeout)
         {
             public readonly Vector3 Point = point;
@@ -54,10 +36,9 @@ namespace COTLMP.Game
         private readonly static PlayerFarming[] players;
         private readonly static MoveInfo?[] moveCommands;
 
-        /*
-         * @brief
-         * Static constructor. Initializes the arrays and starts the move player coroutine.
-         */
+        /// <summary>
+        /// Static constructor. Initializes the arrays and starts the move player coroutine.
+        /// </summary>
         static PlayerManager()
         {
             players = new PlayerFarming[InternalData.MaxPlayersPerServerInternal];
@@ -65,6 +46,9 @@ namespace COTLMP.Game
             Plugin.MonoInstance.StartCoroutine(MovePlayers());
         }
 
+        /// <summary>
+        /// Moves managed players, never supposed to quit
+        /// </summary>
         private static IEnumerator MovePlayers()
         {
             while (true)
@@ -81,19 +65,12 @@ namespace COTLMP.Game
             }
         }
 
-        /*
-         * @brief
-         * Move a managed player with a given ID
-         * 
-         * @param[in] plr
-         * The ID of the player you want to move
-         * 
-         * @param[in] point
-         * The point you want to move the player to
-         * 
-         * @param[in] timeout
-         * The timeout of the move
-         */
+        /// <summary>
+        /// Move a managed player with a given ID
+        /// </summary>
+        /// <param name="plr">The ID of the player you want to move</param>
+        /// <param name="point">The point you want to move the player to</param>
+        /// <param name="timeout">The timeout of the move</param>
         public static void MovePlayer(uint plr, Vector3 point, float timeout)
         {
             if (plr > players.Length - 1 || players[plr] == null)
@@ -101,16 +78,11 @@ namespace COTLMP.Game
             moveCommands[plr] = new MoveInfo(point, timeout);
         }
 
-        /*
-         * @brief
-         * Move a managed player with a given ID instantly to the point provided
-         * 
-         * @param[in] plr
-         * The ID of the player you want to move
-         * 
-         * @param[in] point
-         * The point you want to move the player to
-         */
+        /// <summary>
+        /// Move a managed player with a given ID instantly to the point provided
+        /// </summary>
+        /// <param name="plr">The ID of the player you want to move</param>
+        /// <param name="point">The point you want to move the player to</param>
         public static void MovePlayerNow(uint plr, Vector3 point)
         {
             if (plr > players.Length - 1 || players[plr] == null)
@@ -119,13 +91,10 @@ namespace COTLMP.Game
             players[plr].gameObject.transform.position = point;
         }
 
-        /*
-         * @brief
-         * Delete a managed player
-         * 
-         * @param[in] plr
-         * The ID of the managed player you want to delete
-         */
+        /// <summary>
+        /// Delete a managed player
+        /// </summary>
+        /// <param name="plr">The ID of the managed player you want to delete</param>
         public static void DeletePlayer(uint plr)
         {
             if (plr > players.Length - 1 || players[plr] == null)
@@ -136,22 +105,15 @@ namespace COTLMP.Game
             players[plr] = null;
         }
 
-        /*
-         * @brief
-         * Create a managed player under a given ID
-         * 
-         * @param[in] id
-         * The ID you want the managed player to have
-         * 
-         * @param[in] pos
-         * The position of the new managed player to be at
-         * 
-         * @param[in] skin
-         * The fleece ID to put on the new player
-         * 
-         * @remarks
-         * If the ID is already taken, the existing player is deleted and recreated.
-         */
+        /// <summary>
+        /// Create a managed player under a given ID
+        /// </summary>
+        /// <param name="id">The ID you want the managed player to have</param>
+        /// <param name="pos">The position of the new managed player to be at</param>
+        /// <param name="skin">The fleece ID to put on the new player</param>
+        /// <remarks>
+        /// If the ID is already taken, the existing player is deleted and recreated.
+        /// </remarks>
         public static void CreatePlayer(uint id, Vector3 pos = new(), int skin = 0)
         {
             if (id > players.Length - 1)
@@ -200,16 +162,11 @@ namespace COTLMP.Game
             farming.Spine.Skeleton.SetToSetupPose();
         }
 
-        /*
-         * @brief
-         * Set the visual fleece of a managed player
-         * 
-         * @param[in] plr
-         * The ID of the player you want to set the fleece of
-         * 
-         * @param[in] skin
-         * The fleece ID to set the player to
-         */
+        /// <summary>
+        /// Set the visual fleece of a managed player
+        /// </summary>
+        /// <param name="plr">The ID of the player you want to set the fleece of</param>
+        /// <param name="skin">The fleece ID to set the player to</param>
         public static void SetPlayerSkin(uint plr, int skin = 0)
         {
             if (plr > players.Length - 1 || players[plr] == null)
@@ -218,18 +175,15 @@ namespace COTLMP.Game
             PlayerFarming farming = players[plr];
             var plrskin = farming.PlayerSkin = new Spine.Skin("Player Skin");
             plrskin.AddSkin(farming.Spine.Skeleton.Data.FindSkin($"Lamb_{skin}"));
+            farming.Spine.skeleton.SetSkin(plrskin);
+            farming.Spine.skeleton.SetToSetupPose();
         }
 
-        /*
-         * @brief
-         * Check if a managed player exists
-         * 
-         * @param[in] plr
-         * The managed player ID
-         * 
-         * @returns
-         * Whether a managed player exists or not
-         */
+        /// <summary>
+        /// Check if a managed player exists
+        /// </summary>
+        /// <param name="plr">The managed player ID</param>
+        /// <returns>Whether a managed player exists or not</returns>
         public static bool DoesPlayerExist(uint plr)
         {
             if (plr > players.Length - 1)
@@ -237,28 +191,17 @@ namespace COTLMP.Game
             return players[plr] != null;
         }
 
-        /*
-         * @brief
-         * Set the state of a given managed player
-         * 
-         * @param[in] plr
-         * The ID of the player you want to set the state of
-         * 
-         * @param[in] state
-         * The state you want to set the player to
-         * 
-         * @param[in] isCustomAnimation
-         * Whether if the state you want to set is custom animation
-         * 
-         * @param[in] customAnimation
-         * If you want to set the state to custom animation, the name of the animation
-         * 
-         * @param[in] customAnimationLoop
-         * If you want to set the state to custom animation, whether the animation should loop
-         * 
-         * @remarks
-         * If isCustomAnimation is true, the state parameter is ignored
-         */
+        /// <summary>
+        /// Set the state of a given managed player
+        /// </summary>
+        /// <param name="plr">The ID of the player you want to set the state of</param>
+        /// <param name="state">The state you want to set the player to</param>
+        /// <param name="isCustomAnimation">Whether if the state you want to set is custom animation</param>
+        /// <param name="customAnimation">If you want to set the state to custom animation, the name of the animation</param>
+        /// <param name="customAnimationLoop">If you want to set the state to custom animation, whether the animation should loop</param>
+        /// <remarks>
+        /// If isCustomAnimation is true, the state parameter is ignored
+        /// </remarks>
         public static void SetPlayerState(uint plr, StateMachine state, bool isCustomAnimation = false, string customAnimation = null, bool customAnimationLoop = false)
         {
             if (plr > players.Length - 1 || players[plr] == null)
@@ -276,16 +219,11 @@ namespace COTLMP.Game
             }
         }
 
-        /*
-         * @brief
-         * Get the state of a managed player
-         * 
-         * @param[in] plr
-         * The ID of the player you want to get the state of
-         * 
-         * @returns
-         * The StateMachine of the player if the ID is valid. Otherwise, null
-         */
+        /// <summary>
+        /// Get the state of a managed player
+        /// </summary>
+        /// <param name="plr">The ID of the player you want to get the state of</param>
+        /// <returns>The StateMachine of the player if the ID is valid. Otherwise, null</returns>
         public static StateMachine GetPlayerState(uint plr)
         {
             if (plr > players.Length - 1 || players[plr] == null)
@@ -293,20 +231,16 @@ namespace COTLMP.Game
             return players[plr].state;
         }
 
-        /*
-         * @brief
-         * This class contains the patches that the PlayerManager class needs to function
-         */
+        /// <summary>
+        /// This class contains the patches that the PlayerManager class needs to function
+        /// </summary>
         [HarmonyPatch]
         private static class PlayerManagerPatches
         {
-            /*
-             * @brief
-             * Prevent the managed player from being controlled by the actual player
-             * 
-             * @param[in] __instance
-             * The PlayerFarming instance
-             */
+            /// <summary>
+            /// Prevent the managed player from being controlled by the actual player
+            /// </summary>
+            /// <param name="__instance">The PlayerFarming instance</param>
             [HarmonyPatch(typeof(PlayerFarming), nameof(PlayerFarming.Update))]
             [HarmonyPostfix]
             private static void Update(PlayerFarming __instance)
@@ -315,16 +249,11 @@ namespace COTLMP.Game
                     __instance.rewiredPlayer = null;
             }
 
-            /*
-             * @brief
-             * Prevents the game from adding the managed player to camera focus
-             * 
-             * @param[in] g
-             * The gameobject the game is trying to add to the camera focus
-             * 
-             * @returns
-             * true if the game should continue, false if not
-             */
+            /// <summary>
+            /// Prevents the game from adding the managed player to camera focus
+            /// </summary>
+            /// <param name="g">The gameobject the game is trying to add to the camera focus</param>
+            /// <returns>true if the game should continue, false if not</returns>
             [HarmonyPatch(typeof(CameraFollowTarget), nameof(CameraFollowTarget.AddTarget))]
             [HarmonyPrefix]
             private static bool AddTarget(GameObject g)
@@ -333,16 +262,11 @@ namespace COTLMP.Game
                 return farming == null || (farming == PlayerFarming.Instance && !players.Contains(farming)); // for some reason the players check doesnt work here so here's what i made
             }
 
-            /*
-             * @brief
-             * Prevent managed players from triggering a transition
-             * 
-             * @param[in] collision
-             * The collider that collided with the transition zone
-             * 
-             * @returns
-             * false if the collider is one of the managed players, true otherwise
-             */
+            /// <summary>
+            /// Prevent managed players from triggering a transition
+            /// </summary>
+            /// <param name="collision">The collider that collided with the transition zone</param>
+            /// <returns>false if the collider is one of the managed players, true otherwise</returns>
             [HarmonyPatch(typeof(EnterBuilding), "OnTriggerEnter2D")]
             [HarmonyPrefix]
             private static bool OnTriggerEnter2D(Collider2D collision)
@@ -351,10 +275,9 @@ namespace COTLMP.Game
                 return !players.Contains(farming);
             }
 
-            /*
-             * @brief
-             * Destroy all managed players on transition
-             */
+            /// <summary>
+            /// Destroy all managed players on transition
+            /// </summary>
             [HarmonyPatch(typeof(MMTransition), nameof(MMTransition.Play))]
             [HarmonyPostfix]
             private static void MMTransitionPlay()

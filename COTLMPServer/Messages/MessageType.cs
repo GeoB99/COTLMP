@@ -7,16 +7,11 @@
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains all classes/structs/enums associated with network messages
- */
 namespace COTLMPServer.Messages
 {
-    /**
-     * @brief
-     * Message type enum
-     */
+    /// <summary>
+    /// Message type enum
+    /// </summary>
     public enum MessageType
     {
         Ping,

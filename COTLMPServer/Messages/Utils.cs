@@ -12,34 +12,28 @@ using System.IO;
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains all classes/structs/enums associated with network messages
- */
 namespace COTLMPServer.Messages
 {
-    /**
-     * @brief
-     * Contains static utility methods
-     */
+    /// <summary>
+    /// Contains static utility methods
+    /// </summary>
     public static class Utils
     {
-        /**
-         * @brief
-         * Read a byte array that is prefixed by its size from a stream
-         *
-         * @return
-         * The read byte array or null if the size is 0
-         * 
-         * @param[in] reader
-         * The binary reader to use
-         * 
-         * @throws InvalidDataException
-         * If the data passed to it is invalid
-         *
-         * @throws ArgumentNullException
-         * If any of the arguments are null
-         */
+        /// <summary>
+        /// Read a byte array that is prefixed by its size from a stream
+        /// </summary>
+        /// <returns>
+        /// The read byte array or null if the size is 0
+        /// </returns>
+        /// <param name="reader">
+        /// The binary reader to use
+        /// </param>
+        /// <exception cref="InvalidDataException">
+        /// If the data passed to the method is invalid
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// If any of the arguments are null
+        /// </exception>
         public static byte[] ReadBytes(BinaryReader reader)
         {
             if (reader == null)
@@ -56,6 +50,23 @@ namespace COTLMPServer.Messages
             }
             else
                 return null;
+        }
+
+        /// <summary>
+        /// Reverse the endianness of a uint
+        /// </summary>
+        /// <param name="val">
+        /// The integer to be reversed
+        /// </param>
+        /// <returns>
+        /// val with its byte order reversed
+        /// </returns>
+        public static uint ReverseEndianness(uint val)
+        {
+            return ((val & 0x000000FFU) << 24 |
+                    (val & 0x0000FF00U) << 8 |
+                    (val & 0x00FF0000U) >> 8 |
+                    (val & 0xFF000000U) >> 24);
         }
     }
 }

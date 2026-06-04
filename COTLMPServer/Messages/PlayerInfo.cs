@@ -13,59 +13,26 @@ using System.Text;
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains the classes/structs/enums for the server
- */
 namespace COTLMPServer.Messages
 {
-    /**
-     * @brief
-     * This struct represents all of the information about a player.
-     * 
-     * @field ID
-     * The player ID
-     * 
-     * @field Skin
-     * The skin that the player is using
-     * 
-     * @field Username
-     * The player's username (max. 35 characters)
-     * 
-     * @field State
-     * The player state
-     * 
-     * @field SerializedSize
-     * The minimum amount of bytes the structure will take up serialized
-     * 
-     * @remarks
-     * This struct doesn't have a magic number because the inner PlayerState object has one and the chances that if random junk is sent and everything aligns
-     * are very low
-     */
+    /// <summary>
+    /// This struct represents all of the information about a player that a client needs, ready to send over the netrwork.
+    /// </summary>
+    /// <remarks>
+    /// This struct doesn't have a magic number because the inner PlayerState object has one and the chances that if random junk is sent and everything aligns are very low
+    /// </remarks>
     public readonly struct PlayerInfo
     {
         public readonly uint ID;
         public readonly int Skin;
         public readonly string Username;
         public readonly PlayerState State;
+
+        /// <summary>
+        /// The minimum amount of bytes the structure will take up serialized
+        /// </summary>
         public const int SerializedSize = (sizeof(int) * 3) + 1;
         
-        /**
-         * @brief
-         * The struct contstructor
-         * 
-         * @param[in] state
-         * The PlayerState object to send
-         * 
-         * @param[in] username
-         * The username to send
-         * 
-         * @param[in] id
-         * The player ID to send
-         * 
-         * @param[in] skin
-         * The player skin to send
-         */
         public PlayerInfo(PlayerState state, string username = "", uint id = 9999, int skin = 0)
         {
             ID = id;
@@ -74,16 +41,15 @@ namespace COTLMPServer.Messages
             Username = username;
         }
 
-        /**
-         * @brief
-         * Serialize the object into a byte array
-         * 
-         * @returns
-         * The resulting byte array
-         * 
-         * @throws InvalidDataException
-         * If the data in the object is invalid
-         */
+        /// <summary>
+        /// Serialize the object into a byte array
+        /// </summary>
+        /// <returns>
+        /// The resulting byte array
+        /// </returns>
+        /// <exception cref="InvalidDataException">
+        /// If the data in the object is invalid
+        /// </exception>
         public byte[] Serialize()
         {
             using (MemoryStream stream = new MemoryStream())
@@ -101,22 +67,21 @@ namespace COTLMPServer.Messages
             }
         }
 
-        /**
-         * @brief
-         * Deserializes the byte array back into an object
-         * 
-         * @param[in] data
-         * The byte array to be processed
-         * 
-         * @returns
-         * The resulting object
-         * 
-         * @throws ArgumentNullException
-         * When data is null
-         * 
-         * @throws InvalidDataException
-         * When the data contained in the byte array is invalid
-         */
+        /// <summary>
+        /// Deserializes the byte array back into an object
+        /// </summary>
+        /// <param name="data">
+        /// The byte array to be processed
+        /// </param>
+        /// <returns>
+        /// The resulting object
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// When data is null
+        /// </exception>
+        /// <exception cref="InvalidDataException">
+        /// When the data contained in the byte array is invalid
+        /// </exception>
         public static PlayerInfo Deserialize(byte[] data)
         {
             if (data == null)
@@ -137,16 +102,15 @@ namespace COTLMPServer.Messages
             }
         }
 
-        /**
-         * @brief
-         * Convert the internal Player object into a network PlayerInfo to send it
-         * 
-         * @param[in] source
-         * The source Player object
-         * 
-         * @returns
-         * The resulting PlayerInfo object
-         */
+        /// <summary>
+        /// Convert the internal Player object into a network PlayerInfo
+        /// </summary>
+        /// <param name="source">
+        /// The source Player object
+        /// </param>
+        /// <returns>
+        /// The resulting PlayerInfo object
+        /// </returns>
         internal static PlayerInfo FromInternal(COTLMPServer.Player source)
         {
             return new PlayerInfo(source.State, source.Username, source.ID, source.Skin);

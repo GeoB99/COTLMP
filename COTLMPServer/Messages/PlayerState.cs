@@ -8,46 +8,15 @@
 /* IMPORTS ********************************************************************/
 
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains the classes/structs/enums for the server
- */
 namespace COTLMPServer.Messages
 {
-    /**
-     * @brief
-     * Represents the state of a player
-     * 
-     * @field Current
-     * the current state of the player
-     * 
-     * @field Facing
-     * Where the player is facing
-     * 
-     * @field Look
-     * Where the player is looking
-     * 
-     * @field Defending
-     * Whether the player is defending or not
-     * 
-     * @field Timer
-     * Some kind of timer
-     * 
-     * @field Position
-     * The player position
-     * 
-     * @field SerializedSize
-     * The minimum amount of bytes the structure will take up serialized
-     * 
-     * @field MagicNumber
-     * The magic number to be used for verification when sent over the network
-     */
+    /// <summary>
+    /// Represents the state of a player
+    /// </summary>
     public class PlayerState
     {
         public State Current;
@@ -56,31 +25,17 @@ namespace COTLMPServer.Messages
         public bool Defending;
         public float Timer;
         public Vector3 Position;
+
+        /// <summary>
+        /// The magic number to be used for verification when sent over the network
+        /// </summary>
         public const int MagicNumber = 0xAB3245;
+
+        /// <summary>
+        /// The minimum amount of bytes the structure will take up serialized
+        /// </summary>
         public const int SerializedSize = (sizeof(int) * 2 + sizeof(float) * 3 + sizeof(byte));
 
-        /**
-         * @brief
-         * The constructor
-         * 
-         * @param[in] Current
-         * the current state of the player
-         * 
-        * @param[in] Facing
-        * Where the player is facing
-        * 
-         * @param[in] Look
-        * Where the player is looking
-        * 
-        * @param[in] Defending
-        * Whether the player is defending or not
-         * 
-         * @param[in] Timer
-         * Some kind of timer
-         * 
-         * @param[in] Position
-        * The player position
-         */
         public PlayerState(State state, float facing, float look, bool defending, float timer, Vector3 position)
         {
             Current = state;
@@ -91,16 +46,15 @@ namespace COTLMPServer.Messages
             Position = position;
         }
 
-        /**
-         * @brief
-         * Serialize the object into a byte array
-         * 
-         * @returns
-         * The resulting byte array
-         * 
-         * @throws InvalidDataException
-         * If the data in the object is invalid
-         */
+        /// <summary>
+        /// Serialize the object into a byte array
+        /// </summary>
+        /// <returns>
+        /// The resulting byte array
+        /// </returns>
+        /// <exception cref="InvalidDataException">
+        /// If the data in the object is invalid
+        /// </exception>
         public byte[] Serialize()
         {
             if (!Enum.IsDefined(typeof(State), Current))
@@ -122,22 +76,21 @@ namespace COTLMPServer.Messages
             }
         }
 
-        /**
-         * @brief
-         * Deserializes the byte array back into an object
-         * 
-         * @param[in] data
-         * The byte array to be processed
-         * 
-         * @returns
-         * The resulting object
-         * 
-         * @throws ArgumentNullException
-         * When data is null
-         * 
-         * @throws InvalidDataException
-         * When the data contained in the byte array is invalid
-         */
+        /// <summary>
+        /// Deserializes the byte array back into an object
+        /// </summary>
+        /// <param name="data">
+        /// The byte array to be processed
+        /// </param>
+        /// <returns>
+        /// The resulting object
+        /// </returns>
+        /// <exception cref="ArgumentNullException">
+        /// When data is null
+        /// </exception>
+        /// <exception cref="InvalidDataException">
+        /// When the data contained in the byte array is invalid
+        /// </exception>
         public static PlayerState Deserialize(byte[] data)
         {
             if (data == null)
@@ -159,10 +112,9 @@ namespace COTLMPServer.Messages
             }
         }
 
-        /**
-         * @brief
-         * An enum of all possible player states
-         */
+        /// <summary>
+        /// An enum of all possible player states
+        /// </summary>
         public enum State
         {
             Idle,

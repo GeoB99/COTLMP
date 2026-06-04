@@ -7,40 +7,19 @@
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains the classes/structs/enums for the server
- */
 namespace COTLMPServer
 {
-    /**
-     * @brief
-     * Interface that classes must implement to be a logger class for the server
-     */
+    /// <summary>
+    /// Interface that classes must implement to be a logger class for the server
+    /// </summary>
     public interface ILogger
     {
-        /**
-         * @brief
-         * Logs a message with the info log level
-         */
         void LogInfo(string message);
 
-        /**
-         * @brief
-         * Logs a message with the warning log level
-         */
         void LogWarning(string message);
 
-        /**
-         * @brief
-         * Logs a message with the error log level
-         */
         void LogError(string message);
 
-        /**
-         * @brief
-         * Logs a message with the fatal log level
-         */
         void LogFatal(string message);
     }
 }

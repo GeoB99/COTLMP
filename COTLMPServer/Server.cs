@@ -22,54 +22,11 @@ using System.Threading.Tasks;
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains the classes/structs/enums for the server
- */
 namespace COTLMPServer
 {
-    /**
-     * @brief
-     * This class implements the functionality of a server
-     *
-     * @field Port
-     * The port on which the server is running on
-     *
-     * The port that the server is running on
-     * 
-     * @field ServerStopped
-     * The event that is invoked when the server is stopped
-     * 
-     * @field running
-     * 1 if server is running, 0 if not
-     * 
-     * @field disposedValue
-     * Whether if the Server object was disposed
-     * 
-     * @field client
-     * The UdpClient object that the server uses for listening
-     * 
-     * @field token
-     * The user-provided cancellation token that is canceled to stop the server
-     * 
-     * @field logger
-     * The user-provided logger
-     * 
-     * @field ids
-     * An array of player IDs, true if taken, false if not
-     * 
-     * @field idLock
-     * A lock to protect the ids array
-     * 
-     * @field sendLock
-     * A lock to protect UdpClient.SendAsync()
-     * 
-     * @field players
-     * A dictionary for storing players currently in the game
-     * 
-     * @field gameVersion
-     * The game version which the server is supposed to support
-     */
+    /// <summary>
+    /// This class implements the functionality of a server
+    /// </summary>
     public sealed class Server : IDisposable
     {
         public readonly int Port;
@@ -86,28 +43,6 @@ namespace COTLMPServer
         private readonly bool[] ids;
         private readonly object idLock;
 
-        /**
-         * @brief
-         * The Server class constructor
-         * 
-         * @param[in] port
-         * The port that the server should listen on. 0 for any ephemeral port.
-         * 
-         * @param[in] cancellationToken
-         * The cancellation token to stop the server. Null if none.
-         * 
-         * @param[in] logger
-         * The logger that the server should use. Null if none.
-         * 
-         * @param[in] ver
-         * The game version
-         * 
-         * @param[in] maxPlayers
-         * The player cap
-         * 
-         * @param[in] log
-         * The logger that the server should use
-         */
         public Server(string ver, int maxPlayers, int port = 0, CancellationToken? cancellationToken = null, ILogger log = null)
         {
             client = new UdpClient(port);
@@ -127,16 +62,15 @@ namespace COTLMPServer
             idLock = new object();
         }
 
-        /**
-         * @brief
-         * A method responsible for disconnecting inresponsive players
-         * 
-         * @param[in]
-         * The player that should be monitored
-         * 
-         * @param[in] endpoint
-         * The endpoint of the player
-         */
+        /// <summary>
+        /// A method responsible for disconnecting inresponsive players
+        /// </summary>
+        /// <param name="plr">
+        /// The player that should be monitored
+        /// </param>
+        /// <param name="endpoint">
+        /// The endpoint of the player
+        /// </param>
         private async Task PlayerHeartBeat(Player plr, IPEndPoint endpoint)
         {
             try
@@ -166,16 +100,15 @@ namespace COTLMPServer
             }
         }
 
-        /**
-         * @brief
-         * Safely concurrently send bytes to an endpoint
-         * 
-         * @param[in] endPoint
-         * The endpoint to send the bytes to
-         * 
-         * @param[in] data
-         * The bytes to send
-         */
+        /// <summary>
+        /// Safely concurrently send bytes to an endpoint
+        /// </summary>
+        /// <param name="endPoint">
+        /// The endpoint to send the bytes to
+        /// </param>
+        /// <param name="data">
+        /// The bytes to send
+        /// </param>
         private async Task Send(IPEndPoint endPoint, byte[] data)
         {
             await sendLock.WaitAsync(token);
@@ -189,16 +122,15 @@ namespace COTLMPServer
             }
         }
 
-        /**
-         * @brief
-         * Disconnect a player
-         * 
-         * @param[in] endPoint
-         * The endpoint of the player
-         * 
-         * @param[in] message
-         * The message to attach to the disconnect message
-         */
+        /// <summary>
+        /// Disconnect a player
+        /// </summary>
+        /// <param name="message">
+        /// The message to attach to the disconnect message
+        /// </param>
+        /// <param name="endPoint">
+        /// The endpoint of the player
+        /// </param>
         private async Task DisconnectPlayer(IPEndPoint endPoint, string message = null)
         {
             Message msg = new Message(MessageType.Disconnect, 1, message == null ? null : Encoding.UTF8.GetBytes(message));
@@ -213,43 +145,24 @@ namespace COTLMPServer
                 }
             }
             await Send(endPoint, msg.Serialize());
-            await SendToBiome(removed.Biome, MessageType.PlayerLeft, BitConverter.GetBytes(BitConverter.IsLittleEndian ? removed.ID : ReverseEndianness(removed.ID)), null);
+            await SendToBiome(removed.Biome, MessageType.PlayerLeft, BitConverter.GetBytes(BitConverter.IsLittleEndian ? removed.ID : Utils.ReverseEndianness(removed.ID)), null);
         }
 
-        /**
-         * @brief
-         * Reverse the endianness of a uint
-         * 
-         * @param[in] val
-         * The uint
-         * 
-         * @returns
-         * The uint with its byte order reversed
-         */
-        private static uint ReverseEndianness(uint val)
-        {
-            return ((val & 0x000000FFU) << 24 |
-                    (val & 0x0000FF00U) << 8 |
-                    (val & 0x00FF0000U) >> 8 |
-                    (val & 0xFF000000U) >> 24);
-        }
-
-        /**
-         * @brief
-         * Send a message to all players within a biome
-         * 
-         * @param[in] name
-         * The name of the biome
-         * 
-         * @param[in] type
-         * The message type
-         * 
-         * @param[in] data
-         * The data that should be included in the message
-         * 
-         * @param[in] except
-         * The player in the biome to which the message shouldn't be sent
-         */
+        /// <summary>
+        /// Send a message to all players within a biome
+        /// </summary>
+        /// <param name="name">
+        /// The name of the biome
+        /// </param>
+        /// <param name="type">
+        /// The message type
+        /// </param>
+        /// <param name="data">
+        /// The data that should be included in the message
+        /// </param>
+        /// <param name="except">
+        /// The player in the biome to which the message shouldn't be sent
+        /// </param>
         private async Task SendToBiome(string name, MessageType type, byte[] data, Player except)
         {
             var pairs = players.ToArray().Where(p => p.Value.Biome == name);
@@ -272,13 +185,12 @@ namespace COTLMPServer
             await Task.WhenAll(tasks);
         }
 
-        /**
-         * @brief
-         * Main server logic
-         * 
-         * @remarks
-         * Only one instance of this method can run at a time
-         */
+        /// <summary>
+        /// Main server logic
+        /// </summary>
+        /// <remarks>
+        /// Only one instance of this method can run at a time
+        /// </remarks>
         public async Task Run()
         {
             if (disposedValue)
@@ -400,7 +312,7 @@ namespace COTLMPServer
 
                             case MessageType.Transition:
                                 {
-                                    await SendToBiome(plr.Biome, MessageType.PlayerLeft, BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : ReverseEndianness(ReverseEndianness(plr.ID))), plr);
+                                    await SendToBiome(plr.Biome, MessageType.PlayerLeft, BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : Utils.ReverseEndianness(Utils.ReverseEndianness(plr.ID))), plr);
 
                                     plr.Biome = Encoding.UTF8.GetString(message.Data);
                                     var pairs = players.ToArray().Where(p => p.Value.Biome == plr.Biome);
@@ -439,7 +351,7 @@ namespace COTLMPServer
                                 {
                                     plr.State.Position = Vector3.Deserialize(message.Data, 0, out _);
                                     byte[] bytes = new byte[sizeof(uint) + Vector3.SerializedSize];
-                                    Array.Copy(BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : ReverseEndianness(plr.ID)), bytes, sizeof(uint));
+                                    Array.Copy(BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : Utils.ReverseEndianness(plr.ID)), bytes, sizeof(uint));
                                     Array.Copy(message.Data, 0, bytes, sizeof(uint), Vector3.SerializedSize);
 
                                     await SendToBiome(plr.Biome, MessageType.PositionUpdate, bytes, plr);
@@ -469,6 +381,9 @@ namespace COTLMPServer
                             case MessageType.Ping:
                                 uint seq = plr?.Sequence ?? 0;
                                 await Send(result.RemoteEndPoint, new Message(MessageType.Ping, seq).Serialize());
+                                break;
+                            default:
+                                await DisconnectPlayer(result.RemoteEndPoint, "invalid message");
                                 break;
                         }
                     }
@@ -514,13 +429,12 @@ namespace COTLMPServer
             }
         }
 
-        /**
-         * @brief
-         * Dispose of unmanaged resources
-         * 
-         * @param[in] disposing
-         * Whether if the Dispose() method was called manually
-         */
+        /// <summary>
+        /// Dispose of unmanaged resources
+        /// </summary>
+        /// <param name="disposing">
+        /// Whether if the Dispose() method was called manually
+        /// </param>
         private void Dispose(bool disposing)
         {
             if (!disposedValue)
@@ -533,19 +447,14 @@ namespace COTLMPServer
             }
         }
 
-        /**
-         * @brief
-         * The server destructor
-         */
         ~Server()
         {
             Dispose(false);
         }
 
-        /**
-         * @brief
-         * Dispose of unmanaged resources 
-         */
+        /// <summary>
+        /// Dispose of unmanaged resources
+        /// </summary>
         public void Dispose()
         {
             Dispose(true);
