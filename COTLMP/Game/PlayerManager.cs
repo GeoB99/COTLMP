@@ -8,6 +8,7 @@
 /* IMPORTS ********************************************************************/
 
 using COTLMP.Data;
+using COTLMP.Debug;
 using HarmonyLib;
 using MMTools;
 using System;
@@ -130,6 +131,7 @@ namespace COTLMP.Game
             if (plr > players.Length - 1 || players[plr] == null)
                 return;
 
+            // if this turns out to work bad, can try CoopManager.RemoveCoopPlayerStatic
             GameObject.Destroy(players[plr].gameObject);
             players[plr] = null;
         }
@@ -184,9 +186,10 @@ namespace COTLMP.Game
                 plr.SetActive(true);
                 farming.Spine.GetComponent<MeshRenderer>()?.enabled = true;
             }
-            catch (NullReferenceException)
+            catch (Exception e)
             {
                 GameObject.Destroy(plr);
+                PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, $"Failed to create additional player: {e.Message}");
                 return;
             }
 
