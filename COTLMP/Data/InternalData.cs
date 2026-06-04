@@ -53,8 +53,15 @@ namespace COTLMP.Data
         /// The player hosts the server through LAN (tipically via Play > Open to LAN option).
         /// </summary>
         internal bool IsServerCreator = false;
-
+        
+        /// <summary>
+        /// The time interval between position update, in seconds
+        /// </summary>
         internal const float updateFrequencySec = 1f / 15f; // 15hz
+
+        /// <summary>
+        /// The amount of messages that the client will process in one frame
+        /// </summary>
         internal const uint maxProcessPerFrame = 100;
 
         internal InternalData()
