@@ -54,6 +54,9 @@ namespace COTLMP.Data
         /// </summary>
         internal bool IsServerCreator = false;
 
+        internal const float updateFrequencySec = 1f / 15f; // 15hz
+        internal const uint maxProcessPerFrame = 100;
+
         internal InternalData()
         {
             /* Do nothing */

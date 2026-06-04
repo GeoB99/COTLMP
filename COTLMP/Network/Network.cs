@@ -24,6 +24,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using COTLMP.Data;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -94,9 +95,6 @@ namespace COTLMP.Network
         private static uint sequence;
         private static bool transitionHappened;
         private static ConcurrentQueue<Message> messageQueue;
-
-        private const float updateFrequencySec = 1f / 15f; // 15hz
-        private const uint maxProcessPerFrame = 100;
 
         /**
          * @brief
@@ -183,7 +181,7 @@ namespace COTLMP.Network
          */
         public static IEnumerator SendUpdates()
         {
-            var wait = new WaitForSecondsRealtime(updateFrequencySec);
+            var wait = new WaitForSecondsRealtime(InternalData.updateFrequencySec);
             Vector3 lastPosition = new();
             while (!cancelToken.IsCancellationRequested && online != 0)
             {
@@ -226,7 +224,7 @@ namespace COTLMP.Network
             int processedThisFrame = 0;
             while (!cancelToken.IsCancellationRequested && keepLooping)
             {
-                if (processedThisFrame == maxProcessPerFrame)
+                if (processedThisFrame == InternalData.maxProcessPerFrame)
                 {
                     if (messageQueue.TryPeek(out _))
                         PrintLogger.Print(DebugLevel.WARNING_LEVEL, DebugComponent.NETWORK_STACK_COMPONENT, "Can't keep up! Is the game overloaded?");
@@ -257,7 +255,7 @@ namespace COTLMP.Network
                     localPlayer?.state.OnStateChange += OnStateChanged;
                 }
 
-                // FIXME: this doesn't seem to work to differentiate between the crusade select place and the main cult
+                // FIXME: transitions are just broken in general
                 if (localPlayer != null && transitionHappened)
                 {
                     _ = Send(new Message(MessageType.Transition,

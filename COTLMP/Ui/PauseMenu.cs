@@ -149,7 +149,19 @@ namespace COTLMP.Ui
             {
                 try
                 {
+                    /*
+                     * The server has been started, the player is currently in session.
+                     * Acknowledge the player hosts the server through LAN which makes
+                     * themselves a server so to speak.
+                     */
+                    Plugin.GlobalsInternal.InGameSession = true;
+                    Plugin.GlobalsInternal.IsServerCreator = true;
+
+                    /* Start the saychat mechanism */
+                    COTLMP.Ui.SayChat.StartSayChat();
+
                     Server = new Server(Application.version, Plugin.Globals.MaxNumPlayers, cancellationToken:tokenSource.Token, log:new ServerLogger());
+                    Server.ServerStopped += ServerStopped;
                 }
                 catch
                 {
