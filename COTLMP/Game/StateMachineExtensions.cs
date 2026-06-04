@@ -12,40 +12,28 @@ using COTLMPServer.Messages;
 
 /* CLASSES & CODE *************************************************************/
 
-/*
- * @brief
- * Contains the classes and code for the mod game related stuff.
- */
 namespace COTLMP.Game
 {
-    /*
-     * @brief
-     * Extensions for the StateMachine class
-     */
+    /// <summary>
+    /// Extensions for the StateMachine class
+    /// </summary>
     internal static class StateMachineExtensions
     {
-        /*
-         * @brief
-         * Convert a StateMachine instance to PlayerState
-         * 
-         * @param[in] position
-         * The player's position
-         * 
-         * @returns
-         * A PlayerState instance that represents the same thing as the StateMachine instance
-         */
+        /// <summary>
+        /// Convert a StateMachine instance to PlayerState
+        /// </summary>
+        /// <param name="position">The player's position</param>
+        /// <returns>A PlayerState instance that represents the same thing as the StateMachine instance</returns>
         public static PlayerState ToNetwork(this StateMachine machine, Vector3 position)
         {
             return new PlayerState((PlayerState.State)machine.CURRENT_STATE, machine.facingAngle, machine.LookAngle, machine.isDefending, machine.Timer, position);
         }
 
-        /*
-         * @brief
-         * Convert a PlayerState instance to StateMachine
-         * 
-         * @returns
-         * A StateMachine instance that represents the same thing as the PlayerInstance instance
-         */
+        /// <summary>
+        /// Convert a PlayerState instance to StateMachine
+        /// </summary>
+        /// <param name="state"></param>
+        /// <returns>A StateMachine instance that represents the same thing as the PlayerInstance instance</returns>
         public static StateMachine ToUnity(this PlayerState state)
         {
             return new StateMachine()

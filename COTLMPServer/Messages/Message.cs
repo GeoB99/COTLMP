@@ -12,47 +12,37 @@ using System.IO;
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains all classes/structs associated with network messages
- */
 namespace COTLMPServer.Messages
 {
-    /**
-     * @brief
-     * Message header
-     *
-     * @field Type
-     * Message type
-     * 
-     * @field Data
-     * Actual message data (depends on the message type)
-     *
-     * @field MagicNumber
-     * The magic number to be used for verification when sent over the network
-     */
+    /// <summary>
+    /// Message header
+    /// </summary>
     public sealed class Message
     {
         public MessageType Type;
         public uint Sequence;
+        /// <summary>
+        /// Actual message data (depends on the message type)
+        /// </summary>
         public byte[] Data;
+        /// <summary>
+        /// The magic number to be used for verification when sent over the network
+        /// </summary>
         public const int MagicNumber = 0x173495;
         public const int SerializedSize = sizeof(int) * 3;
 
-        /**
-         * @brief
-         * Serialize the message into a byte array
-         *
-         * @return
-         * A byte array that represents the message
-         *
-         * @remarks
-         * Type must be a value that the MessageType enum defines
-         * Data can be null or an empty array
-         *
-         * @throws InvalidDataException
-         * If any of the data in the class is invalid
-         */
+        /// <summary>
+        /// Serialize the message into a byte array
+        /// </summary>
+        /// <returns>
+        /// A byte array that represents the message
+        /// </returns>
+        /// <remarks>
+        /// Type must be a value that the MessageType enum defines, Data can be null or an empty array
+        /// </remarks>
+        /// <exception cref="InvalidCastException">
+        /// If any of the data in the class is invalid
+        /// </exception>
         public byte[] Serialize()
         {
             if (!Enum.IsDefined(typeof(MessageType), Type))
@@ -63,7 +53,6 @@ namespace COTLMPServer.Messages
                 writer.Write(MagicNumber);
                 writer.Write((int)Type);
                 writer.Write(Sequence);
-                //                writer.Write(ID);
                 if (Data?.Length > 0) // check if data is null or zero length
                 {
                     writer.Write(Data.Length);
@@ -82,22 +71,21 @@ namespace COTLMPServer.Messages
             Sequence = sequence;
         }
 
-        /**
-         * @brief
-         * Deserialize byte array back into a Message object
-         *
-         * @param[in] data
-         * The byte array
-         *
-         * @return
-         * The resulting Message object
-         *
-         * @throws InvalidDataException
-         * If the data in the array is invalid
-         *
-         * @throws ArgumentNullException
-         * If any of the arguments are null
-         */
+        /// <summary>
+        /// Deserialize byte array back into a Message object
+        /// </summary>
+        /// <param name="data">
+        /// The byte array
+        /// </param>
+        /// <returns>
+        /// The resulting Message object
+        /// </returns>
+        /// <exception cref="InvalidDataException">
+        /// If the data in the array is invalid
+        /// </exception>
+        /// <exception cref="ArgumentNullException">
+        /// If any of the arguments are null
+        /// </exception>
         public static Message Deserialize(byte[] data)
         {
             if (data == null)

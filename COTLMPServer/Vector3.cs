@@ -14,46 +14,36 @@ using System.Linq;
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains the classes/structs/enums for the server
- */
 namespace COTLMPServer
 {
-    /**
-     * @brief
-     * Represents a point in 3d space
-     * 
-     * @field X
-     * The X coordinate
-     * 
-     * @field Y
-     * The Y coordinate
-     * 
-     * @field Z
-     * The Z coordinate
-     * 
-     * @field MagicNumber
-     * The magic number to be used for verification when sent over the network
-     * 
-     * @field SerializedSize
-     * The minimum amount of bytes the structure will take up serialized
-     */
+    /// <summary>
+    ///     Represents a point in 3d space
+    /// </summary>
     public readonly struct Vector3
     {
         public readonly float X;
         public readonly float Y;
         public readonly float Z;
+
+        /// <summary>
+        /// The minimum amount of bytes the structure will take up serialized
+        /// </summary>
+        /// <remarks>
+        /// It is only the minimum, the structure may be larger than this when serialized.
+        /// </remarks>
         public const int SerializedSize = (sizeof(float) * 3) + sizeof(int);
+
+        /// <summary>
+        /// The magic number to be used for verification when sent over the network
+        /// </summary>
         public const int MagicNumber = 0xDE33789;
 
-        /**
-         * @brief
-         * Serialize the object into a byte array
-         * 
-         * @returns
-         * The resulting byte array
-         */
+        /// <summary>
+        /// Serialize the object into a byte array
+        /// </summary>
+        /// <returns>
+        /// The resulting byte array
+        /// </returns>
         public byte[] Serialize()
         {
             using (MemoryStream stream = new MemoryStream())
@@ -67,32 +57,30 @@ namespace COTLMPServer
             }
         }
 
-        /**
-         * @brief
-         * Deserializes the byte array back into an object
-         * 
-         * @param[in] data
-         * The byte array to be processed
-         * 
-         * @param[in] offset
-         * The offset to use when processing the byte array
-         * 
-         * @param[out] after
-         * The offset that 
-         * 
-         * @returns
-         * The resulting object
-         * 
-         * @throws ArgumentNullException
-         * When data is null
-         * 
-         * @throws InvalidDataException
-         * When the data contained in the byte array is invalid
-         * 
-         * @remarks
-         * This is the only Deserialize() method to accept an offset and after parameter because a vector3 can be encountered in contexts where you might want to read it from the middle
-         * of a byte array
-         */
+        /// <summary>
+        /// Deserializes the byte array back into an object
+        /// </summary>
+        /// <param name="data">
+        /// The byte array to be processed
+        /// </param>
+        /// <param name="offset">
+        /// The offset to use when processing the byte array
+        /// </param>
+        /// <param name="after">
+        /// The offset that follows immediately after the object in the array
+        /// </param>
+        /// <exception cref="ArgumentNullException">
+        /// When data is null
+        /// </exception>
+        /// <exception cref="InvalidDataException">
+        /// When the data contained in the byte array is invalid
+        /// </exception>
+        /// <remarks>
+        /// This is the only Deserialize() method to accept an offset and after parameter because a vector3 can be encountered in contexts where you might want to read it from the middle of a byte array
+        /// </remarks>
+        /// <returns>
+        /// The resulting object
+        /// </returns>
         public static Vector3 Deserialize(byte[] data, int offset, out int after)
         {
             if (data == null)
@@ -110,19 +98,18 @@ namespace COTLMPServer
             }
         }
 
-        /**
-         * @brief
-         * The constructor of the struct
-         * 
-         * @param[in] x
-         * The x coordinate
-         * 
-         * @param[in] y
-         * The y coordinate
-         * 
-         * @param[in] z
-         * The z coordinate
-         */
+        /// <summary>
+        /// The constructor of the struct
+        /// </summary>
+        /// <param name="x">
+        /// The x coordinate
+        /// </param>
+        /// <param name="y">
+        /// The y coordinate
+        /// </param>
+        /// <param name="z">
+        /// The z coordinate
+        /// </param>
         public Vector3(float x, float y, float z)
         {
             X = x;

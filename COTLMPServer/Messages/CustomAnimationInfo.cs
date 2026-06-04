@@ -13,50 +13,33 @@ using System.Text;
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains all classes/structs associated with network messages
- */
 namespace COTLMPServer.Messages
 {
-    /**
-     * @brief
-     * The handshake message that the client sends
-     * 
-     * @field ID
-     * The player ID
-     * 
-     * @field Loop
-     * Whether the animation should loop
-     * 
-     * @field Name
-     * The name of the animation
-     * 
-     * @field SerializedSize
-     * The minimum amount of bytes the structure will take up serialized
-     * 
-     * @field MagicNumber
-     * The magic number to be used for verification when sent over the network
-     */
+    /// <summary>
+    /// The handshake message that the client sends
+    /// </summary>
     public class CustomAnimationInfo
     {
         public uint ID;
         public bool Loop;
         public string Name;
         public Vector3 Position;
+        /// <summary>
+        /// The magic number to be used for verification when sent over the network
+        /// </summary>
         public const int MagicNumber = 0xAFE3423;
+        /// <summary>
+        /// The minimum amount of bytes the structure will take up serialized
+        /// </summary>
         public const int SerializedSize = sizeof(int) * 3 + 2 + Vector3.SerializedSize;
 
-        /**
-         * @brief
-         * Serialize the object into a byte array
-         * 
-         * @returns
-         * The resulting byte array
-         * 
-         * @throws InvalidDataException
-         * If the data in the object is invalid
-         */
+        /// <summary>
+        /// Serialize the object into a byte array
+        /// </summary>
+        /// <returns>
+        /// The resulting byte array
+        /// </returns>
+        /// <exception cref="InvalidDataException"/>
         public byte[] Serialize()
         {
             if (string.IsNullOrEmpty(Name))
@@ -78,22 +61,17 @@ namespace COTLMPServer.Messages
             }
         }
 
-        /**
-         * @brief
-         * Deserializes the byte array back into an object
-         * 
-         * @param[in] data
-         * The byte array to be processed
-         * 
-         * @returns
-         * The resulting object
-         * 
-         * @throws ArgumentNullException
-         * When data is null
-         * 
-         * @throws InvalidDataException
-         * When the data contained in the byte array is invalid
-         */
+        /// <summary>
+        /// Deserializes the byte array back into an object
+        /// </summary>
+        /// <param name="data">
+        /// The byte array to be processed
+        /// </param>
+        /// <returns>
+        /// The resulting object
+        /// </returns>
+        /// <exception cref="ArgumentNullException"/>
+        /// <exception cref="InvalidDataException"/>
         public static CustomAnimationInfo Deserialize(byte[] data)
         {
             if (data == null)
@@ -114,19 +92,6 @@ namespace COTLMPServer.Messages
             }
         }
 
-        /**
-         * @brief
-         * The constructor for CustomAnimationInfo
-         * 
-         * @param[in] name
-         * The name of the animation
-         * 
-         * @param[in] id
-         * The player ID
-         * 
-         * @param[in] loop
-         * Whether to loop the animation
-         */
         public CustomAnimationInfo(string name, uint id = 0, bool loop = false, Vector3 pos = new Vector3())
         {
             Name = name;

@@ -34,52 +34,9 @@ using COTLMP.Data;
  */
 namespace COTLMP.Network
 {
-    /**
-     * @brief
-     * The main class for network features
-     * 
-     * @field OnDisconnect
-     * The event that will be invoked upon a disconnect
-     * 
-     * @field IsConnected
-     * Whether the game is online or not
-     * 
-     * @field client
-     * The main UdpClient for the connection
-     * 
-     * @field localPlayer
-     * The local player instance
-     * 
-     * @field cancelToken
-     * The cancellation token used to cancel online functions
-     * 
-     * @field sendLock
-     * The lock used to protect UdpClient.SendAsync()
-     * 
-     * @field online
-     * Whether the game is online or not (internal)
-     * 
-     * @field registration
-     * The cancellation token cancellation for disposing of the UdpClient once the token is cancelled
-     * 
-     * @field seqLock
-     * The lock to protect sequence
-     * 
-     * @field sequence
-     * The sequence number of the next message
-     * 
-     * @field transitionHappened
-     * Whether a transition happened
-     * 
-     * @field messageQueue
-     * A queue of messages
-     * 
-     * @field updateFrequencySec
-     * How often the game sends position updates (in seconds)
-     * 
-     * @field maxProcessPerFrame
-     * How many messages the game will process in one frame
-     */
+    /// <summary>
+    /// The main class for network features
+    /// </summary>
     internal static class Network
     {
         public static event Action OnDisconnect;
@@ -89,23 +46,31 @@ namespace COTLMP.Network
         private static PlayerFarming localPlayer;
         private static CancellationToken cancelToken;
         private static SemaphoreSlim sendLock;
+        /// <summary>
+        /// Whether the game is online or not
+        /// </summary>
         private static int online;
+        /// <summary>
+        /// The cancellation token registration for disposing of the UdpClient once the token is cancelled
+        /// </summary>
         private static CancellationTokenRegistration registration;
         private static object seqLock;
         private static uint sequence;
         private static bool transitionHappened;
+        /// <summary>
+        /// A queue of messages to be processed by the main thread
+        /// </summary>
         private static ConcurrentQueue<Message> messageQueue;
 
-        /**
-         * @brief
-         * Safely concurrently send messages
-         * 
-         * @param[in] msg
-         * What message to send
-         * 
-         * @remarks
-         * The sequence number in msg is ignored and overwritten in the method
-         */
+        /// <summary>
+        /// Safely concurrently send messages
+        /// </summary>
+        /// <param name="msg">
+        /// The message to send
+        /// </param>
+        /// <remarks>
+        /// The sequence number in msg is ignored and is overwritten
+        /// </remarks>
         private static async System.Threading.Tasks.Task Send(Message msg)
         {
             if (online == 0)
@@ -125,10 +90,9 @@ namespace COTLMP.Network
             }
         }
 
-        /**
-         * @brief
-         * Monitor if the server has stopped responding and send pings at regular intervals
-         */
+        /// <summary>
+        /// Monitor if the server has stopped responding and send pings at regular intervals
+        /// </summary>
         private static async System.Threading.Tasks.Task HeartBeat()
         {
             var ping = new Message(MessageType.Ping, 0);
@@ -139,10 +103,9 @@ namespace COTLMP.Network
             }
         }
 
-        /**
-         * @brief
-         * Run in a loop recieving messages from the client
-         */
+        /// <summary>
+        /// Run in a loop recieving messages from the client
+        /// </summary>
         private static async System.Threading.Tasks.Task Recv()
         {
             try
@@ -175,10 +138,9 @@ namespace COTLMP.Network
             }
         }
 
-        /**
-         * @brief
-         * Send position updates
-         */
+        /// <summary>
+        /// Send position updates
+        /// </summary>
         public static IEnumerator SendUpdates()
         {
             var wait = new WaitForSecondsRealtime(InternalData.updateFrequencySec);
@@ -195,28 +157,9 @@ namespace COTLMP.Network
             }
         }
 
-        /**
-         * @brief
-         * Reverse the endianness of a uint
-         * 
-         * @param[in] val
-         * The uint
-         * 
-         * @returns
-         * The uint with its byte order reversed
-         */
-        private static uint ReverseEndianness(uint val)
-        {
-            return ((val & 0x000000FFU) << 24 |
-                    (val & 0x0000FF00U) << 8 |
-                    (val & 0x00FF0000U) >> 8 |
-                    (val & 0xFF000000U) >> 24);
-        }
-
-        /**
-         * @brief
-         * Main message processing loop
-         */
+        /// <summary>
+        /// Main message processing loop
+        /// </summary>
         public static IEnumerator PollServer()
         {
             var wait = new WaitForTask(null);
@@ -275,7 +218,7 @@ namespace COTLMP.Network
 
                                 uint id = BitConverter.ToUInt32(msg.Data, 0);
                                 if (!BitConverter.IsLittleEndian) // the data in the message is in little endian, convert
-                                    id = ReverseEndianness(id);
+                                    id = COTLMPServer.Messages.Utils.ReverseEndianness(id);
 
                                 var pos = COTLMPServer.Vector3.Deserialize(msg.Data, sizeof(uint), out _);
 
@@ -310,7 +253,7 @@ namespace COTLMP.Network
 
                                 uint id = BitConverter.ToUInt32(msg.Data, 0);
                                 if (!BitConverter.IsLittleEndian)
-                                    id = ReverseEndianness(id);
+                                    id = COTLMPServer.Messages.Utils.ReverseEndianness(id);
 
                                 PlayerManager.DeletePlayer(id);
                             }
@@ -366,16 +309,18 @@ namespace COTLMP.Network
             yield break;
         }
 
-        /**
-         * @brief
-         * Attempt to connect to a server
-         * 
-         * @param[in] server
-         * The server's endpoint
-         * 
-         * @param[in] token
-         * The cancellation token to use for this connection
-         */
+        /// <summary>
+        /// Attempt to connect to a server
+        /// </summary>
+        /// <param name="server">
+        /// The server's endpoint
+        /// </param>
+        /// <param name="token">
+        /// The cancellation token to use for this connection
+        /// </param>
+        /// <returns>
+        /// true if the connection succeeded, false otherwise
+        /// </returns>
         public async static Task<bool> Connect(IPEndPoint server, CancellationToken token)
         {
             if (Interlocked.CompareExchange(ref online, 1, 0) != 0)
@@ -427,16 +372,9 @@ namespace COTLMP.Network
             }
         }
 
-        /**
-         * @brief
-         * If the scene loaded is main menu, stop the integrated server
-         *
-         * @param[in] scene
-         * The scene
-         *
-         * @param[in] _
-         * The scene load mode, unused
-         */
+        /// <summary>
+        /// If the scene loaded is main menu, stop the integrated server
+        /// </summary>
         private static void OnSceneLoaded(Scene scene, LoadSceneMode _)
         {
             if (scene.name.Equals("Main Menu"))
@@ -448,23 +386,21 @@ namespace COTLMP.Network
             }
         }
 
-        /**
-         * @brief
-         * On game quitting, stop the integrated server
-         */
+        /// <summary>
+        /// On game quitting, stop the integrated server
+        /// </summary>
         private static void OnQuitting()
         {
             PauseMenuPatches.Quitting = true;
-            PauseMenuPatches.Server?.Dispose();
+            PauseMenuPatches.StopServer();
         }
 
-        /**
-         * @brief
-         * When the local player state changes, update the server
-         * 
-         * @param[in] newState
-         * The new player state
-         */
+        /// <summary>
+        /// When the local player state changes, update the server
+        /// </summary>
+        /// <param name="newState">
+        /// The new player state
+        /// </param>
         private async static void OnStateChanged(StateMachine.State newState, StateMachine.State _)
         {
             if (newState == StateMachine.State.CustomAnimation || newState == StateMachine.State.Moving || newState == StateMachine.State.Idle || localPlayer == null)
@@ -472,10 +408,9 @@ namespace COTLMP.Network
             await Send(new Message(MessageType.StateUpdate, 0, localPlayer.state.ToNetwork(localPlayer.transform.position.ToNetwork()).Serialize()));
         }
 
-        /**
-         * @brief
-         * When a transition completes, update the server
-         */
+        /// <summary>
+        /// When a transition completes, update the server
+        /// </summary>
         private static async void OnTransitionComplete()
         {
             string sceneName = SceneManager.GetActiveScene().name;
@@ -492,20 +427,18 @@ namespace COTLMP.Network
             }
         }
 
-        /**
-         * @brief
-         * When a transition begins, remove the localPlayer reference
-         */
+        /// <summary>
+        /// When a transition begins, remove the localPlayer reference
+        /// </summary>
         private static void OnBeginTransition()
         {
             localPlayer?.state.OnStateChange -= OnStateChanged;
             localPlayer = null;
         }
 
-        /**
-         * @brief
-         * Initialize the network components
-         */
+        /// <summary>
+        /// Initialize the network components
+        /// </summary>
         public static void Initialize()
         {
             SceneManager.sceneLoaded += OnSceneLoaded;
@@ -514,10 +447,9 @@ namespace COTLMP.Network
             MMTransition.OnBeginTransition += OnBeginTransition;
         }
 
-        /**
-         * @brief
-         * Game patches related to networking
-         */
+        /// <summary>
+        /// Game patches related to networking
+        /// </summary>
         [HarmonyPatch]
         private static class NetworkPatches
         {

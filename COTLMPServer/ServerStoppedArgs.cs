@@ -11,37 +11,22 @@ using System;
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains the classes/structs/enums for the server
- */
 namespace COTLMPServer
 {
-    /**
-     * @brief
-     * The event args that get passed to the server stopped event listeners
-     * 
-     * @field Reason
-     * The reason for which the server was stopped
-     * 
-     * @field What
-     * If an error ocurred, the description of the error
-     */
+    /// <summary>
+    /// The event args that get passed to the server stopped event listeners
+    /// </summary>
     public class ServerStoppedArgs : EventArgs
     {
         public ServerStopReason Reason;
+        /// <summary>
+        /// If an error ocurred, the description of the error
+        /// </summary>
         public string What;
 
-        /**
-         * @brief
-         * The constructor
-         * 
-         * @param[in] reason
-         * The value to initialize Reason with
-         * 
-         * @param[in] what
-         * The value to initialize What with
-         */
+        /// <summary>
+        /// The constructor
+        /// </summary>
         public ServerStoppedArgs(ServerStopReason reason, string what)
         {
             Reason = reason;
@@ -49,10 +34,9 @@ namespace COTLMPServer
         }
     }
 
-    /**
-     * @brief
-     * Enum of server stop reasons
-     */
+    /// <summary>
+    /// Enum of server stop reasons
+    /// </summary>
     public enum ServerStopReason
     {
         Error,
