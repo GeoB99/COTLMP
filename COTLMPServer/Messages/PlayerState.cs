@@ -108,7 +108,7 @@ namespace COTLMPServer.Messages
                 State state = (State)reader.ReadInt32();
                 if (!Enum.IsDefined(typeof(State), state))
                     throw new InvalidDataException("State not defined in enum");
-                return new PlayerState(state, reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadSingle(), Vector3.Deserialize(Messages.Utils.ReadBytes(reader), 0, out _));
+                return new PlayerState(state, reader.ReadSingle(), reader.ReadSingle(), reader.ReadBoolean(), reader.ReadSingle(), Vector3.Deserialize(Utils.ReadBytes(reader), 0, out _));
             }
         }
 

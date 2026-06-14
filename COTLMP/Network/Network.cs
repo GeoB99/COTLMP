@@ -218,7 +218,7 @@ namespace COTLMP.Network
 
                                 uint id = BitConverter.ToUInt32(msg.Data, 0);
                                 if (!BitConverter.IsLittleEndian) // the data in the message is in little endian, convert
-                                    id = COTLMPServer.Messages.Utils.ReverseEndianness(id);
+                                    id = COTLMPServer.Utils.ReverseEndianness(id);
 
                                 var pos = COTLMPServer.Vector3.Deserialize(msg.Data, sizeof(uint), out _);
 
@@ -253,7 +253,7 @@ namespace COTLMP.Network
 
                                 uint id = BitConverter.ToUInt32(msg.Data, 0);
                                 if (!BitConverter.IsLittleEndian)
-                                    id = COTLMPServer.Messages.Utils.ReverseEndianness(id);
+                                    id = COTLMPServer.Utils.ReverseEndianness(id);
 
                                 PlayerManager.DeletePlayer(id);
                             }
