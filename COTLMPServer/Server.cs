@@ -9,6 +9,7 @@
 
 using COTLMPServer.Messages;
 using COTLMPServer.Data;
+using static COTLMPServer.Data.GameModes;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -30,7 +31,10 @@ namespace COTLMPServer
     /// </summary>
     public sealed class Server : IDisposable
     {
+        public readonly IPAddress Ip;
         public readonly int Port;
+        public readonly string serverName;
+        public readonly GameMode gameMode;
         public event EventHandler<ServerStoppedArgs> ServerStopped;
 
         private volatile int running;
@@ -44,20 +48,33 @@ namespace COTLMPServer
         private readonly bool[] ids;
         private readonly object idLock;
 
-        public Server(string ver, int maxPlayers, int port = 0, CancellationToken? cancellationToken = null, ILogger log = null)
+        public Server(string ver, int maxPlayers, string SrvName, GameMode gmMode, IPEndPoint endPoint, CancellationToken? cancellationToken = null, ILogger log = null)
         {
-            client = new UdpClient(port);
+            if (endPoint == null)
+            {
+                throw new ArgumentNullException(nameof(endPoint));
+            }
+
+            client = new UdpClient(endPoint);
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
                 client.Client.IOControl(-1744830452, new byte[] { 0 }, null);
+
             logger = log;
             running = 0;
             players = new ConcurrentDictionary<IPEndPoint, Player>();
+
             Port = (client.Client.LocalEndPoint as IPEndPoint)?.Port ?? 0;
+            Ip = (client.Client.LocalEndPoint as IPEndPoint)?.Address;
+
             gameVersion = ver;
+            serverName = SrvName;
+            gameMode = gmMode;
+
             if (cancellationToken == null)
                 token = CancellationToken.None;
             else
                 token = cancellationToken.Value;
+
             sendLock = new SemaphoreSlim(1, 1);
             ids = new bool[maxPlayers];
             idLock = new object();
@@ -204,7 +221,7 @@ namespace COTLMPServer
 
             var args = new ServerStoppedArgs(ServerStopReason.NormalShutdown, "");
             CancellationTokenRegistration registration = token.Register(client.Dispose);
-            logger?.LogInfo("Started server at port " + Port + "!");
+            logger?.LogInfo("Started server at port " + Port + " with name " + serverName + $" (IP: {Ip} -- GameMode: {TranslateGameModeToString(gameMode)})!");
 
             try
             {
