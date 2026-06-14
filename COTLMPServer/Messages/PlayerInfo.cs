@@ -10,6 +10,7 @@
 using System;
 using System.IO;
 using System.Text;
+using COTLMPServer.Data;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -32,7 +33,7 @@ namespace COTLMPServer.Messages
         /// The minimum amount of bytes the structure will take up serialized
         /// </summary>
         public const int SerializedSize = (sizeof(int) * 3) + 1;
-        
+
         public PlayerInfo(PlayerState state, string username = "", uint id = 9999, int skin = 0)
         {
             ID = id;
@@ -111,7 +112,7 @@ namespace COTLMPServer.Messages
         /// <returns>
         /// The resulting PlayerInfo object
         /// </returns>
-        internal static PlayerInfo FromInternal(COTLMPServer.Player source)
+        internal static PlayerInfo FromInternal(Player source)
         {
             return new PlayerInfo(source.State, source.Username, source.ID, source.Skin);
         }
