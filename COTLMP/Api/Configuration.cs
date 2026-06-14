@@ -395,11 +395,22 @@ namespace COTLMP.Api
         /// Retrieves the data of the setting.
         /// </summary>
         /// <param name = "ConfigObject">An object to a configuration setting.</param>
+        /// <param name = "IsEnum">Set this to TRUE if the data to be returned is an enum.</param>
         /// <returns>Returns the type data of the setting.</returns>
-        public static T GetSettingData<T>(Object ConfigObject)
+        public static T GetSettingData<T>(Object ConfigObject, bool IsEnum)
         {
             /* NULL objects is illegal here */
             COTLMP.Debug.Assertions.Assert(ConfigObject != null, false, null, null);
+
+            /*
+             * Enums are declared by the caller, they aren't standard types like integers
+             * or strings so we don't know their type name. Convert the enum to a type
+             * object that is bound to the enum.
+             */
+            if (IsEnum)
+            {
+                return (T)Enum.ToObject(typeof(T), ConfigObject);
+            }
 
             /* Cast the object immediately to the generic type if possible */
             if (ConfigObject is T)

@@ -8,6 +8,7 @@
 /* IMPORTS ********************************************************************/
 
 using COTLMP;
+using static COTLMPServer.Data.GameModes;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -26,7 +27,7 @@ namespace COTLMP.Data
         /// <summary>
         /// The current executing game-play mode.
         /// </summary>
-        public string GameMode;
+        public GameMode Mode;
 
         /// <summary>
         /// The name of the player in-game
@@ -59,7 +60,7 @@ namespace COTLMP.Data
         public bool ProtectServer;
 
         public ModDataGlobals(bool Enable,
-                              string Mode,
+                              GameMode gameMode,
                               string PlName,
                               string SvName,
                               int PlNum,
@@ -68,7 +69,7 @@ namespace COTLMP.Data
                               bool Protect)
         {
             EnableMod = Enable;
-            GameMode = Mode;
+            Mode = gameMode;
             PlayerName = PlName;
             ServerName = SvName;
             MaxNumPlayers = PlNum;

@@ -19,6 +19,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
+using static COTLMPServer.Data.GameModes;
 
 /* NAMESPACES *****************************************************************/
 
@@ -55,9 +56,10 @@ public class Plugin : BaseUnityPlugin
     {
         System.Object SettingData;
         int MaxPlayers;
-        string ServerName, PlayerName, GameMode, ServerPassowrd;
+        string ServerName, PlayerName, ServerPassowrd;
         bool ToggleMod, VoiceChat, ProtectServer;
         bool Success;
+        GameMode Mode;
 
         /*
          * Start patching the game assembly with our code
@@ -100,7 +102,7 @@ public class Plugin : BaseUnityPlugin
         }
 
         /* Retrieve the setting data from the setting object */
-        ToggleMod = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData);
+        ToggleMod = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData, false);
 
         /* Initialize the "Player Name" setting */
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ModSettings,
@@ -115,13 +117,13 @@ public class Plugin : BaseUnityPlugin
         }
 
         /* Retrieve the setting data from the setting object */
-        PlayerName = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
+        PlayerName = COTLMP.Api.Configuration.GetSettingData<string>(SettingData, false);
 
         /* Initialize the "Game Mode" setting */
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
                                                              "Game Mode",
-                                                             "The game mode for the multiplayer server. Possible values are: Standard, Boss Fight, Deathmatch, Zombies!",
-                                                             "Standard");
+                                                             "The game mode for the multiplayer server. Possible values are: 0 = Standard, 1 = Deathmatch, 2 = Boss Fight, 3 = Zombies",
+                                                             (int)GameMode.Standard);
         if (SettingData == null)
         {
             Logger.LogFatal("Failed to set default or load the \"Game Mode\" setting!");
@@ -130,7 +132,7 @@ public class Plugin : BaseUnityPlugin
         }
 
         /* Retrieve the setting data from the setting object */
-        GameMode = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
+        Mode = COTLMP.Api.Configuration.GetSettingData<GameMode>(SettingData, true);
 
         /* Initialize the "Server Name" setting */
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
@@ -145,7 +147,7 @@ public class Plugin : BaseUnityPlugin
         }
 
         /* Retrieve the setting data from the setting object */
-        ServerName = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
+        ServerName = COTLMP.Api.Configuration.GetSettingData<string>(SettingData, false);
 
         /* Initialize the "Max Players In Server" setting */
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
@@ -160,7 +162,7 @@ public class Plugin : BaseUnityPlugin
         }
 
         /* Retrieve the setting data from the setting object */
-        MaxPlayers = COTLMP.Api.Configuration.GetSettingData<int>(SettingData);
+        MaxPlayers = COTLMP.Api.Configuration.GetSettingData<int>(SettingData, false);
 
         /* Initialize the "Enable Voice Chat" setting */
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
@@ -175,7 +177,7 @@ public class Plugin : BaseUnityPlugin
         }
 
         /* Retrieve the setting data from the setting object */
-        VoiceChat = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData);
+        VoiceChat = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData, false);
 
         /* Initialize the "Server Password" setting */
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
@@ -190,7 +192,7 @@ public class Plugin : BaseUnityPlugin
         }
 
         /* Retrieve the setting data from the setting object */
-        ServerPassowrd = COTLMP.Api.Configuration.GetSettingData<string>(SettingData);
+        ServerPassowrd = COTLMP.Api.Configuration.GetSettingData<string>(SettingData, false);
 
         /* Initialize the "Protect Server" setting */
         SettingData = COTLMP.Api.Configuration.CreateSetting(CONFIGURATION_SECTION.ServerSettings,
@@ -205,11 +207,11 @@ public class Plugin : BaseUnityPlugin
         }
 
         /* Retrieve the setting data from the setting object */
-        ProtectServer = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData);
+        ProtectServer = COTLMP.Api.Configuration.GetSettingData<bool>(SettingData, false);
 
         /* Now store all the cached settings into the globals data store */
         Globals = new ModDataGlobals(ToggleMod,
-                                     GameMode,
+                                     Mode,
                                      PlayerName,
                                      ServerName,
                                      MaxPlayers,

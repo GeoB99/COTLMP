@@ -12,6 +12,7 @@ using System.IO;
 using System.Reflection;
 using CommandLine;
 using Newtonsoft.Json;
+using static COTLMPServer.Data.GameModes;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -25,62 +26,6 @@ namespace DedicatedServer
         internal const string ConfigFile = "ServerSettings.json";
         internal static string PathLocation = Directory.GetCurrentDirectory();
         internal static Version ServerVersion = Assembly.GetExecutingAssembly().GetName().Version;
-
-        /// <summary>
-        /// Enumeration class for the supported game mode values.
-        /// </summary>
-        private enum GameModes
-        {
-            Standard = 0,
-            Deathmatch,
-            BossFight,
-            Zombies
-        }
-
-        /// <summary>
-        /// Translates the game mode enum value to a readable string.
-        /// </summary>
-        /// <param name = "Modes">The game mode enum value to be passed.</param>
-        /// <returns>Returns the name string of the game mode.</returns>
-        private static string TranslateGameModeToString(GameModes Modes)
-        {
-            string Mode;
-
-            switch (Modes)
-            {
-                case GameModes.Standard:
-                {
-                    Mode = "Standard";
-                    break;
-                }
-
-                case GameModes.Deathmatch:
-                {
-                    Mode = "Deathmatch";
-                    break;
-                }
-
-                case GameModes.BossFight:
-                {
-                    Mode = "Boss Fight";
-                    break;
-                }
-
-                case GameModes.Zombies:
-                {
-                    Mode = "Zombies";
-                    break;
-                }
-
-                default:
-                {
-                    Mode = null;
-                    break;
-                }
-            }
-
-            return Mode;
-        }
 
         /// <summary>
         /// Initializes the server configuration options to defaults.
@@ -130,7 +75,7 @@ namespace DedicatedServer
              * Validate the optional options (game mode must be one of the
              * valid mode values and the password mustn't have white spaces).
              */
-            if (Options.GameMode > (uint)GameModes.Zombies)
+            if (Options.GameMode > (uint)GameMode.Zombies)
             {
                 return false;
             }
@@ -200,10 +145,10 @@ namespace DedicatedServer
                      * HACK: Always hardcode the game mode to Standard if other mode was submitted.
                      * Because we don't support any other game modes other than the standard one....
                      */
-                    if (Options.GameMode != (uint)GameModes.Standard)
+                    if (Options.GameMode != (uint)GameMode.Standard)
                     {
-                        Logger.LogWarning($"{TranslateGameModeToString((GameModes)Options.GameMode)} is currently not supported as a game mode, defaulting to Standard...");
-                        Options.GameMode = (uint)GameModes.Standard;
+                        Logger.LogWarning($"{TranslateGameModeToString((GameMode)Options.GameMode)} is currently not supported as a game mode, defaulting to Standard...");
+                        Options.GameMode = (uint)GameMode.Standard;
                     }
 
                     Config = new ServerConfig
@@ -267,10 +212,10 @@ namespace DedicatedServer
                      * HACK: Always hardcode the game mode to Standard if other mode was submitted.
                      * Because we don't support any other game modes other than the standard one....
                      */
-                    if (Options.GameMode != (uint)GameModes.Standard)
+                    if (Options.GameMode != (uint)GameMode.Standard)
                     {
-                        Logger.LogWarning($"{TranslateGameModeToString((GameModes)Options.GameMode)} is currently not supported as a game mode, defaulting to Standard...");
-                        Options.GameMode = (uint)GameModes.Standard;
+                        Logger.LogWarning($"{TranslateGameModeToString((GameMode)Options.GameMode)} is currently not supported as a game mode, defaulting to Standard...");
+                        Options.GameMode = (uint)GameMode.Standard;
                     }
 
                     Config.GameMode = Options.GameMode;

@@ -9,6 +9,7 @@
 
 using COTLMP;
 using COTLMP.Debug;
+using static COTLMPServer.Data.GameModes;
 using COTL_API.UI;
 using COTL_API.UI.Helpers;
 using COTL_API.CustomSettings;
@@ -168,10 +169,10 @@ namespace COTLMP.Ui
 
             /* Add the "Game Mode" setting */
             Callbacks = new ActionCallbacks(null, COTLMP.Game.Callbacks.GameModeCallback);
-            string[] GameModes = {"Standard", "Boss Fight", "Deathmatch", "Zombies!"}; // FIXME: This is a placeholder, this must be declared in a dedicated internal array with supported game modes!
+            string[] GameModes = System.Enum.GetNames(typeof(GameMode));
             Success = AddSetting(SETTING_TYPE.HorizontalSelector,
                                  MultiplayerModLocalization.UI.Settings.MultiplayerSettings_GameMode,
-                                 Plugin.Globals.GameMode,
+                                 TranslateGameModeToString(Plugin.Globals.Mode),
                                  GameModes,
                                  false,
                                  Callbacks);

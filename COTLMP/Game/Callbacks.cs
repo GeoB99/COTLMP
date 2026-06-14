@@ -9,6 +9,7 @@
 
 using COTLMP;
 using COTLMP.Debug;
+using static COTLMPServer.Data.GameModes;
 using COTLMP.Api;
 using BepInEx;
 using BepInEx.Configuration;
@@ -28,58 +29,28 @@ namespace COTLMP.Game
         public static void GameModeCallback(int Value)
         {
             string Section;
-            string GameMode;
             ConfigDefinition Definition;
-            ConfigEntry<string> SettingEntry;
+            ConfigEntry<int> SettingEntry;
 
             /* Retrieve the section name for the setting */
             Section = COTLMP.Api.Configuration.GetSectionName(CONFIGURATION_SECTION.ServerSettings);
 
             /* Get the Game Mode setting */
             Definition = new ConfigDefinition(Section, "Game Mode");
-            SettingEntry = COTLMP.Api.Configuration.GetSettingEntry<string>(Definition);
+            SettingEntry = COTLMP.Api.Configuration.GetSettingEntry<int>(Definition);
             COTLMP.Debug.Assertions.Assert(SettingEntry != null, false, null, null);
 
-            /* FIXME: This is a placeholder code, the game modes should be declared in a dedicated enum */
-            switch (Value)
+            /* HACK: Always force the game mode to Standard because we don't support any other modes atm */
+            if (Value != 0)
             {
-                case 0:
-                {
-                    GameMode = "Standard";
-                    break;
-                }
-
-                case 1:
-                {
-                    GameMode = "Boss Fight";
-                    break;
-                }
-
-                case 2:
-                {
-                    GameMode = "Deathmatch";
-                    break;
-                }
-
-                case 3:
-                {
-                    GameMode = "Zombies!";
-                    break;
-                }
-
-                /* Always default the game mode to Standard on bogus values */
-                default:
-                {
-                    GameMode = "Standard";
-                    break;
-                }
+                Value = 0;
             }
 
             /* Cache the new value to the globals store */
-            Plugin.Globals.GameMode = GameMode;
+            Plugin.Globals.Mode = (GameMode)Value;
 
             /* Overwrite the current value of the setting and flush it */
-            SettingEntry.BoxedValue = GameMode;
+            SettingEntry.BoxedValue = (GameMode)Value;
             COTLMP.Api.Configuration.FlushSettings();
         }
 
