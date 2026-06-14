@@ -8,6 +8,7 @@
 /* IMPORTS ********************************************************************/
 
 using COTLMPServer;
+using static COTLMPServer.Data.GameModes;
 using HarmonyLib;
 using I2.Loc;
 using Lamb.UI;
@@ -18,6 +19,7 @@ using src.UINavigator;
 using System.Threading;
 using TMPro;
 using UnityEngine;
+using System.Net;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -138,13 +140,15 @@ namespace COTLMP.Ui
         [HarmonyPrefix]
         private static bool OnCoopButtonPressed(UIPauseMenuController __instance)
         {
+            IPEndPoint LanPoint;
+
             /* The server has already been created, ask the player if they want to shut it down */
             if (Server != null)
             {
                 UIMenuConfirmationWindow window = __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate);
                 window.Configure(MultiplayerModLocalization.UI.ServerStarted, MultiplayerModLocalization.UI.ServerStopConfirm);
                 window.OnConfirm += StopServer;
-            } 
+            }
             else
             {
                 try
@@ -160,7 +164,8 @@ namespace COTLMP.Ui
                     /* Start the saychat mechanism */
                     COTLMP.Ui.SayChat.StartSayChat();
 
-                    Server = new Server(Application.version, Plugin.Globals.MaxNumPlayers, cancellationToken:tokenSource.Token, log:new ServerLogger());
+                    LanPoint = new IPEndPoint(0, 0);
+                    Server = new Server(Application.version, Plugin.Globals.MaxNumPlayers, Plugin.Globals.ServerName, Plugin.Globals.Mode, LanPoint, cancellationToken: tokenSource.Token, log: new ServerLogger());
                     Server.ServerStopped += ServerStopped;
                 }
                 catch
@@ -169,7 +174,7 @@ namespace COTLMP.Ui
                     return false;
                 }
 
-                __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Started server!", $"Port: {Server.Port}", true);
+                __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Started server!", $"Port: {Server.Port}\nServer Name: {Server.serverName}\nGamemode: {TranslateGameModeToString(Server.gameMode)}", true);
                 Server.ServerStopped += ServerStopped;
                 _ = Server.Run();
             }
