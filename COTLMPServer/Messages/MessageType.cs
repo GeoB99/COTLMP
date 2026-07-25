@@ -21,7 +21,8 @@ namespace COTLMPServer.Messages
         StateUpdate,
         Transition,
         CustomAnimation,
-        PlayerLeft
+        PlayerLeft,
+        ServerInfo
     }
 }
 
