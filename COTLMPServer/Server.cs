@@ -47,6 +47,9 @@ namespace COTLMPServer
         private readonly bool[] ids;
         private readonly object idLock;
 
+        private static readonly IPAddress MulticastIp = IPAddress.Parse("239.15.7.11");
+        private static readonly IPEndPoint MulticastEndPoint = new IPEndPoint(MulticastIp, 1175);
+
         public Server(string ver, int maxPlayers, string SrvName, GameMode gmMode, IPEndPoint endPoint, CancellationToken? cancellationToken = null, ILogger log = null)
         {
             if (endPoint == null)
@@ -76,6 +79,33 @@ namespace COTLMPServer
             sendLock = new SemaphoreSlim(1, 1);
             ids = new bool[maxPlayers];
             idLock = new object();
+        }
+
+        /// <summary>
+        /// Announces to every game client that the server is online and reachable,
+        /// of which it can be visible in the Multiplayer servers list browser.
+        /// </summary>
+        private async Task AnnounceBroadcast()
+        {
+            byte[] ServerPort = BitConverter.GetBytes(BitConverter.IsLittleEndian ? (uint)Port : Utils.ReverseEndianness((uint)Port));
+
+            while (!disposedValue && !token.IsCancellationRequested)
+            {
+                try
+                {
+                    await Send(MulticastEndPoint, ServerPort);
+                    await Task.Delay(5000, token);
+                }
+                catch (TaskCanceledException)
+                {
+                    logger?.LogInfo("Server is being stopped, terminate the server broadcast task!");
+                }
+                catch (Exception ex)
+                {
+                    logger?.LogFatal($"Sending server broadcast packet ABORTED: {ex.GetType()} + ERROR MESSAGE: {ex.Message} + GUILTY METHOD: {ex.TargetSite}");
+                    return;
+                }
+            }
         }
 
         /// <summary>
@@ -221,6 +251,8 @@ namespace COTLMPServer
             CancellationTokenRegistration registration = token.Register(client.Dispose);
             logger?.LogInfo("Started server at port " + Port + " with name " + serverName + $" ( GameMode: {TranslateGameModeToString(gameMode)})!");
 
+            _ = System.Threading.Tasks.Task.Run(AnnounceBroadcast);
+
             try
             {
                 while (true)
@@ -249,7 +281,7 @@ namespace COTLMPServer
                                     plr.Lag = false;
                                 }
                         }
-                        else if (message.Type != MessageType.Ping && message.Type != MessageType.Handshake)
+                        else if (message.Type != MessageType.Ping && message.Type != MessageType.Handshake && message.Type != MessageType.ServerInfo)
                             continue;
 
                         switch (message.Type)
@@ -398,6 +430,14 @@ namespace COTLMPServer
                                 uint seq = plr?.Sequence ?? 0;
                                 await Send(result.RemoteEndPoint, new Message(MessageType.Ping, seq).Serialize());
                                 break;
+
+                            case MessageType.ServerInfo:
+                            {
+                                var SrvInfo = new ServerInfo(serverName, gameMode, ids.Length, players.Count);
+                                await Send(result.RemoteEndPoint, new Message(MessageType.ServerInfo, 1, SrvInfo.Serialize()).Serialize());
+                                break;
+                            }
+
                             default:
                                 await DisconnectPlayer(result.RemoteEndPoint, "invalid message");
                                 break;
