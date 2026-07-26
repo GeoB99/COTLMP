@@ -411,8 +411,13 @@ namespace COTLMP.Network
         /// <summary>
         /// When a transition completes, update the server
         /// </summary>
-        private static async void OnTransitionComplete()
+        private static void OnTransitionComplete()
         {
+            if (online == 0)
+            {
+                return;
+            }
+
             string sceneName = SceneManager.GetActiveScene().name;
             if (sceneName != "Main Menu")
             {
