@@ -174,9 +174,11 @@ namespace COTLMP.Ui
                     return false;
                 }
 
+                /* Run the main Server thread and let the host connect to it immediately */
                 __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate).Configure("Started server!", $"Port: {Server.Port}\nServer Name: {Server.serverName}\nGamemode: {TranslateGameModeToString(Server.gameMode)}", true);
                 Server.ServerStopped += ServerStopped;
-                _ = Server.Run();
+                _ = System.Threading.Tasks.Task.Run(Server.Run);
+                _ = COTLMP.Network.Network.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), Server.Port), tokenSource.Token);
             }
             return false;
         }

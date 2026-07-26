@@ -31,7 +31,6 @@ namespace COTLMPServer
     /// </summary>
     public sealed class Server : IDisposable
     {
-        public readonly IPAddress Ip;
         public readonly int Port;
         public readonly string serverName;
         public readonly GameMode gameMode;
@@ -64,7 +63,6 @@ namespace COTLMPServer
             players = new ConcurrentDictionary<IPEndPoint, Player>();
 
             Port = (client.Client.LocalEndPoint as IPEndPoint)?.Port ?? 0;
-            Ip = (client.Client.LocalEndPoint as IPEndPoint)?.Address;
 
             gameVersion = ver;
             serverName = SrvName;
@@ -221,7 +219,7 @@ namespace COTLMPServer
 
             var args = new ServerStoppedArgs(ServerStopReason.NormalShutdown, "");
             CancellationTokenRegistration registration = token.Register(client.Dispose);
-            logger?.LogInfo("Started server at port " + Port + " with name " + serverName + $" (IP: {Ip} -- GameMode: {TranslateGameModeToString(gameMode)})!");
+            logger?.LogInfo("Started server at port " + Port + " with name " + serverName + $" ( GameMode: {TranslateGameModeToString(gameMode)})!");
 
             try
             {
