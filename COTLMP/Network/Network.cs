@@ -201,9 +201,11 @@ namespace COTLMP.Network
                 // FIXME: transitions are just broken in general
                 if (localPlayer != null && transitionHappened)
                 {
+                    var send = SceneManager.GetActiveScene().name;
                     _ = Send(new Message(MessageType.Transition,
                         0,
-                        Encoding.UTF8.GetBytes(SceneManager.GetActiveScene().name)));
+                        Encoding.UTF8.GetBytes(send)));
+                    Plugin.Logger?.LogDebug(send);
                     transitionHappened = false;
                 }
 
