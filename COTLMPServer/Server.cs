@@ -7,9 +7,8 @@
 
 /* IMPORTS ********************************************************************/
 
-using COTLMPServer.Messages;
 using COTLMPServer.Data;
-using static COTLMPServer.Data.GameModes;
+using COTLMPServer.Messages;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -21,6 +20,7 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using static COTLMPServer.Data.GameModes;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -202,6 +202,13 @@ namespace COTLMPServer
         }
 
         /// <summary>
+        /// Get all player objects within a given biome.
+        /// </summary>
+        /// <param name="biome">The name of the biome</param>
+        /// <returns>An IEnumerable object of all players within the biome.</returns>
+        private IEnumerable<Player> GetPlayersFromBiome(string biome) => players.Values.Where((plr) => plr.Biome == biome);
+
+        /// <summary>
         /// Main server logic
         /// </summary>
         /// <remarks>
@@ -331,35 +338,19 @@ namespace COTLMPServer
                                     await SendToBiome(plr.Biome, MessageType.PlayerLeft, BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : Utils.ReverseEndianness(Utils.ReverseEndianness(plr.ID))), plr);
 
                                     plr.Biome = Encoding.UTF8.GetString(message.Data);
-                                    var pairs = players.ToArray().Where(p => p.Value.Biome == plr.Biome);
 
-                                    var msg = new Message(MessageType.StateUpdate, 0, null);
-                                    byte[] localInfo = PlayerInfo.FromInternal(plr).Serialize();
+                                    await SendToBiome(plr.Biome, MessageType.StateUpdate, PlayerInfo.FromInternal(plr).Serialize(), plr);
 
-                                    var tasks = new List<Task>();
-                                    foreach (var pair in pairs)
+                                    Message msg;
+                                    lock (plr.Lock)
+                                        msg = new Message(MessageType.StateUpdate, plr.Sequence++);
+                                    foreach (var inbiome in GetPlayersFromBiome(plr.Biome))
                                     {
-                                        byte[] bytes;
-                                        if (plr.ID != pair.Value.ID)
-                                        {
-                                            lock (plr.Lock)
-                                            {
-                                                msg.Sequence = plr.Sequence++;
-                                                msg.Data = PlayerInfo.FromInternal(pair.Value).Serialize();
-                                                bytes = msg.Serialize();
-                                            }
-                                            tasks.Add(Send(result.RemoteEndPoint, bytes));
-                                        }
-
-                                        lock (pair.Value.Lock)
-                                        {
+                                        msg.Data = PlayerInfo.FromInternal(inbiome).Serialize();
+                                        await Send(result.RemoteEndPoint, msg.Serialize());
+                                        lock (plr.Lock)
                                             msg.Sequence = plr.Sequence++;
-                                            msg.Data = localInfo;
-                                            bytes = msg.Serialize();
-                                        }
-                                        tasks.Add(Send(pair.Key, bytes));
                                     }
-                                    await Task.WhenAll(tasks);
                                 }
                                 break;
 
