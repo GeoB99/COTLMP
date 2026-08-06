@@ -102,8 +102,6 @@ namespace COTLMP.Game
 
             players[plr].AbortGoTo();
             CoopManager.RemoveCoopPlayerStatic(players[plr], withDelay: false);
-            // if this turns out to work bad, can try CoopManager.RemoveCoopPlayerStatic
-            // GameObject.Destroy(players[plr].gameObject);
             players[plr] = null;
         }
 
