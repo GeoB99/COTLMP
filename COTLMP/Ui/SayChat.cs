@@ -31,6 +31,8 @@ namespace COTLMP.Ui
         private static Image SayBox;
         private static Component SayComponent;
         private static Player PlayerInstance;
+        private static Coroutine DisplayWorker;
+        private static Coroutine BroadcastWorker;
 
         /// <summary>
         /// Called by the Update() method of the core saychat box mechanism whenever a
@@ -127,7 +129,7 @@ namespace COTLMP.Ui
 
                 /* Acknowledge ourselves the saychat box has been spawned and setup the saychat worker */
                 BoxSpawned = true;
-                Plugin.MonoInstance.StartCoroutine(SayChatDisplayWorker());
+                DisplayWorker = Plugin.MonoInstance.StartCoroutine(SayChatDisplayWorker());
                 return;
             }
 
@@ -142,7 +144,7 @@ namespace COTLMP.Ui
                     if (Input.GetKeyDown(KeyCode.Return))
                     {
                         CapturedMessage = SayInput.text;
-                        Plugin.MonoInstance.StartCoroutine(BroadcastSayMessageWorker(CapturedMessage));
+                        BroadcastWorker = Plugin.MonoInstance.StartCoroutine(BroadcastSayMessageWorker(CapturedMessage));
                         return;
                     }
 
@@ -158,8 +160,8 @@ namespace COTLMP.Ui
         public static void Shutdown()
         {
             /* Cease any coroutine execution if any */
-            Plugin.MonoInstance.StopCoroutine(SayChatDisplayWorker());
-            Plugin.MonoInstance.StopCoroutine(BroadcastSayMessageWorker(null));
+            Plugin.MonoInstance.StopCoroutine(DisplayWorker);
+            Plugin.MonoInstance.StopCoroutine(BroadcastWorker);
 
             /* Close our attached component */
             Object.Destroy(SayComponent);
