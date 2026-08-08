@@ -294,6 +294,7 @@ namespace COTLMPServer
                         switch (message.Type)
                         {
                             case MessageType.Handshake:
+                            {
                                 if (message.Sequence != 1 || plr != null)
                                     throw new InvalidDataException();
 
@@ -362,65 +363,75 @@ namespace COTLMPServer
                                 _ = PlayerHeartBeat(player, result.RemoteEndPoint);
 
                                 logger?.LogInfo($"{player.Username} ({result.RemoteEndPoint}) joined the game");
-
                                 break;
+                            }
 
                             case MessageType.Transition:
+                            {
+                                await SendToBiome(plr.Biome, MessageType.PlayerLeft, BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : Utils.ReverseEndianness(Utils.ReverseEndianness(plr.ID))), plr);
+
+                                plr.Biome = Encoding.UTF8.GetString(message.Data);
+
+                                await SendToBiome(plr.Biome, MessageType.StateUpdate, PlayerInfo.FromInternal(plr).Serialize(), plr);
+
+                                Message msg;
+                                lock (plr.Lock)
                                 {
-                                    await SendToBiome(plr.Biome, MessageType.PlayerLeft, BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : Utils.ReverseEndianness(Utils.ReverseEndianness(plr.ID))), plr);
+                                    msg = new Message(MessageType.StateUpdate, plr.Sequence++);
+                                }
 
-                                    plr.Biome = Encoding.UTF8.GetString(message.Data);
-
-                                    await SendToBiome(plr.Biome, MessageType.StateUpdate, PlayerInfo.FromInternal(plr).Serialize(), plr);
-
-                                    Message msg;
+                                foreach (var inbiome in GetPlayersFromBiome(plr.Biome))
+                                {
+                                    msg.Data = PlayerInfo.FromInternal(inbiome).Serialize();
+                                    await Send(result.RemoteEndPoint, msg.Serialize());
                                     lock (plr.Lock)
-                                        msg = new Message(MessageType.StateUpdate, plr.Sequence++);
-                                    foreach (var inbiome in GetPlayersFromBiome(plr.Biome))
                                     {
-                                        msg.Data = PlayerInfo.FromInternal(inbiome).Serialize();
-                                        await Send(result.RemoteEndPoint, msg.Serialize());
-                                        lock (plr.Lock)
-                                            msg.Sequence = plr.Sequence++;
+                                        msg.Sequence = plr.Sequence++;
                                     }
                                 }
+
                                 break;
+                            }
 
                             case MessageType.PositionUpdate:
-                                {
-                                    plr.State.Position = Vector3.Deserialize(message.Data, 0, out _);
-                                    byte[] bytes = new byte[sizeof(uint) + Vector3.SerializedSize];
-                                    Array.Copy(BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : Utils.ReverseEndianness(plr.ID)), bytes, sizeof(uint));
-                                    Array.Copy(message.Data, 0, bytes, sizeof(uint), Vector3.SerializedSize);
+                            {
+                                plr.State.Position = Vector3.Deserialize(message.Data, 0, out _);
+                                byte[] bytes = new byte[sizeof(uint) + Vector3.SerializedSize];
+                                Array.Copy(BitConverter.GetBytes(BitConverter.IsLittleEndian ? plr.ID : Utils.ReverseEndianness(plr.ID)), bytes, sizeof(uint));
+                                Array.Copy(message.Data, 0, bytes, sizeof(uint), Vector3.SerializedSize);
 
-                                    await SendToBiome(plr.Biome, MessageType.PositionUpdate, bytes, plr);
-                                }
+                                await SendToBiome(plr.Biome, MessageType.PositionUpdate, bytes, plr);
                                 break;
+                            }
 
                             case MessageType.StateUpdate:
-                                {
-                                    var info = PlayerState.Deserialize(message.Data);
-                                    plr.State = info;
-                                    await SendToBiome(plr.Biome, MessageType.StateUpdate, PlayerInfo.FromInternal(plr).Serialize(), plr);
-                                }
+                            {
+                                var info = PlayerState.Deserialize(message.Data);
+                                plr.State = info;
+                                await SendToBiome(plr.Biome, MessageType.StateUpdate, PlayerInfo.FromInternal(plr).Serialize(), plr);
                                 break;
+                            }
 
                             case MessageType.CustomAnimation:
-                                {
-                                    CustomAnimationInfo.Deserialize(message.Data); // make sure the format is right, if its corrupt, it'll throw.
-                                    plr.State.Current = PlayerState.State.CustomAnimation;
-                                    await SendToBiome(plr.Biome, MessageType.CustomAnimation, message.Data, plr);
-                                }
+                            {
+                                CustomAnimationInfo.Deserialize(message.Data); // make sure the format is right, if its corrupt, it'll throw.
+                                plr.State.Current = PlayerState.State.CustomAnimation;
+                                await SendToBiome(plr.Biome, MessageType.CustomAnimation, message.Data, plr);
                                 break;
+                            }
 
                             case MessageType.Disconnect:
+                            {
                                 await DisconnectPlayer(result.RemoteEndPoint, "Disconnected");
                                 break;
+                            }
 
                             case MessageType.Ping:
+                            {
                                 uint seq = plr?.Sequence ?? 0;
                                 await Send(result.RemoteEndPoint, new Message(MessageType.Ping, seq).Serialize());
                                 break;
+                            }
 
                             case MessageType.ServerInfo:
                             {
@@ -430,8 +441,10 @@ namespace COTLMPServer
                             }
 
                             default:
+                            {
                                 await DisconnectPlayer(result.RemoteEndPoint, "invalid message");
                                 break;
+                            }
                         }
                     }
                     catch (Exception e) when (e is InvalidDataException || e is ArgumentNullException)

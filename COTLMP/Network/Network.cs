@@ -214,71 +214,75 @@ namespace COTLMP.Network
                     switch (msg.Type)
                     {
                         case MessageType.PositionUpdate:
-                            {
-                                if (msg.Data.Length < sizeof(uint) + COTLMPServer.Vector3.SerializedSize)
-                                    throw new InvalidDataException("data too small!");
+                        {
+                            if (msg.Data.Length < sizeof(uint) + COTLMPServer.Vector3.SerializedSize)
+                                throw new InvalidDataException("data too small!");
 
-                                uint id = BitConverter.ToUInt32(msg.Data, 0);
-                                if (!BitConverter.IsLittleEndian) // the data in the message is in little endian, convert
-                                    id = COTLMPServer.Utils.ReverseEndianness(id);
+                            uint id = BitConverter.ToUInt32(msg.Data, 0);
+                            if (!BitConverter.IsLittleEndian) // the data in the message is in little endian, convert
+                                id = COTLMPServer.Utils.ReverseEndianness(id);
 
-                                var pos = COTLMPServer.Vector3.Deserialize(msg.Data, sizeof(uint), out _);
+                            var pos = COTLMPServer.Vector3.Deserialize(msg.Data, sizeof(uint), out _);
 
-                                if (!PlayerManager.DoesPlayerExist(id) && PlayerFarming.Instance != null)
-                                    PlayerManager.CreatePlayer(id, pos.ToUnity());
-                                else
-                                    PlayerManager.MovePlayer(id, pos.ToUnity(), 1); // just use 1 as a timeout to get smooth animation
-                            }
+                            if (!PlayerManager.DoesPlayerExist(id) && PlayerFarming.Instance != null)
+                                PlayerManager.CreatePlayer(id, pos.ToUnity());
+                            else
+                                PlayerManager.MovePlayer(id, pos.ToUnity(), 1); // just use 1 as a timeout to get smooth animation
+
                             break;
+                        }
 
                         case MessageType.StateUpdate:
-                            {
-                                var plrinfo = PlayerInfo.Deserialize(msg.Data);
+                        {
+                            var plrinfo = PlayerInfo.Deserialize(msg.Data);
 
-                                if (!PlayerManager.DoesPlayerExist(plrinfo.ID) && PlayerFarming.Instance != null)
-                                {
-                                    PlayerManager.CreatePlayer(plrinfo.ID, plrinfo.State.Position.ToUnity(), plrinfo.Skin);
-                                    PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
-                                }
-                                else
-                                {
-                                    PlayerManager.MovePlayer(plrinfo.ID, plrinfo.State.Position.ToUnity(), 0);
-                                    PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
-                                }
+                            if (!PlayerManager.DoesPlayerExist(plrinfo.ID) && PlayerFarming.Instance != null)
+                            {
+                                PlayerManager.CreatePlayer(plrinfo.ID, plrinfo.State.Position.ToUnity(), plrinfo.Skin);
+                                PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
                             }
+                            else
+                            {
+                                PlayerManager.MovePlayer(plrinfo.ID, plrinfo.State.Position.ToUnity(), 0);
+                                PlayerManager.SetPlayerState(plrinfo.ID, plrinfo.State.ToUnity());
+                            }
+
                             break;
+                        }
 
                         case MessageType.PlayerLeft:
-                            {
-                                if (msg.Data.Length < sizeof(uint))
-                                    throw new InvalidDataException("data too small!");
+                        {
+                            if (msg.Data.Length < sizeof(uint))
+                                throw new InvalidDataException("data too small!");
 
-                                uint id = BitConverter.ToUInt32(msg.Data, 0);
-                                if (!BitConverter.IsLittleEndian)
-                                    id = COTLMPServer.Utils.ReverseEndianness(id);
+                            uint id = BitConverter.ToUInt32(msg.Data, 0);
+                            if (!BitConverter.IsLittleEndian)
+                                id = COTLMPServer.Utils.ReverseEndianness(id);
 
-                                PlayerManager.DeletePlayer(id);
-                            }
+                            PlayerManager.DeletePlayer(id);
                             break;
+                        }
 
                         case MessageType.CustomAnimation:
-                            {
-                                var info = CustomAnimationInfo.Deserialize(msg.Data);
+                        {
+                            var info = CustomAnimationInfo.Deserialize(msg.Data);
 
-                                if (!PlayerManager.DoesPlayerExist(info.ID) && PlayerFarming.Instance != null)
-                                    PlayerManager.CreatePlayer(info.ID, info.Position.ToUnity());
-                                else
-                                    PlayerManager.MovePlayerNow(info.ID, info.Position.ToUnity());
+                            if (!PlayerManager.DoesPlayerExist(info.ID) && PlayerFarming.Instance != null)
+                                PlayerManager.CreatePlayer(info.ID, info.Position.ToUnity());
+                            else
+                                PlayerManager.MovePlayerNow(info.ID, info.Position.ToUnity());
 
-                                PlayerManager.SetPlayerState(info.ID, null, true, info.Name, info.Loop);
-                            }
+                            PlayerManager.SetPlayerState(info.ID, null, true, info.Name, info.Loop);
                             break;
+                        }
 
                         case MessageType.Disconnect:
+                        {
                             keepLooping = false;
                             if (msg.Data != null)
                                 PauseMenuPatches.Message = Encoding.UTF8.GetString(msg.Data);
                             break;
+                        }
                     }
                 }
                 catch (InvalidDataException e)
