@@ -160,8 +160,15 @@ namespace COTLMP.Ui
         public static void Shutdown()
         {
             /* Cease any coroutine execution if any */
-            Plugin.MonoInstance.StopCoroutine(DisplayWorker);
-            Plugin.MonoInstance.StopCoroutine(BroadcastWorker);
+            if (DisplayWorker != null)
+            {
+                Plugin.MonoInstance.StopCoroutine(DisplayWorker);
+            }
+
+            if (BroadcastWorker != null)
+            {
+                Plugin.MonoInstance.StopCoroutine(BroadcastWorker);
+            }
 
             /* Close our attached component */
             Object.Destroy(SayComponent);
