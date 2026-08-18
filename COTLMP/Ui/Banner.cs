@@ -9,10 +9,11 @@
 
 using COTLMP;
 using COTLMP.Data;
-using BepInEx;
 using HarmonyLib;
+using BepInEx;
 using I2.Loc;
 using Lamb.UI;
+using src.Extensions;
 using System.Collections;
 
 /* CLASSES & CODE *************************************************************/
@@ -26,12 +27,20 @@ namespace COTLMP.Ui
     internal static class Banner
     {
         /// <summary>
-        /// A dummy IEnumerator method that is used to replace the
-        /// returned value which represents a coroutine.
+        /// A coroutine that forces the loading of game assets into memory.
+        /// This is needed because joining a game server from the serverlist
+        /// makes the game not loading the assets due to a peculiar behavior of
+        /// SceneLoad() of the game.
+        ///
+        /// It first tries to check the current active scene to unload and based
+        /// on that it loads whatever game asset depending on that current scene.
+        /// The game assets are loaded ONLY if the previous active scene was Main
+        /// Menu and the serverlist scene isn't named like that. Consequently,
+        /// the game was started with unintialized assets.
         /// </summary>
         private static IEnumerator BannerEnumerator()
         {
-            yield break;
+            yield return MonoSingleton<UIManager>.Instance.LoadPersistentGameAssets().YieldUntilCompleted();
         }
 
         /// <summary>
