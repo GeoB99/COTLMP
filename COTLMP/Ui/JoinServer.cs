@@ -7,13 +7,16 @@
 
 /* IMPORTS ********************************************************************/
 
+using BepInEx;
 using COTLMP;
 using COTLMP.Debug;
 using HarmonyLib;
-using BepInEx;
 using I2.Loc;
+using MMTools;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
+using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -34,11 +37,46 @@ namespace COTLMP.Ui
         /// Main handler that performs connection with the server given
         /// its IP address.
         /// </summary>
-        private static void ConnectToServer()
+        private static async void ConnectToServer()
         {
-            // TODO
+            bool Status;
+            string[] Address;
+            IPEndPoint Server;
+
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "ConnectToServer() called");
-            return;
+
+            /* Don't do anything if the input field is blank */
+            if (IpInputField.text.IsNullOrWhiteSpace())
+            {
+                return;
+            }
+
+            /*
+             * Split the address string from the input field by hand.
+             * IPEndPoint.Parse is only available for later .NET Core
+             * versions only so we have gotten to do that.
+             */
+            Address = IpInputField.text.Split(':');
+            if (Address.Length != 2)
+            {
+                // TODO: Display a dialog box telling the user of this fact
+                COTLMP.Debug.PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT, $"The following IP address isn't valid - {IpInputField.text}");
+                return;
+            }
+
+            /* Attempt to estabilish server connection */
+            Server = new IPEndPoint(IPAddress.Parse(Address[0]), int.Parse(Address[1]));
+            Status = await COTLMP.Network.Network.Connect(Server, COTLMP.Ui.PauseMenuPatches.tokenSource.Token);
+            if (!Status)
+            {
+                /* FIXME: Display a dialog box telling the player of this error */
+                PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
+                                  $"Failed to connect to the server  - {IpInputField.text}");
+                return;
+            }
+
+            /* Now put the client into the game */
+            Plugin.MonoInstance.StartCoroutine(COTLMP.Ui.ServerList.TransitionPlayerToGame());
         }
 
         /// <summary>

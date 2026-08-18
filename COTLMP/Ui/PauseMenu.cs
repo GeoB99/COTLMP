@@ -49,7 +49,7 @@ namespace COTLMP.Ui
         public static Server Server = null;
         public static string Message = null;
         public static bool Quitting = false;
-        private static CancellationTokenSource tokenSource = new();
+        public static CancellationTokenSource tokenSource = new();
 
         /**
          * @brief
@@ -86,7 +86,23 @@ namespace COTLMP.Ui
             {
                 __instance.DenyCoop = false;
                 ____coopButton.interactable = true;
-                ____coopButtonText.text = (Server == null) ? MultiplayerModLocalization.UI.StartServer : MultiplayerModLocalization.UI.ServerStarted;
+
+                /* Overwite the Coop button based on the state of the client */
+                if (Server == null &&
+                   !Plugin.GlobalsInternal.InGameSession)
+                {
+                    ____coopButtonText.text = MultiplayerModLocalization.UI.StartServer;
+                }
+                else if (Server != null &&
+                        (Plugin.GlobalsInternal.IsServerCreator &&
+                         Plugin.GlobalsInternal.InGameSession))
+                {
+                    ____coopButtonText.text = MultiplayerModLocalization.UI.ServerStarted;
+                }
+                else // Plugin.GlobalsInternal.InGameSession == true
+                {
+                    ____coopButtonText.text = MultiplayerModLocalization.UI.LeaveServer;
+                }
             }
             if (__instance.DenyCoop && ___CoopButtonSelected)
                 MonoSingleton<UINavigatorNew>.Instance.NavigateToNew(____photoModeButton);
@@ -122,7 +138,28 @@ namespace COTLMP.Ui
             {
                 __instance.DenyCoop = false;
                 ____coopButton.interactable = true;
-                ____coopButtonText.text = (Server == null) ? MultiplayerModLocalization.UI.StartServer : MultiplayerModLocalization.UI.ServerStarted;
+
+                /*
+                 * Overwite the Coop button based on the state of the client.
+                 * Force disable the Save button on clients who have joined a server
+                 * since they don't have any save file loaded anyway.
+                 */
+                if (Server == null &&
+                   !Plugin.GlobalsInternal.InGameSession)
+                {
+                    ____coopButtonText.text = MultiplayerModLocalization.UI.StartServer;
+                }
+                else if (Server != null &&
+                        (Plugin.GlobalsInternal.IsServerCreator &&
+                         Plugin.GlobalsInternal.InGameSession))
+                {
+                    ____coopButtonText.text = MultiplayerModLocalization.UI.ServerStarted;
+                }
+                else // Plugin.GlobalsInternal.InGameSession == true
+                {
+                    ____coopButtonText.text = MultiplayerModLocalization.UI.LeaveServer;
+                    MonoSingleton<UIManager>.Instance.ForceDisableSaving = true;
+                }
             }
         }
 
@@ -143,11 +180,19 @@ namespace COTLMP.Ui
             IPEndPoint LanPoint;
 
             /* The server has already been created, ask the player if they want to shut it down */
-            if (Server != null)
+            if (Server != null &&
+               (Plugin.GlobalsInternal.IsServerCreator &&
+                Plugin.GlobalsInternal.InGameSession))
             {
                 UIMenuConfirmationWindow window = __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate);
                 window.Configure(MultiplayerModLocalization.UI.ServerStarted, MultiplayerModLocalization.UI.ServerStopConfirm);
                 window.OnConfirm += StopServer;
+            }
+            else if (Plugin.GlobalsInternal.InGameSession)
+            {
+                UIMenuConfirmationWindow window = __instance.Push<UIMenuConfirmationWindow>(MonoSingleton<UIManager>.Instance.ConfirmationWindowTemplate);
+                window.Configure(MultiplayerModLocalization.UI.LeaveServer, MultiplayerModLocalization.UI.LeaveConfirm);
+                window.OnConfirm += LeaveServer;
             }
             else
             {
@@ -180,7 +225,44 @@ namespace COTLMP.Ui
                 _ = System.Threading.Tasks.Task.Run(Server.Run);
                 _ = COTLMP.Network.Network.Connect(new IPEndPoint(IPAddress.Parse("127.0.0.1"), Server.Port), tokenSource.Token);
             }
+
             return false;
+        }
+
+        /// <summary>
+        /// Cleans up the game structures and stuff that have been initialized
+        /// upon joining a server game or playing the game on LAN, etc.
+        /// </summary>
+        private static void RundownGame()
+        {
+            /* Shutdown all the game related stuff */
+            SimulationManager.Pause();
+            DeviceLightingManager.Reset();
+            FollowerManager.Reset();
+            StructureManager.Reset();
+
+            /* Reset the game display */
+            UIDynamicNotificationCenter.Reset();
+            MonoSingleton<UIManager>.Instance.ResetPreviousCursor();
+            TwitchManager.Abort();
+
+            /* Shutdown the saychat mechanism */
+            COTLMP.Ui.SayChat.Shutdown();
+        }
+
+        /// <summary>
+        /// Method that is called whenever a client wants to leave the server.
+        /// </summary>
+        private static void LeaveServer()
+        {
+            /* Disconnect the client and cleanup game related stuff before transitioning to main menu */
+            tokenSource.Cancel();
+            tokenSource = new();
+            RundownGame();
+
+            /* The client fully disconnected from the server, the player is no longer in session */
+            MMTransition.Play(MMTransition.TransitionType.ChangeSceneAutoResume, MMTransition.Effect.BlackFade, "Main Menu", 1f, "", null);
+            Plugin.GlobalsInternal.InGameSession = false;
         }
 
         /**
@@ -200,19 +282,8 @@ namespace COTLMP.Ui
             if (Quitting)
                 return;
 
-            /* Shutdown all the game related stuff */
-            SimulationManager.Pause();
-            DeviceLightingManager.Reset();
-            FollowerManager.Reset();
-            StructureManager.Reset();
-
-            /* Reset the game display */
-            UIDynamicNotificationCenter.Reset();
-            MonoSingleton<UIManager>.Instance.ResetPreviousCursor();
-            TwitchManager.Abort();
-
-            /* Shutdown the saychat mechanism */
-            COTLMP.Ui.SayChat.Shutdown();
+            /* Cleanup all the game related stuff */
+            RundownGame();
 
             /* Show a reason message to the player why the server has stopped and return to main menu scene */
             Message = (e.Reason == ServerStopReason.Error) ? MultiplayerModLocalization.UI.DisconnectedError : "";

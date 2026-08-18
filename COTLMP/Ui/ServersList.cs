@@ -7,29 +7,26 @@
 
 /* IMPORTS ********************************************************************/
 
-using COTLMP;
+using BepInEx.Configuration;
 using COTLMP.Api;
-using COTLMP.Data;
 using COTLMP.Debug;
 using COTLMP.Network;
-using static COTLMP.Data.Network;
+using COTLMPServer;
 using COTLMPServer.Messages;
-using HarmonyLib;
-using BepInEx;
-using BepInEx.Configuration;
 using I2.Loc;
+using MMTools;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using static COTLMP.Data.Network;
 
 /* CLASSES & CODE *************************************************************/
 
@@ -113,42 +110,70 @@ namespace COTLMP.Ui
         {
             COTLMP.Debug.PrintLogger.PrintVerbose(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "BackButtonHandler() called");
 
-            /*
-             * Iterate over the Internet and LAN server entries and free each of the
-             * inserted entry. We cannot remove the entry that was linked in the list
-             * due to the nature of the foreach loop as we get a modified Collection
-             * exception, so we have to punt the entire linked list after the iteration.
-             */
-            lock (ServerListLock)
-            {
-                foreach (ServerEntry Entry in ServerEntries)
-                {
-                    ReleaseServerEntry(Entry);
-                }
-
-                ServerEntries.Clear();
-
-                foreach (ServerEntry Entry in ServerLanEntries)
-                {
-                    ReleaseServerEntry(Entry);
-                }
-
-                ServerLanEntries.Clear();
-            }
-
-            /* Cleanup the serverlist client */
-            ClientReceiver.DropMulticastGroup(MulticastIp);
-            ClientReceiver.Close();
-
-            /* Cleanup the serverlist's LAN CTS as we no longer need it */
-            if (LanToken != null)
-            {
-                LanToken.Cancel();
-                LanToken.Dispose();
-            }
+            /* Cleanup all the serverlist constructs that have been init'ed */
+            CleanupServerlistUi();
 
             /* Return to the main menu of the game */
             COTLMP.Api.Assets.ShowScene("Main Menu", false, null);
+        }
+
+        /// <summary>
+        /// Connect button handler that handles the connection procedure of a server.
+        /// </summary>
+        /// <param name = "Entry">A server entry that is attached to the button handler.</param>
+        private static async void ConnectButtonHandler(ServerEntry Entry)
+        {
+            IPEndPoint Server;
+            bool Status;
+
+            /* Attempt to estabilish server connection */
+            Server = new IPEndPoint(Entry.Address, Entry.Port);
+            Status = await COTLMP.Network.Network.Connect(Server, COTLMP.Ui.PauseMenuPatches.tokenSource.Token);
+            if (!Status)
+            {
+                /* FIXME: Display a dialog box telling the player of this error */
+                PrintLogger.Print(DebugLevel.ERROR_LEVEL, DebugComponent.UI_COMPONENT,
+                                  $"Failed to connect to the server (IP - {Entry.Address} Port - {Entry.Port})");
+                return;
+            }
+
+            /* Now put the client into the game */
+            Plugin.MonoInstance.StartCoroutine(TransitionPlayerToGame());
+        }
+
+        /// <summary>
+        /// Transitions the client into the game cult once connection has
+        /// been fully estabilished.
+        /// </summary>
+        public static IEnumerator TransitionPlayerToGame()
+        {
+            /* The client has joined the server, transition the player to the game */
+            AudioManager.Instance.StopCurrentMusic();
+            MMTransition.Play(MMTransition.TransitionType.ChangeRoomWaitToResume,
+                              MMTransition.Effect.BlackFade,
+                              "Base Biome 1",
+                              2,
+                              "",
+                              OnJoinServerFinish,
+                              null);
+
+            /* Startup all the game mod mechanisms (say chat, et al) */
+            COTLMP.Ui.SayChat.StartSayChat();
+
+            /* The player successfully joined the server, cleanup all the serverlist stuff */
+            CleanupServerlistUi();
+            yield break;
+        }
+
+        /// <summary>
+        /// Callback that gets executed after the client has fully joined the
+        /// server and is on the game cult scene.
+        /// </summary>
+        public static void OnJoinServerFinish()
+        {
+            AudioManager.Instance.StopCurrentMusic();
+            Plugin.GlobalsInternal.InGameSession = true;
+            PrintLogger.Print(DebugLevel.MESSAGE_LEVEL, DebugComponent.UI_COMPONENT, "Fully connected to the server session");
         }
 
         /// <summary>
@@ -294,6 +319,7 @@ namespace COTLMP.Ui
             UiEntry.transform.Find("PlayersCount").GetComponent<TMP_Text>().text = PlayersCount;
             ConnectButton = UiEntry.transform.Find("ConnectButton").GetComponent<Button>();
             ConnectButton.GetComponentInChildren<TMP_Text>().text = MultiplayerModLocalization.UI.ServerList.ServerList_ConnectButton;
+            ConnectButton.onClick.AddListener(() => ConnectButtonHandler(Entry));
 
             /* And finally show it to the browser */
             UiEntry.gameObject.SetActive(true);
@@ -790,6 +816,40 @@ namespace COTLMP.Ui
             /* Estabilish connection with the masterserver and look for available servers */
             RefreshServersList(REFRESH_WHAT.InternetList);
             yield break;
+        }
+
+        public static void CleanupServerlistUi()
+        {
+            /*
+             * Iterate over the Internet and LAN server entries and free each of the
+             * inserted entry. We cannot remove the entry that was linked in the list
+             * due to the nature of the foreach loop as we get a modified Collection
+             * exception, so we have to punt the entire linked list after the iteration.
+             */
+            lock (ServerListLock)
+            {
+                foreach (ServerEntry Entry in ServerEntries)
+                {
+                    ReleaseServerEntry(Entry);
+                }
+
+                ServerEntries.Clear();
+
+                foreach (ServerEntry Entry in ServerLanEntries)
+                {
+                    ReleaseServerEntry(Entry);
+                }
+
+                ServerLanEntries.Clear();
+            }
+
+            /* Cleanup the serverlist client */
+            ClientReceiver?.DropMulticastGroup(MulticastIp);
+            ClientReceiver?.Close();
+
+            /* Cleanup the serverlist's LAN CTS as we no longer need it */
+            LanToken?.Cancel();
+            LanToken?.Dispose();
         }
 
         /// <summary>

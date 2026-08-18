@@ -443,6 +443,11 @@ namespace COTLMP.Network
         /// </summary>
         private static void OnBeginTransition()
         {
+            if (online == 0)
+            {
+                return;
+            }
+
             localPlayer?.state.OnStateChange -= OnStateChanged;
             localPlayer = null;
         }
