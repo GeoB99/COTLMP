@@ -6,7 +6,7 @@
     <AssemblyTitle>CultOfTheLambServer</AssemblyTitle>
     <AssemblyName>CultOfTheLambServer</AssemblyName>
     <Product>Cult of the Lamb Standalone Dedicated Server</Product>
-    <Version>0.0.0.5</Version>
+    <Version>0.0.0.6</Version>
     <Copyright>Copyright (c) 2026 GeoB99 &amp; Neco-Arc</Copyright>
     <RootNamespace>DedicatedServer</RootNamespace>
   </PropertyGroup>
