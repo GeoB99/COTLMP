@@ -23,53 +23,46 @@ using System.Net;
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * Contains the classes and code for the main menu interface
- * of the Multiplayer functionality.
- */
 namespace COTLMP.Ui
 {
-    /**
-     * @brief
-     * Contains the pause menu patches
-     *
-     * @field Server
-     * The server object
-     *
-     * @field Message
-     * The message to show when quitting to main menu
-     *
-     * @field Quitting
-     * Whether the game is quitting
-     */
+    /// <summary>
+    /// Contains the pause menu patches
+    /// </summary>
     [HarmonyPatch]
     internal static class PauseMenuPatches
     {
+        /// <summary>
+        /// The server object
+        /// </summary>
         public static Server Server = null;
+        /// <summary>
+        /// The message to show when quitting to main menu
+        /// </summary>
         public static string Message = null;
+        /// <summary>
+        /// Whether the game is quitting
+        /// </summary>
         public static bool Quitting = false;
         public static CancellationTokenSource tokenSource = new();
 
-        /**
-         * @brief
-         * Refresh the coop button
-         *
-         * @param[in] __instance
-         * The instance of the patched class
-         *
-         * @param[in] ____coopButton
-         * The coop button
-         *
-         * @param[in] ____coopButtonText
-         * The coop button text
-         *
-         * @param[in] ____photoModeButton
-         * The photo mode button
-         *
-         * @return
-         * true to execute the original method, false to not
-         */
+        /// <summary>
+        /// Refresh the coop button
+        /// </summary>
+        /// <param name="__instance">
+        /// The instance of the patched class
+        /// </param>
+        /// <param name="____coopButton">
+        /// The coop button
+        /// </param>
+        /// <param name="____coopButtonText">
+        /// The coop button text
+        /// </param>
+        /// <param name="____photoModeButton">
+        /// The photo mode button
+        /// </param>
+        /// <returns>
+        /// true to execute the original method, false to not
+        /// </returns>
         [HarmonyPatch(typeof(UIPauseMenuController), "RefreshCoopText")]
         [HarmonyPrefix]
         private static bool RefreshCoopText(UIPauseMenuController __instance, MMButton ____coopButton, TextMeshProUGUI ____coopButtonText, MMButton ____photoModeButton, bool ___CoopButtonSelected)
@@ -109,19 +102,18 @@ namespace COTLMP.Ui
             return false;
         }
 
-        /**
-         * @brief
-         * On pause menu open
-         *
-         * @param[in] __instance
-         * The instance of the patched class
-         *
-         * @param[in] ____coopButton
-         * The coop button
-         *
-         * @param[in] ____coopButtonText
-         * The coop button text
-         */
+        /// <summary>
+        /// On pause menu open
+        /// </summary>
+        /// <param name="__instance">
+        /// The instance of the patched class
+        /// </param>
+        /// <param name="____coopButton">
+        /// The coop button
+        /// </param>
+        /// <param name="____coopButtonText">
+        /// The coop button text
+        /// </param>
         [HarmonyPatch(typeof(UIPauseMenuController), "OnEnable")]
         [HarmonyPostfix]
         private static void OnEnable(UIPauseMenuController __instance, MMButton ____coopButton, TextMeshProUGUI ____coopButtonText)
@@ -163,16 +155,15 @@ namespace COTLMP.Ui
             }
         }
 
-        /**
-         * @brief
-         * On coop button pressed
-         *
-         * @param[in] __instance
-         * The instance of the patched class
-         *
-         * @return
-         * true to execute the original method, false to not
-         */
+        /// <summary>
+        /// On pause menu open
+        /// </summary>
+        /// <param name="__instance">
+        /// The instance of the patched class
+        /// </param>
+        /// <returns>
+        /// true to execute the original method, false to not
+        /// </returns>
         [HarmonyPatch(typeof(UIPauseMenuController), "OnCoopButtonPressed")]
         [HarmonyPrefix]
         private static bool OnCoopButtonPressed(UIPauseMenuController __instance)
@@ -265,16 +256,15 @@ namespace COTLMP.Ui
             Plugin.GlobalsInternal.InGameSession = false;
         }
 
-        /**
-         * @brief
-         * On server stopped
-         *
-         * @param[in] sender
-         * The sender of the event
-         *
-         * @param[in] e
-         * The reason why the server was stopped
-         */
+        /// <summary>
+        /// On server stopped
+        /// </summary>
+        /// <param name="sender">
+        /// The sender of the event
+        /// </param>
+        /// <param name="e">
+        /// The reason why the server was stopped
+        /// </param>
         private static void ServerStopped(object sender, ServerStoppedArgs e)
         {
             /* The server is already quitting, bail out */
@@ -294,10 +284,9 @@ namespace COTLMP.Ui
             Plugin.GlobalsInternal.IsServerCreator = false;
         }
 
-        /**
-         * @brief
-         * Stops the integrated server.
-         */
+        /// <summary>
+        /// Stops the integrated server.
+        /// </summary>
         public static void StopServer()
         {
             tokenSource.Cancel();
@@ -305,55 +294,50 @@ namespace COTLMP.Ui
             Server = null;
         }
 
-        /**
-         * @brief
-         * The logger class for the server
-         */
+        /// <summary>
+        /// The logger class for the server
+        /// </summary>
         private class ServerLogger : COTLMPServer.ILogger
         {
-            /**
-             * @brief
-             * Log an error
-             *
-             * @param[in] message
-             * The message to log
-             */
+            /// <summary>
+            /// Log an error
+            /// </summary>
+            /// <param name="message">
+            /// The message to log
+            /// </param>
             public void LogError(string message)
             {
                 Debug.PrintLogger.Print(Debug.DebugLevel.ERROR_LEVEL, Debug.DebugComponent.NETWORK_STACK_COMPONENT, message);
             }
 
-            /**
-             * @brief
-             * Log a fatal error
-             *
-             * @param[in] message
-             * The message to log
-             */
+            /// <summary>
+            /// Log a fatal error
+            /// </summary>
+            /// <param name="message">
+            /// The message to log
+            /// </param>
             public void LogFatal(string message)
             {
                 Debug.PrintLogger.Print(Debug.DebugLevel.FATAL_LEVEL, Debug.DebugComponent.NETWORK_STACK_COMPONENT, message);
             }
 
-            /**
-             * @brief
-             * Log information
-             *
-             * @param[in] message
-             * The message to log
-             */
+            /// <summary>
+            /// Log information
+            /// </summary>
+            /// <param name="message">
+            /// The message to log
+            /// </param>
             public void LogInfo(string message)
             {
                 Debug.PrintLogger.Print(Debug.DebugLevel.INFO_LEVEL, Debug.DebugComponent.NETWORK_STACK_COMPONENT, message);
             }
 
-            /**
-             * @brief
-             * Log a warning
-             *
-             * @param[in] message
-             * The message to log
-             */
+            /// <summary>
+            /// Log a warning
+            /// </summary>
+            /// <param name="message">
+            /// The message to log
+            /// </param>
             public void LogWarning(string message)
             {
                 Debug.PrintLogger.Print(Debug.DebugLevel.WARNING_LEVEL, Debug.DebugComponent.NETWORK_STACK_COMPONENT, message);

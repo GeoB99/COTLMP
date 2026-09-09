@@ -28,10 +28,6 @@ using COTLMP.Data;
 
 /* CLASSES & CODE *************************************************************/
 
-/**
- * @brief
- * The namespace for all network-related classes, enums and structs
- */
 namespace COTLMP.Network
 {
     /// <summary>
